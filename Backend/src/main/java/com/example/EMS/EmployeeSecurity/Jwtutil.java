@@ -5,6 +5,8 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -26,6 +28,26 @@ public class Jwtutil {
 	                .setExpiration(new Date(System.currentTimeMillis() + expiry))
 	                .signWith(key)
 	                .compact();
+	    }
+	    
+	    public String getEmailFromToken(String token) {
+	        Key key = Keys.hmacShaKeyFor(secret.getBytes());
+	        return Jwts.parserBuilder()
+	                .setSigningKey(key)
+	                .build()
+	                .parseClaimsJws(token)
+	                .getBody()
+	                .getSubject();
+	    }
+
+	    public boolean isValid(String token) {
+	        try {
+	            Key key = Keys.hmacShaKeyFor(secret.getBytes());
+	            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+	            return true;
+	        } catch (JwtException e) {
+	            return false;
+	        }
 	    }
 
 }

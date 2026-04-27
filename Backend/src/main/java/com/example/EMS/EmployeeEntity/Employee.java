@@ -35,9 +35,6 @@ public class Employee {
     
     @Embedded
     private BankDetails bankDetails;
-    
-    
-
     private String department;
     private String designation;
     private String marital_status;
@@ -52,7 +49,6 @@ public class Employee {
     
     @Embedded
     private EmergencyContact emergency_contact;
-
     private Date createdAt;
     private Date updatedAt;
 	private String imgFile;
