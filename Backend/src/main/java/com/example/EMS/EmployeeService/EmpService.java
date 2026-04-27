@@ -1,6 +1,7 @@
 package com.example.EMS.EmployeeService;
 
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,7 +38,6 @@ public class EmpService {
 			return ResponseEntity.status(409).body("User Already exists");
 		}
 		
-		emp.setPassword(passwordEncoder.encode(emp.getPassword()));
 		Employee employee = empRepo.save(emp);
 		return ResponseEntity.ok(employee);
 		
@@ -78,10 +78,16 @@ public class EmpService {
 			}
 		}
 		
-		emp.setPassword(passwordEncoder.encode(emp.getPassword()));
+
 		Employee employee = empRepo.save(emp);
 		return ResponseEntity.ok(employee);
 		
+	}
+	
+	public ResponseEntity<?> getAllEmployeeDetails(){
+		List<Employee> list = empRepo.findAll();
+		
+		return ResponseEntity.status(302).body(list);
 	}
 	
 

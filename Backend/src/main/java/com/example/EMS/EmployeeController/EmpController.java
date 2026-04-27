@@ -1,6 +1,7 @@
 package com.example.EMS.EmployeeController;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,5 +32,22 @@ public class EmpController {
 	public ResponseEntity<?> createUserImg(@RequestPart("employee") Employee emp, @RequestPart(value= "file", required=false) MultipartFile file){
 		return empService.createUserIMG(emp, file);
 	}
+	
+	
+	@GetMapping("/getData")
+	public ResponseEntity<?> getAllEmployeeDetails(){
+		
+		return empService.getAllEmployeeDetails();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 }
