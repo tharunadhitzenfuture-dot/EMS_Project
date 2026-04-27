@@ -43,7 +43,7 @@ public class EmpService {
 		
 	}
 	
-	public ResponseEntity<?> createUserIMG(@RequestPart("employee") Employee emp, @RequestPart(value= "file", required=false) MultipartFile file){
+	public ResponseEntity<?> createEmpIMG(@RequestPart("employee") Employee emp, @RequestPart(value= "file", required=false) MultipartFile file, @RequestPart(value= "passbook", required=false) MultipartFile passbook){
 		
 		Optional<Employee> emailuser = empRepo.findByEmail(emp.getEmail());
 		
@@ -56,7 +56,7 @@ public class EmpService {
 				String upload = System.getProperty("user.dir") + "/uploads/";
 				File dir = new File(upload);
 
-				if (!dir.exists()) dir.mkdirs(); // better than mkdir()
+				if (!dir.exists()) dir.mkdirs(); 
 
 				String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
 
@@ -68,13 +68,40 @@ public class EmpService {
 				System.out.println("File size: " + file.getSize());
 
 				file.transferTo(destination);
-
 				emp.setImgFile(fileName);
 				
 				
 			}
 			catch(Exception e) {
 				return ResponseEntity.status(500).body("Image upload failed");
+			}
+		}
+		
+		
+		if(passbook != null && !passbook.isEmpty()) {
+			try {
+				String upload = System.getProperty("user.dir") + "/uploadsPDF/";
+				File dir = new File(upload);
+
+				if (!dir.exists()) dir.mkdirs(); 
+
+				String fileName = UUID.randomUUID() + "_" + passbook.getOriginalFilename();
+
+				File destination = new File(upload + fileName);
+
+				System.out.println("Saving to: " + destination.getAbsolutePath());
+				System.out.println("File is empty: " + passbook.isEmpty());
+				System.out.println("File name: " + passbook.getOriginalFilename());
+				System.out.println("File size: " + passbook.getSize());
+
+				passbook.transferTo(destination);
+				emp.setImgFile(fileName);
+				emp.setPassBook(fileName);
+				
+				
+			}
+			catch(Exception e) {
+				return ResponseEntity.status(500).body("Pdf upload failed");
 			}
 		}
 		
@@ -86,8 +113,7 @@ public class EmpService {
 	
 	public ResponseEntity<?> getAllEmployeeDetails(){
 		List<Employee> list = empRepo.findAll();
-		
-		return ResponseEntity.status(302).body(list);
+		return ResponseEntity.ok(list);
 	}
 	
 

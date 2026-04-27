@@ -29,8 +29,8 @@ public class EmpController {
 	}
 	
 	@PostMapping("/registerImg")
-	public ResponseEntity<?> createUserImg(@RequestPart("employee") Employee emp, @RequestPart(value= "file", required=false) MultipartFile file){
-		return empService.createUserIMG(emp, file);
+	public ResponseEntity<?> createUserImg(@RequestPart("employee") Employee emp, @RequestPart(value= "file", required=false) MultipartFile file, @RequestPart(value= "passbook", required=false) MultipartFile passbook){
+		return empService.createEmpIMG(emp, file, passbook);
 	}
 	
 	

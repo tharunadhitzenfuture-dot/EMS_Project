@@ -29,6 +29,14 @@ public class Employee {
     private String address;
     private Date date_of_birth;
     private Date date_of_joining;
+    private String state;
+    private String pincode;
+    private String pan_number;
+    
+    @Embedded
+    private BankDetails bankDetails;
+    
+    
 
     private String department;
     private String designation;
@@ -47,9 +55,18 @@ public class Employee {
 
     private Date createdAt;
     private Date updatedAt;
-    
-    
 	private String imgFile;
+	private String passBook;
+
+
+	public String getPassBook() {
+		return passBook;
+	}
+
+
+	public void setPassBook(String passBook) {
+		this.passBook = passBook;
+	}
 
 
 	public Long getId() {
@@ -290,6 +307,47 @@ public class Employee {
 	public void setImgFile(String imgFile) {
 		this.imgFile = imgFile;
 	}
+
+
+	public String getState() {
+		return state;
+	}
+
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+
+	public String getPincode() {
+		return pincode;
+	}
+
+
+	public void setPincode(String pincode) {
+		this.pincode = pincode;
+	}
+
+
+	public String getPan_number() {
+		return pan_number;
+	}
+
+
+	public void setPan_number(String pan_number) {
+		this.pan_number = pan_number;
+	}
+
+
+	public BankDetails getBankDetails() {
+		return bankDetails;
+	}
+
+
+	public void setBankDetails(BankDetails bankDetails) {
+		this.bankDetails = bankDetails;
+	}
+	
 	
 	
 	
