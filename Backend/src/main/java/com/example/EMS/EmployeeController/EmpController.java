@@ -1,7 +1,11 @@
 package com.example.EMS.EmployeeController;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +17,7 @@ import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeService.EmpService;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/employee")
 public class EmpController {
 	
@@ -28,9 +33,17 @@ public class EmpController {
 		
 	}
 	
-	@PostMapping("/registerImg")
-	public ResponseEntity<?> createUserImg(@RequestPart("employee") Employee emp, @RequestPart(value= "file", required=false) MultipartFile file, @RequestPart(value= "passbook", required=false) MultipartFile passbook){
-		return empService.createEmpIMG(emp, file, passbook);
+	@PostMapping("/registerEmp")
+	public ResponseEntity<?> createUserImg(@RequestPart("employee") Employee emp, 
+			@RequestPart(value= "file", required=true) MultipartFile file,
+			@RequestPart(value= "passbook", required=true) MultipartFile passbook,
+			@RequestPart(value= "education", required= true) MultipartFile education,
+			@RequestPart(value="resume", required= true) MultipartFile resume,
+			@RequestPart(value="offerLetter", required= true) MultipartFile offerLetter,
+			@RequestPart(value="experienceLetter", required= true) List<MultipartFile> experienceLetter){
+		
+		
+		return empService.createEmpIMG(emp, file, passbook, education, resume, offerLetter,experienceLetter);
 	}
 	
 	
@@ -38,6 +51,12 @@ public class EmpController {
 	public ResponseEntity<?> getAllEmployeeDetails(){
 		
 		return empService.getAllEmployeeDetails();
+	}
+	
+	@GetMapping("/getPayroll/{empId}")
+	public ResponseEntity<?> getEmployeePayrollById(@PathVariable Long empId){
+		return empService.getPayrollById(empId);
+		
 	}
 	
 	

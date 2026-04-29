@@ -1,7 +1,9 @@
 package com.example.EMS.EmployeeEntity;
 
 import java.util.Date;
+import java.util.List;
 
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,7 +20,7 @@ public class Employee {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String employee_code;
+	private Long employeeId;
 	private String first_name;
 	private String last_name;
 	private String email;
@@ -33,8 +35,7 @@ public class Employee {
     private String pincode;
     private String pan_number;
     
-    @Embedded
-    private BankDetails bankDetails;
+    
     private String department;
     private String designation;
     private String marital_status;
@@ -44,25 +45,56 @@ public class Employee {
 
     private String reporting_manager_id;
     private String status;
-
-    private String employee_id;
-    
-    @Embedded
-    private EmergencyContact emergency_contact;
     private Date createdAt;
     private Date updatedAt;
 	private String imgFile;
-	private String passBook;
-
-
-	public String getPassBook() {
-		return passBook;
+    
+	@Embedded
+    private BankDetails bankDetails;
+	@Embedded
+	private EmployeePayroll empPayroll;
+	@Embedded
+    private EmergencyContact emergency_contact;
+	@Embedded
+	private Education education;
+	@Embedded
+	private ProfessionalDetails professional_details;
+	@ElementCollection
+	private List<Experience> experience;
+	
+	
+	public EmployeePayroll getEmpPayroll() {
+		return empPayroll;
+	}
+	public void setEmpPayroll(EmployeePayroll empPayroll) {
+		this.empPayroll = empPayroll;
+	}
+	public List<Experience> getExperience() {
+		return experience;
+	}
+	public void setExperience(List<Experience> experience) {
+		this.experience = experience;
+	}
+	
+	public ProfessionalDetails getProfessional_details() {
+		return professional_details;
 	}
 
 
-	public void setPassBook(String passBook) {
-		this.passBook = passBook;
+	public void setProfessional_details(ProfessionalDetails professional_details) {
+		this.professional_details = professional_details;
 	}
+
+
+	public Education getEducation() {
+		return education;
+	}
+
+
+	public void setEducation(Education education) {
+		this.education = education;
+	}
+
 
 
 	public Long getId() {
@@ -75,14 +107,6 @@ public class Employee {
 	}
 
 
-	public String getEmployee_code() {
-		return employee_code;
-	}
-
-
-	public void setEmployee_code(String employee_code) {
-		this.employee_code = employee_code;
-	}
 
 
 	public String getFirst_name() {
@@ -255,13 +279,13 @@ public class Employee {
 	}
 
 
-	public String getEmployee_id() {
-		return employee_id;
+	public Long getEmployeeId() {
+		return employeeId;
 	}
 
 
-	public void setEmployee_id(String employee_id) {
-		this.employee_id = employee_id;
+	public void setEmployeeId(Long employeeId) {
+		this.employeeId = employeeId;
 	}
 
 
@@ -344,12 +368,4 @@ public class Employee {
 		this.bankDetails = bankDetails;
 	}
 	
-	
-	
-	
-
-	
-	
-	
-
 }
