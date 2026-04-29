@@ -54,7 +54,7 @@ public class EmpController {
 	}
 	
 	@GetMapping("/getPayroll/{empId}")
-	public ResponseEntity<?> getEmployeePayrollById(@PathVariable Long empId){
+	public ResponseEntity<?> getEmployeePayrollById(@PathVariable String empId){
 		return empService.getPayrollById(empId);
 		
 	}

@@ -80,6 +80,12 @@ public class EmpService {
 			return ResponseEntity.status(409).body("User Already exists with Email: "+ emailuser.get().getEmail());
 		}
 		
+		Long maxId = empRepo.findMaxId();
+		long nextId = (maxId == null) ? 1 : maxId + 1;
+
+	    emp.setEmployeeId(String.format("ZF%03d", nextId));
+		
+		
 		if(file != null && !file.isEmpty()) {
 			try {
 				String fileName = saveFile(file, "uploads");
@@ -190,7 +196,7 @@ public class EmpService {
 		return ResponseEntity.ok(list);
 	}
 	
-	public ResponseEntity<?> getPayrollById(Long empId){
+	public ResponseEntity<?> getPayrollById(String empId){
 		 Optional<Employee> empOptional = empRepo.findByEmployeeId(empId);
 
 		 if (empOptional.isEmpty()) {

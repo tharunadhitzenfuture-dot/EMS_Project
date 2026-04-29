@@ -20,35 +20,22 @@ public class Employee {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private Long employeeId;
+	private String employeeId;
 	private String first_name;
 	private String last_name;
 	private String email;
 	private Long phone_number;
+	private Date date_of_birth;
+	private String marital_status;
     private String gender;
     private String blood_group;
-    private String aadhar_number;
-    private String address;
-    private Date date_of_birth;
-    private Date date_of_joining;
     private String state;
     private String pincode;
+    private String aadhar_number;
     private String pan_number;
-    
-    
-    private String department;
-    private String designation;
-    private String marital_status;
-    
-    private String experience_type;
-    private String experience_details;
-
-    private String reporting_manager_id;
-    private String status;
-    private Date createdAt;
-    private Date updatedAt;
-	private String imgFile;
-    
+    private String address;
+    private String imgFile;
+     
 	@Embedded
     private BankDetails bankDetails;
 	@Embedded
@@ -199,34 +186,9 @@ public class Employee {
 	}
 
 
-	public Date getDate_of_joining() {
-		return date_of_joining;
-	}
+	
 
-
-	public void setDate_of_joining(Date date_of_joining) {
-		this.date_of_joining = date_of_joining;
-	}
-
-
-	public String getDepartment() {
-		return department;
-	}
-
-
-	public void setDepartment(String department) {
-		this.department = department;
-	}
-
-
-	public String getDesignation() {
-		return designation;
-	}
-
-
-	public void setDesignation(String designation) {
-		this.designation = designation;
-	}
+	
 
 
 	public String getMarital_status() {
@@ -239,52 +201,12 @@ public class Employee {
 	}
 
 
-	public String getExperience_type() {
-		return experience_type;
-	}
-
-
-	public void setExperience_type(String experience_type) {
-		this.experience_type = experience_type;
-	}
-
-
-	public String getExperience_details() {
-		return experience_details;
-	}
-
-
-	public void setExperience_details(String experience_details) {
-		this.experience_details = experience_details;
-	}
-
-
-	public String getReporting_manager_id() {
-		return reporting_manager_id;
-	}
-
-
-	public void setReporting_manager_id(String reporting_manager_id) {
-		this.reporting_manager_id = reporting_manager_id;
-	}
-
-
-	public String getStatus() {
-		return status;
-	}
-
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-
-	public Long getEmployeeId() {
+	public String getEmployeeId() {
 		return employeeId;
 	}
 
 
-	public void setEmployeeId(Long employeeId) {
+	public void setEmployeeId(String employeeId) {
 		this.employeeId = employeeId;
 	}
 
@@ -298,25 +220,6 @@ public class Employee {
 		this.emergency_contact = emergency_contact;
 	}
 
-
-	public Date getCreatedAt() {
-		return createdAt;
-	}
-
-
-	public void setCreatedAt(Date createdAt) {
-		this.createdAt = createdAt;
-	}
-
-
-	public Date getUpdatedAt() {
-		return updatedAt;
-	}
-
-
-	public void setUpdatedAt(Date updatedAt) {
-		this.updatedAt = updatedAt;
-	}
 
 
 	public String getImgFile() {
