@@ -48,6 +48,12 @@ public class EmpService {
 		
 	}
 	
+	public double calculateAnnualCTC(double basicPay,double HRA, double specialAllowance,double LTA,double PF,double medicalAllowance, double bonus) {
+		 double monthlyCTC = basicPay + HRA + specialAllowance + LTA + PF + medicalAllowance + bonus;
+		  return monthlyCTC * 12;
+		
+	}
+	
 	public String saveFile(MultipartFile file, String folder) throws Exception{
 		String upload = System.getProperty("user.dir") + "/"+ folder + "/";
 		File dir = new File(upload);
@@ -184,7 +190,15 @@ public class EmpService {
 		    }
 		}
 		
-	
+		double basic = emp.getEmpPayroll().getBasicPay();
+		double hra = emp.getEmpPayroll().getHRA();
+		double specialAllowance = emp.getEmpPayroll().getSpecialAllowance();
+		double lta = emp.getEmpPayroll().getLTA();
+		double pf = emp.getEmpPayroll().getPF();
+		double medical = emp.getEmpPayroll().getMedicalAllowance();
+		double bonus = emp.getEmpPayroll().getBonus();
+		double ctc = calculateAnnualCTC(basic,hra,specialAllowance,lta,pf,medical,bonus);
+		emp.getEmpPayroll().setAnnualCTC(ctc);
 
 		Employee employee = empRepo.save(emp);
 		return ResponseEntity.ok(employee);

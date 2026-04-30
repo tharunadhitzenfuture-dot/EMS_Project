@@ -12,7 +12,15 @@ public class EmployeePayroll {
 	private double PF;
 	private double medicalAllowance;
 	private double bonus;
+	private double annualCTC;
 	
+	
+	public double getAnnualCTC() {
+		return annualCTC;
+	}
+	public void setAnnualCTC(double annualCTC) {
+		this.annualCTC = annualCTC;
+	}
 	public double getBasicPay() {
 		return basicPay;
 	}
