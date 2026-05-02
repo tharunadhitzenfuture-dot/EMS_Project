@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,7 +69,7 @@ public class EmpService {
 		String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
 		File destination = new File(upload + fileName);
 		file.transferTo(destination);
-		return fileName;
+		return folder + "/" +fileName;
 		
 	}
 	
@@ -230,6 +231,29 @@ public class EmpService {
 
 		    return ResponseEntity.ok(emp.getEmpPayroll());
 	}
+	
+	public ResponseEntity<?> getEmployeeById(Long id){
+		
+		Optional<Employee> emp = empRepo.findById(id);
+		if(emp.isPresent()) {
+			return ResponseEntity.status(HttpStatus.FOUND).body(emp);
+		}
+		
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee with id: "+id+" not found");
+	}
+		
+	@Transactional
+	public ResponseEntity<?> deleteEmployeeById(String id){
+		
+		Optional<Employee> emp = empRepo.findByEmployeeId(id);
+		if(emp.isPresent()) {
+			empRepo.deleteByEmployeeId(id);
+			return ResponseEntity.status(HttpStatus.FOUND).body("Employee deleted with id: "+id);
+		}
+		
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee with id: "+id+" not found");
+	}
+		
 	
 
 }
