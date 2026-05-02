@@ -1,5 +1,8 @@
 package com.example.EMS.EmployeeController;
 
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.LoginRequest;
+import com.example.EMS.EmployeeSecurity.Jwtutil;
 import com.example.EMS.EmployeeService.Loginservice;
 
 @RestController
@@ -15,19 +19,19 @@ import com.example.EMS.EmployeeService.Loginservice;
 @RequestMapping("/api/auth")
 public class LoginController {
 	
-	private Loginservice empservice;
+	private Loginservice authService;
+
 	
-	public LoginController(Loginservice empservice) {
-		this.empservice = empservice;
+	public LoginController(Loginservice authService) {
+		this.authService = authService;
 		
 	}
 	
 	@PostMapping("/login")
-	public ResponseEntity<?>  getLoginResponse(@RequestBody LoginRequest login){
-		ResponseEntity<?> emp = empservice.empLoginService(login);
-		return emp;
+	public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+	    return authService.empLoginService(request);
 	}
-	
+		
 	
 
 }

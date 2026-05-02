@@ -7,10 +7,17 @@ import lombok.Setter;
 @Data
 public class LoginResponse {
     private String email;
-    private String password;
     private String name;
     private String token;
+    private String userRole;
     
+    
+    public String getUserRole() {
+    	return userRole;
+    }
+    public void setUserRole(String userRole) {
+    	this.userRole = userRole;
+    }
     public String getToken() {
 		return token;
 	}
@@ -29,12 +36,7 @@ public class LoginResponse {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	public String getPassword() {
-		return password;
-	}
-	public void setPassword(String password) {
-		this.password = password;
-	}
+
 	
 }
 

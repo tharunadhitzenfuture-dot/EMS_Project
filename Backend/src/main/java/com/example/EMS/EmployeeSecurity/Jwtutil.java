@@ -6,6 +6,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -18,8 +19,10 @@ public class Jwtutil {
 
 	    @Value("${jwt.expiry}")
 	    private long expiry;
+	    
+	  
 
-	    public String generateToken(String email) {
+		public String generateToken(String email) {
 	        Key key = Keys.hmacShaKeyFor(secret.getBytes());
 
 	        return Jwts.builder()
@@ -39,6 +42,7 @@ public class Jwtutil {
 	                .getBody()
 	                .getSubject();
 	    }
+	    
 
 	    public boolean isValid(String token) {
 	        try {

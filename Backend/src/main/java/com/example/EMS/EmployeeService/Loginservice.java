@@ -2,6 +2,7 @@ package com.example.EMS.EmployeeService;
 
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,29 +29,29 @@ public class Loginservice {
 	}
 	
 	
-	public ResponseEntity<?> empLoginService(@RequestBody LoginRequest login){
-		Optional<User> user = userRepository.findByEmail(login.getEmail());
-		if(user.isEmpty()) {
-			return ResponseEntity.status(401).body("User not found");
-		}
-		
-		User userOptional = user.get();
-		
-		if(!passwordEncoder.matches(login.getPassword(), userOptional.getPassword())) {
-			return ResponseEntity.status(401).body("Password not matched");
-		}
-		
-		String token = jwt.generateToken(userOptional.getEmail());
-		
-		LoginResponse response = new LoginResponse();
-		response.setToken(token);
-		response.setName(userOptional.getName());
-		response.setEmail(userOptional.getEmail());
-		response.setPassword(userOptional.getPassword());
-		
-		return ResponseEntity.ok(response);
-		
-		
+	public ResponseEntity<?> empLoginService(@RequestBody LoginRequest login) {
+
+	    Optional<User> user = userRepository.findByEmail(login.getEmail());
+
+	    if (user.isEmpty()) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+	    }
+
+	    User existingUser = user.get();
+
+	    if (!passwordEncoder.matches(login.getPassword(), existingUser.getPassword())) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid password");
+	    }
+
+	    String token = jwt.generateToken(existingUser.getEmail());
+
+	    LoginResponse response = new LoginResponse();
+	    response.setToken(token);
+	    response.setName(existingUser.getName());
+	    response.setEmail(existingUser.getEmail());
+	    response.setUserRole(existingUser.getUserRole()); 
+
+	    return ResponseEntity.ok(response);
 	}
 
 }
