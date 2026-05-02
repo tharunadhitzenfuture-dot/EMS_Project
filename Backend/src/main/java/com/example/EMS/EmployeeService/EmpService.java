@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,10 @@ public class EmpService {
 
 
 	public ResponseEntity<?> createUser(@RequestBody Employee emp){
+		
+		if(emp.getEmail() == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter employee mail id"); 
+		}
 		
 		Optional<Employee> emailuser = empRepo.findByEmail(emp.getEmail());
 		
