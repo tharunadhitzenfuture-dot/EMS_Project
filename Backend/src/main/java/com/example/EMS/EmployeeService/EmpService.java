@@ -1,6 +1,7 @@
 package com.example.EMS.EmployeeService;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.EMS.EmployeeEntity.BankDetails;
 import com.example.EMS.EmployeeEntity.Education;
+import com.example.EMS.EmployeeEntity.EmergencyContact;
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.EmployeePayroll;
 import com.example.EMS.EmployeeEntity.Experience;
 import com.example.EMS.EmployeeEntity.ProfessionalDetails;
 import com.example.EMS.EmployeeRepository.EmpRepository;
@@ -60,18 +63,7 @@ public class EmpService {
 		
 	}
 	
-	public String saveFile(MultipartFile file, String folder) throws Exception{
-		String upload = System.getProperty("user.dir") + "/"+ folder + "/";
-		File dir = new File(upload);
-		
-		if(!dir.exists()) dir.mkdirs();
-		
-		String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-		File destination = new File(upload + fileName);
-		file.transferTo(destination);
-		return folder + "/" +fileName;
-		
-	}
+	
 	
 	public ResponseEntity<?> createEmpIMG(@RequestPart("employee") Employee emp, 
 			@RequestPart(value= "file", required=true) MultipartFile file,
@@ -254,6 +246,206 @@ public class EmpService {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee with id: "+id+" not found");
 	}
 		
+	public ResponseEntity<?> updateEmployee(String empId, Employee emp) {
+	    Optional<Employee> existingEmp = empRepo.findByEmployeeId(empId);
+	    
+	    if (!existingEmp.isPresent()) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                .body("Employee not found with id: " + empId);
+	    }
+
+	    Employee existing = existingEmp.get();
+
+	    
+	    if (emp.getFirst_name() != null) existing.setFirst_name(emp.getFirst_name());
+	    if (emp.getLast_name() != null) existing.setLast_name(emp.getLast_name());
+	    if (emp.getEmail() != null) existing.setEmail(emp.getEmail());
+	    if (emp.getPhone_number() != null) existing.setPhone_number(emp.getPhone_number());
+	    if (emp.getDate_of_birth() != null) existing.setDate_of_birth(emp.getDate_of_birth());
+	    if (emp.getMarital_status() != null) existing.setMarital_status(emp.getMarital_status());
+	    if (emp.getGender() != null) existing.setGender(emp.getGender());
+	    if (emp.getBlood_group() != null) existing.setBlood_group(emp.getBlood_group());
+	    if (emp.getState() != null) existing.setState(emp.getState());
+	    if (emp.getPincode() != null) existing.setPincode(emp.getPincode());
+	    if (emp.getAadhar_number() != null) existing.setAadhar_number(emp.getAadhar_number());
+	    if (emp.getPan_number() != null) existing.setPan_number(emp.getPan_number());
+	    if (emp.getAddress() != null) existing.setAddress(emp.getAddress());
+	    if (emp.getImgFile() != null) existing.setImgFile(emp.getImgFile());
+
+	    if (emp.getBankDetails() != null) {
+	        BankDetails newBank = emp.getBankDetails();
+	        BankDetails existingBank = existing.getBankDetails() != null 
+	                ? existing.getBankDetails() : new BankDetails();
+
+	        if (newBank.getBankName() != null) existingBank.setBankName(newBank.getBankName());
+	        if (newBank.getAccountHolderName() != null) existingBank.setAccountHolderName(newBank.getAccountHolderName());
+	        if (newBank.getAccountNumber() != null) existingBank.setAccountNumber(newBank.getAccountNumber());
+	        if (newBank.getConfirmAccountNumber() != null) existingBank.setConfirmAccountNumber(newBank.getConfirmAccountNumber());
+	        if (newBank.getBranchName() != null) existingBank.setBranchName(newBank.getBranchName());
+	        if (newBank.getIfsc_Number() != null) existingBank.setIfsc_Number(newBank.getIfsc_Number());
+	        if (newBank.getPassbook_pdf() != null) existingBank.setPassbook_pdf(newBank.getPassbook_pdf());
+
+	        existing.setBankDetails(existingBank);
+	    }
+
+	    
+	    if (emp.getEmpPayroll() != null) {
+	        EmployeePayroll newPayroll = emp.getEmpPayroll();
+	        EmployeePayroll existingPayroll = existing.getEmpPayroll() != null 
+	                ? existing.getEmpPayroll() : new EmployeePayroll();
+
+	        if (newPayroll.getBasicPay() != 0) existingPayroll.setBasicPay(newPayroll.getBasicPay());
+	        if (newPayroll.getHRA() != 0) existingPayroll.setHRA(newPayroll.getHRA());
+	        if (newPayroll.getSpecialAllowance() != 0) existingPayroll.setSpecialAllowance(newPayroll.getSpecialAllowance());
+	        if (newPayroll.getLTA() != 0) existingPayroll.setLTA(newPayroll.getLTA());
+	        if (newPayroll.getPF() != 0) existingPayroll.setPF(newPayroll.getPF());
+	        if (newPayroll.getMedicalAllowance() != 0) existingPayroll.setMedicalAllowance(newPayroll.getMedicalAllowance());
+	        if (newPayroll.getBonus() != 0) existingPayroll.setBonus(newPayroll.getBonus());
+	        if (newPayroll.getAnnualCTC() != 0) existingPayroll.setAnnualCTC(newPayroll.getAnnualCTC());
+
+	        existing.setEmpPayroll(existingPayroll);
+	    }
+
+	    // Emergency Contact
+	    if (emp.getEmergency_contact() != null) {
+	        EmergencyContact newEC = emp.getEmergency_contact();
+	        EmergencyContact existingEC = existing.getEmergency_contact() != null 
+	                ? existing.getEmergency_contact() : new EmergencyContact();
+
+	        if (newEC.getName() != null) existingEC.setName(newEC.getName());
+	        if (newEC.getRelation() != null) existingEC.setRelation(newEC.getRelation());
+	        if (newEC.getPhone() != null) existingEC.setPhone(newEC.getPhone());
+
+	        existing.setEmergency_contact(existingEC);
+	    }
+
+	    // Education
+	    if (emp.getEducation() != null) {
+	        Education newEdu = emp.getEducation();
+	        Education existingEdu = existing.getEducation() != null 
+	                ? existing.getEducation() : new Education();
+
+	        if (newEdu.getEducationLevel() != null) existingEdu.setEducationLevel(newEdu.getEducationLevel());
+	        if (newEdu.getEducationalBoard() != null) existingEdu.setEducationalBoard(newEdu.getEducationalBoard());
+	        if (newEdu.getSchoolName() != null) existingEdu.setSchoolName(newEdu.getSchoolName());
+	        if (newEdu.getPlace() != null) existingEdu.setPlace(newEdu.getPlace());
+	        if (newEdu.getEducationalGroup() != null) existingEdu.setEducationalGroup(newEdu.getEducationalGroup());
+	        if (newEdu.getSchool_from() != null) existingEdu.setSchool_from(newEdu.getSchool_from());
+	        if (newEdu.getSchool_to() != null) existingEdu.setSchool_to(newEdu.getSchool_to());
+	        if (newEdu.getSchool_percentage() != 0) existingEdu.setSchool_percentage(newEdu.getSchool_percentage());
+	        if (newEdu.getEducation_pdf() != null) existingEdu.setEducation_pdf(newEdu.getEducation_pdf());
+	        if (newEdu.getHigherEducation() != null && !newEdu.getHigherEducation().isEmpty())
+	            existingEdu.setHigherEducation(newEdu.getHigherEducation());
+
+	        existing.setEducation(existingEdu);
+	    }
+
+	    
+	    if (emp.getProfessional_details() != null) {
+	        ProfessionalDetails newPD = emp.getProfessional_details();
+	        ProfessionalDetails existingPD = existing.getProfessional_details() != null 
+	                ? existing.getProfessional_details() : new ProfessionalDetails();
+
+	        if (newPD.getProfessional_designation() != null) existingPD.setProfessional_designation(newPD.getProfessional_designation());
+	        if (newPD.getProfessional_department() != null) existingPD.setProfessional_department(newPD.getProfessional_department());
+	        if (newPD.getEmp_type() != null) existingPD.setEmp_type(newPD.getEmp_type());
+	        if (newPD.getLocation() != null) existingPD.setLocation(newPD.getLocation());
+	        if (newPD.getEmp_status() != null) existingPD.setEmp_status(newPD.getEmp_status());
+	        if (newPD.getDoj() != null) existingPD.setDoj(newPD.getDoj());
+	        if (newPD.getProbation_period() != null) existingPD.setProbation_period(newPD.getProbation_period());
+	        if (newPD.getConfirmation_date() != null) existingPD.setConfirmation_date(newPD.getConfirmation_date());
+	        if (newPD.getSkills() != null) existingPD.setSkills(newPD.getSkills());
+	        if (newPD.getExp_level() != null) existingPD.setExp_level(newPD.getExp_level());
+	        if (newPD.getResume() != null) existingPD.setResume(newPD.getResume());
+	        if (newPD.getOffer_letter() != null) existingPD.setOffer_letter(newPD.getOffer_letter());
+
+	        existing.setProfessional_details(existingPD);
+	    }
+
+	    
+	    if (emp.getExperience() != null && !emp.getExperience().isEmpty()) {
+	        existing.setExperience(emp.getExperience());
+	    }
+
+	    Employee saved = empRepo.save(existing);
+	    return ResponseEntity.status(HttpStatus.OK).body(saved);
+	}
+	
+	public String saveFile(MultipartFile file, String folder) throws Exception{
+		String upload = System.getProperty("user.dir") + "/"+ folder + "/";
+		File dir = new File(upload);
+		
+		if(!dir.exists()) dir.mkdirs();
+		
+		String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+		File destination = new File(upload + fileName);
+		file.transferTo(destination);
+		return folder + "/" +fileName;
+		
+	}
+	
+	public ResponseEntity<?> updateEmployeeImage(String empId, MultipartFile image) throws Exception{
+	    Optional<Employee> empOpt = empRepo.findByEmployeeId(empId);
+	    if (!empOpt.isPresent())
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
+
+	    try {
+	        Employee existing = empOpt.get();
+	        String path = saveFile(image, "uploads");
+	        existing.setImgFile(path);
+	        empRepo.save(existing);
+	        return ResponseEntity.ok("Image updated successfully for id: "+empId);
+	    } catch (IOException e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Image upload failed: " + e.getMessage());
+	    }
+	}
+	
+	public ResponseEntity<?> updateEmployeeFile(String empId, MultipartFile file, String fileType) throws Exception {
+	    Optional<Employee> empOpt = empRepo.findByEmployeeId(empId);
+	    if (!empOpt.isPresent())
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
+
+	    try {
+	        Employee existing = empOpt.get();
+	        String path = saveFile(file, "uploadsPdf");
+
+	        switch (fileType) {
+	            case "resume":
+	                if (existing.getProfessional_details() == null)
+	                    existing.setProfessional_details(new ProfessionalDetails());
+	                existing.getProfessional_details().setResume(path);
+	                break;
+	            case "offerLetter":
+	                if (existing.getProfessional_details() == null)
+	                    existing.setProfessional_details(new ProfessionalDetails());
+	                existing.getProfessional_details().setOffer_letter(path);
+	                break;
+	            case "passbookPdf":
+	                if (existing.getBankDetails() == null)
+	                    existing.setBankDetails(new BankDetails());
+	                existing.getBankDetails().setPassbook_pdf(path);
+	                break;
+	            case "educationPdf":
+	                if (existing.getEducation() == null)
+	                    existing.setEducation(new Education());
+	                existing.getEducation().setEducation_pdf(path);
+	                break;
+	            case "expLetter":
+	                if (existing.getExperience() != null && !existing.getExperience().isEmpty())
+	                    existing.getExperience().get(0).setExp_letter(path); // update latest
+	                break;
+	            default:
+	                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unknown file type");
+	        }
+
+	        empRepo.save(existing);
+	        return ResponseEntity.ok(fileType + " updated successfully for id: "+empId);
+
+	    } catch (IOException e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed: " + e.getMessage());
+	    }
+	}
+	
 	
 
 }

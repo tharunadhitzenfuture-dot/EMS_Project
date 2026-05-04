@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -71,6 +72,62 @@ public class EmpController {
 		return empService.deleteEmployeeById(empId);
 		
 	}
+	
+	@PutMapping("/updateEmployee/{empId}")
+	public ResponseEntity<?> updateEmployeeById(@PathVariable String empId, @RequestBody Employee emp){
+		return empService.updateEmployee(empId, emp);
+	}
+	
+	
+	@PutMapping("/updateEmployee/{empId}/image")
+	public ResponseEntity<?> updateEmployeeImage(
+	        @PathVariable String empId,
+	        @RequestPart("image") MultipartFile image) throws Exception {
+	    return empService.updateEmployeeImage(empId, image);
+	}
+	
+	@PutMapping("/updateEmployee/{empId}/resume")
+	public ResponseEntity<?> updateEmployeeResume(@PathVariable String empId,
+	        @RequestPart("resume") MultipartFile resume) throws Exception{
+		return empService.updateEmployeeFile(empId, resume, "resume");
+	}
+	
+	@PutMapping("/updateEmployee/{empId}/offerLetter")
+	public ResponseEntity<?> updateOfferLetter(
+	        @PathVariable String empId,
+	        @RequestPart("offerLetter") MultipartFile offerLetter) throws Exception{
+	    return empService.updateEmployeeFile(empId, offerLetter, "offerLetter");
+	}
+
+	@PutMapping("/updateEmployee/{empId}/passbookPdf")
+	public ResponseEntity<?> updatePassbookPdf(
+	        @PathVariable String empId,
+	        @RequestPart("passbookPdf") MultipartFile passbookPdf) throws Exception {
+	    return empService.updateEmployeeFile(empId, passbookPdf, "passbookPdf");
+	}
+
+	@PutMapping("/updateEmployee/{empId}/educationPdf")
+	public ResponseEntity<?> updateEducationPdf(
+	        @PathVariable String empId,
+	        @RequestPart("educationPdf") MultipartFile educationPdf) throws Exception {
+	    return empService.updateEmployeeFile(empId, educationPdf, "educationPdf");
+	}
+
+	@PutMapping("/updateEmployee/{empId}/expLetter")
+	public ResponseEntity<?> updateExpLetter(
+	        @PathVariable String empId,
+	        @RequestPart("expLetter") MultipartFile expLetter) throws Exception {
+	    return empService.updateEmployeeFile(empId, expLetter, "expLetter");
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 
 }

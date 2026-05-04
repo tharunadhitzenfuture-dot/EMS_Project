@@ -10,7 +10,7 @@ public class BankDetails {
 	private Long accountNumber;
 	private Long confirmAccountNumber;
 	private String branchName;
-	private String IFSC_Number;
+	private String ifsc_Number;
 	private String passbook_pdf;
 	
 	public String getPassbook_pdf() {
@@ -50,12 +50,13 @@ public class BankDetails {
 	public void setBranchName(String branchName) {
 		this.branchName = branchName;
 	}
-	public String getIFSC_Number() {
-		return IFSC_Number;
+	public String getIfsc_Number() {
+		return ifsc_Number;
 	}
-	public void setIFSC_Number(String iFSC_Number) {
-		IFSC_Number = iFSC_Number;
+	public void setIfsc_Number(String ifsc_Number) {
+		this.ifsc_Number = ifsc_Number;
 	}
+	
 	
 	
 	
