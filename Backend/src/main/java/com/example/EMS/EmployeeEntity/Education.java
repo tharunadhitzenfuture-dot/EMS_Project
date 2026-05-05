@@ -2,13 +2,24 @@ package com.example.EMS.EmployeeEntity;
 
 import java.util.List;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embeddable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@Embeddable
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+
+@Entity
 public class Education {
 	
 	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long educationId;
 	private String educationLevel;
 	private String educationalBoard;
 	private String schoolName;
@@ -19,10 +30,30 @@ public class Education {
 	
 	private double school_percentage;
 	private String education_pdf;
-	@ElementCollection
+	
+	@OneToMany(mappedBy = "education", cascade = CascadeType.ALL)
 	private List<HigherEducation> higherEducation;
 	
+	@OneToOne
+	@JoinColumn(name="employee_id")
+	@JsonIgnore 
+	private Employee employee;
+	
 
+	
+	public Long getEducationId() {
+		return educationId;
+	}
+	public void setEducationId(Long educationId) {
+		this.educationId = educationId;
+	}
+	public Employee getEmployee() {
+		return employee;
+	}
+	public void setEmployee(Employee employee) {
+		this.employee = employee;
+	}
+	
 	
 	public List<HigherEducation> getHigherEducation() {
 		return higherEducation;

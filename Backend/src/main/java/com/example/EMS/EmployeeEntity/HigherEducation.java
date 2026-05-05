@@ -1,10 +1,19 @@
 package com.example.EMS.EmployeeEntity;
 
-import jakarta.persistence.Embeddable;
 
-@Embeddable
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
+@Entity
 public class HigherEducation {
 	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	private String degree;
 	private String instituition;
 	private String specialization;
@@ -13,6 +22,10 @@ public class HigherEducation {
 	private double percentage;
 	private String certification;
 	private String courseType;
+	
+	@ManyToOne
+	@JoinColumn(name="education_id")
+	private Education education;
 	
 	public String getDegree() {
 		return degree;

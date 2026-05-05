@@ -2,11 +2,21 @@ package com.example.EMS.EmployeeEntity;
 
 import java.util.Date;
 
-import jakarta.persistence.Embeddable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@Embeddable
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Entity;
+
+@Entity
 public class Experience {
 	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long expId;
 	private String company_name;
 	private String job_title;
 	private String emp_type_prev;
@@ -19,6 +29,28 @@ public class Experience {
 	private String roles_responsibilities;
 	private String exp_letter;
 	
+	@ManyToOne
+    @JoinColumn(name = "employee_id")
+	@JsonIgnore 
+    private Employee employee;
+	
+	
+	
+	public Long getExpId() {
+		return expId;
+	}
+	public void setExpId(Long expId) {
+		this.expId = expId;
+	}
+	public Employee getEmployee() {
+		return employee;
+	}
+	public void setEmployee(Employee employee) {
+		this.employee = employee;
+	}
+	public void setEmp_type_prev(String emp_type_prev) {
+		this.emp_type_prev = emp_type_prev;
+	}
 	public String getCompany_name() {
 		return company_name;
 	}

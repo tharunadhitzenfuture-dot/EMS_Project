@@ -3,12 +3,13 @@ package com.example.EMS.EmployeeEntity;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embedded;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -36,17 +37,22 @@ public class Employee {
     private String address;
     private String imgFile;
      
-	@Embedded
+	@OneToOne(mappedBy="employee", cascade= CascadeType.ALL)
     private BankDetails bankDetails;
-	@Embedded
+	
+	@OneToOne(mappedBy="employee", cascade= CascadeType.ALL)
 	private EmployeePayroll empPayroll;
-	@Embedded
+	
+	@OneToOne(mappedBy="employee", cascade= CascadeType.ALL)
     private EmergencyContact emergency_contact;
-	@Embedded
+	
+	@OneToOne(mappedBy="employee", cascade= CascadeType.ALL)
 	private Education education;
-	@Embedded
+	
+	@OneToOne(mappedBy="employee", cascade= CascadeType.ALL)
 	private ProfessionalDetails professional_details;
-	@ElementCollection
+	
+	@OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
 	private List<Experience> experience;
 	
 	

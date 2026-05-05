@@ -62,7 +62,7 @@ public class EmpController {
 	}
 	
 	@GetMapping("/getEmployee/{empId}")
-	public ResponseEntity<?> getEmployeeById(Long empId){
+	public ResponseEntity<?> getEmployeeById(@PathVariable String empId){
 		return empService.getEmployeeById(empId);
 		
 	}
@@ -73,51 +73,20 @@ public class EmpController {
 		
 	}
 	
-	@PutMapping("/updateEmployee/{empId}")
-	public ResponseEntity<?> updateEmployeeById(@PathVariable String empId, @RequestBody Employee emp){
-		return empService.updateEmployee(empId, emp);
-	}
-	
-	
-	@PutMapping("/updateEmployee/{empId}/image")
-	public ResponseEntity<?> updateEmployeeImage(
+	@PutMapping(value = "/updateEmployee/{empId}", consumes = "multipart/form-data")
+	public ResponseEntity<?> updateEmployee(
 	        @PathVariable String empId,
-	        @RequestPart("image") MultipartFile image) throws Exception {
-	    return empService.updateEmployeeImage(empId, image);
-	}
-	
-	@PutMapping("/updateEmployee/{empId}/resume")
-	public ResponseEntity<?> updateEmployeeResume(@PathVariable String empId,
-	        @RequestPart("resume") MultipartFile resume) throws Exception{
-		return empService.updateEmployeeFile(empId, resume, "resume");
-	}
-	
-	@PutMapping("/updateEmployee/{empId}/offerLetter")
-	public ResponseEntity<?> updateOfferLetter(
-	        @PathVariable String empId,
-	        @RequestPart("offerLetter") MultipartFile offerLetter) throws Exception{
-	    return empService.updateEmployeeFile(empId, offerLetter, "offerLetter");
-	}
+	        @RequestPart(value="employee", required=false) Employee emp,
+	        @RequestPart(value = "file", required = false) MultipartFile image,
+	        @RequestPart(value = "resume", required = false) MultipartFile resume,
+	        @RequestPart(value = "offerLetter", required = false) MultipartFile offerLetter,
+	        @RequestPart(value = "passbookPdf", required = false) MultipartFile passbookPdf,
+	        @RequestPart(value = "educationPdf", required = false) MultipartFile educationPdf,
+	        @RequestPart(value = "expLetter", required = false) List<MultipartFile> expLetter
+	) throws Exception {
 
-	@PutMapping("/updateEmployee/{empId}/passbookPdf")
-	public ResponseEntity<?> updatePassbookPdf(
-	        @PathVariable String empId,
-	        @RequestPart("passbookPdf") MultipartFile passbookPdf) throws Exception {
-	    return empService.updateEmployeeFile(empId, passbookPdf, "passbookPdf");
-	}
-
-	@PutMapping("/updateEmployee/{empId}/educationPdf")
-	public ResponseEntity<?> updateEducationPdf(
-	        @PathVariable String empId,
-	        @RequestPart("educationPdf") MultipartFile educationPdf) throws Exception {
-	    return empService.updateEmployeeFile(empId, educationPdf, "educationPdf");
-	}
-
-	@PutMapping("/updateEmployee/{empId}/expLetter")
-	public ResponseEntity<?> updateExpLetter(
-	        @PathVariable String empId,
-	        @RequestPart("expLetter") MultipartFile expLetter) throws Exception {
-	    return empService.updateEmployeeFile(empId, expLetter, "expLetter");
+	    return empService.updateEmployeeAll(empId, emp, image, resume,
+	            offerLetter, passbookPdf, educationPdf, expLetter);
 	}
 	
 	
