@@ -32,10 +32,11 @@ public class LeaveRequest {
 	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private Long id;
 	
-	@ManyToOne(fetch= FetchType.LAZY)
-	@JoinColumn(name="employee_id")
-	@JsonBackReference
+	@ManyToOne
+	@JoinColumn(name = "employee_id")
+	@JsonBackReference("employee-leaveRequest")
 	private Employee employee;
+	
 	private LocalDate startDate;
 	private LocalDate endDate;
 	private Integer totalDays;
