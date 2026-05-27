@@ -24,7 +24,6 @@ public class Attendance {
 	@Id
 	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private int id;
-
 	private String empName;
 	private String designation;
 	private String department;
@@ -35,11 +34,10 @@ public class Attendance {
 	private Long totalWorkingHours;
 	
 	
-	 @ManyToOne
-	 @JoinColumn(name = "employee_id")
-	 @JsonBackReference
-	 private Employee employee;
-	
+	@ManyToOne
+	@JoinColumn(name = "employee_id")
+	@JsonBackReference("employee-attendance")
+	private Employee employee;
 	
 	
 	public int getId() {

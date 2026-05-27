@@ -18,9 +18,9 @@ public class LeaveBalance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "emp_id", nullable = false)
-    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
+    @JsonBackReference("employee-leaveBalance")
     private Employee employee;
 
     @Column(nullable = false)
