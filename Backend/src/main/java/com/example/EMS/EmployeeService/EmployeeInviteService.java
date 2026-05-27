@@ -20,7 +20,6 @@ import com.example.EMS.EmployeeEntity.EmployeeInvite;
 import com.example.EMS.EmployeeEntity.EmployeePayroll;
 import com.example.EMS.EmployeeEntity.Experience;
 import com.example.EMS.EmployeeEntity.HigherEducation;
-import com.example.EMS.EmployeeEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.ProfessionalDetails;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.EmployeeInviteRepository;
@@ -559,10 +558,25 @@ public class EmployeeInviteService {
         // =====================================================
         // SAFE EXPERIENCE INIT
         // =====================================================
+        
+        // ================= EXPERIENCE (FIXED) =================
+        if (empInvite.getExperience() != null && !empInvite.getExperience().isEmpty()) {
 
-        if (existing.getExperience() == null) {
-            existing.setExperience(new ArrayList<>());
+            if (existing.getExperience() == null) {
+                existing.setExperience(new ArrayList<>());
+            }
+
+            List<Experience> expList = existing.getExperience();
+            expList.clear(); // IMPORTANT FIX
+
+            for (Experience exp : empInvite.getExperience()) {
+                exp.setEmployeeInvite(existing);
+                expList.add(exp);
+            }
         }
+
+
+        
     }
 
     // =====================================================
