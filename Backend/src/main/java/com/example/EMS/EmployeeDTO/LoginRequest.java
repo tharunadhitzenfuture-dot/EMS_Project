@@ -2,8 +2,7 @@ package com.example.EMS.EmployeeDTO;
 
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+
 
 
 @Data
