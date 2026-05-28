@@ -1,12 +1,14 @@
-package com.example.EMS.EmployeeEntity;
+package com.example.EMS.EmployeeEntity.LeaveEntity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.enums.LeaveStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,11 +21,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class LeaveRequest {
@@ -42,13 +42,14 @@ public class LeaveRequest {
 	private Integer totalDays;
 	
 	@Enumerated(EnumType.STRING)
-	@Column(nullable=false)
-	private LeaveStatus status;
+	@Column(nullable=true)
+	private LeaveStatus status = LeaveStatus.PENDING;
 	private String reason;
 	private String  hrRemarks;
 	
 	@ManyToOne(fetch= FetchType.LAZY)
 	@JoinColumn(name="reviwed_by")
+	@JsonIgnore
 	private Employee reviewedBy;
 	
 	private LocalDateTime reviewedAt;

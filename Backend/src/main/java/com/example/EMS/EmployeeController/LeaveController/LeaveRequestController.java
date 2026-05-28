@@ -1,4 +1,4 @@
-package com.example.EMS.EmployeeController;
+package com.example.EMS.EmployeeController.LeaveController;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
-import com.example.EMS.EmployeeEntity.LeaveRequest;
-import com.example.EMS.EmployeeService.LeaveRequestService;
+import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
+import com.example.EMS.EmployeeService.LeaveService.LeaveRequestService;
 
 @RestController
 @RequestMapping("/api/leave")

@@ -1,7 +1,8 @@
-package com.example.EMS.EmployeeEntity;
+package com.example.EMS.EmployeeEntity.LeaveEntity;
 
 
 
+import com.example.EMS.EmployeeEntity.Employee;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.*;
@@ -31,6 +32,9 @@ public class LeaveBalance {
 
     @Column(nullable = false)
     private Integer year;
+    
+    @Column(nullable = false)
+    private Integer month;
 
     public Integer getRemainingDays() {
         return totalDays - usedDays;
@@ -74,6 +78,14 @@ public class LeaveBalance {
 
 	public void setYear(Integer year) {
 		this.year = year;
+	}
+
+	public Integer getMonth() {
+		return month;
+	}
+
+	public void setMonth(Integer month) {
+		this.month = month;
 	}
     
     

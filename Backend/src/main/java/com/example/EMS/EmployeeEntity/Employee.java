@@ -3,6 +3,8 @@ package com.example.EMS.EmployeeEntity;
 import java.util.Date;
 import java.util.List;
 
+import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
+import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.enums.Role;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 

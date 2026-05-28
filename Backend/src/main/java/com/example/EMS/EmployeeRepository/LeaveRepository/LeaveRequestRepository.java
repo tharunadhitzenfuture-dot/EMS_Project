@@ -1,10 +1,10 @@
-package com.example.EMS.EmployeeRepository;
+package com.example.EMS.EmployeeRepository.LeaveRepository;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.EMS.EmployeeEntity.LeaveRequest;
+import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long>{
 
