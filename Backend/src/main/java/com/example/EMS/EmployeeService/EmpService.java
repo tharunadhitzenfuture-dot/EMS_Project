@@ -57,6 +57,10 @@ public class EmpService {
         this.passwordEncoder = passwordEncoder;
         this.professionalRepo = professionalRepo;
     }
+    
+    public Long getIdByEmployeeId(String empId) {
+    	return empRepo.findIdByEmployeeId(empId);
+    }
 
     // ══════════════════════════════════════════════════════════════════
     // CREATE — single employee via JSON body
