@@ -25,7 +25,7 @@ public class LeaveRequestController {
 
 
 	@PostMapping("/apply/{empId}")
-	public ResponseEntity<?> applyLeave(@PathVariable Long empId, @RequestBody LeaveRequest request){
+	public ResponseEntity<?> applyLeave(@PathVariable String empId, @RequestBody LeaveRequest request){
 		if(request.getStartDate() == null || request.getEndDate() == null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please provide start date and end date");
 		}
