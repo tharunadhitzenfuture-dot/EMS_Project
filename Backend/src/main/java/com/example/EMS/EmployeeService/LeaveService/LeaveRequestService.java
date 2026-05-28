@@ -36,8 +36,9 @@ public class LeaveRequestService {
 	}
 
 
-	public LeaveRequest applyLeave(Long empId, LeaveRequest request){
-		Employee emp = getUserByEmployeeId(empId);
+	public LeaveRequest applyLeave(String empId, LeaveRequest request){
+		Long id = empRepository.findIdByEmployeeId(empId);
+		Employee emp = getUserByEmployeeId(id);
 		
 //		 if (request.getStartDate().isBefore(LocalDate.now()))
 //	            throw new BadRequestException("Start date cannot be in the past");
