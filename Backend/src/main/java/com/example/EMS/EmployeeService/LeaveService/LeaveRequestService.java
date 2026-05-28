@@ -53,10 +53,10 @@ public class LeaveRequestService {
         LeaveBalance balance = leaveBalanceRepository
                 .findByEmployeeIdAndMonthAndYear(emp.getId(),month, year);
         
-        if (balance.getRemainingDays() < workingDays)
-            throw new BadRequestException("Insufficient balance. Available: "
-                    + balance.getRemainingDays() + ", Requested: " + workingDays);
-        
+//        if (balance.getRemainingDays() < workingDays)
+//            throw new BadRequestException("Insufficient balance. Available: "
+//                    + balance.getRemainingDays() + ", Requested: " + workingDays);
+//        
         
         request.setEmployee(emp);
         return leaveRequestRepository.save(request);
