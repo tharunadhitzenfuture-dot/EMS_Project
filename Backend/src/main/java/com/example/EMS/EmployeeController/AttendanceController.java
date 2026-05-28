@@ -1,10 +1,11 @@
 package com.example.EMS.EmployeeController;
 
-
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.AttendanceRequestDTO;
+import com.example.EMS.EmployeeDTO.WorkingHoursDTO;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
@@ -74,6 +76,7 @@ public class AttendanceController {
 	        ResponseEntity<?> response =
 	                attendanceService.registerService(
 	                        emp.get(),
+	                        request.getDate(),
 	                        request.getCheckIn(),
 	                        request.getCheckOut(),
 	                        request.getStatus());
@@ -117,6 +120,41 @@ public class AttendanceController {
 	                empId,
 	                request);
 	    }
+	    
+	    @GetMapping("/getworkingHours")
+	    public ResponseEntity<?> getWorkingHoursById(@RequestBody WorkingHoursDTO request){
+	    	//Get weekly worked hours by empId - /getworkingHours
+	    	//Get total week hours - /api/weekly/getHours
+	    	if (request.getEmpId() == null || request.getEmpId().isBlank()) {
+	    	    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	    	            .body("Please enter employee id");
+	    	}
+
+	    	if (request.getStartDate() == null) {
+	    	    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	    	            .body("Please enter start date");
+	    	}
+
+	    	if (request.getEndDate() == null) {
+	    	    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	    	            .body("Please enter end date");
+	    	}
+	    	return attendanceService.getWeeklyHours(request);
+	    }
+	    
+	    @GetMapping("/totalEmpPresent/{date}")
+	    public ResponseEntity<?> getTotalEmpPresent(@PathVariable LocalDate date) {
+	    	
+	    	if(date == null) {
+	    		return ResponseEntity.badRequest().body("Please enter date");
+	    	}
+	    	
+	    	return attendanceService.getEmpPresent(date);
+	    	
+	    }
+	    
+	    
+	  
 
 	
 

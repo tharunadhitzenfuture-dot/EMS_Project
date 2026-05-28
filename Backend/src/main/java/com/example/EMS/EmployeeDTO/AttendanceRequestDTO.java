@@ -1,6 +1,7 @@
 package com.example.EMS.EmployeeDTO;
 
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class AttendanceRequestDTO {
@@ -9,6 +10,7 @@ public class AttendanceRequestDTO {
     private String empId;
     private LocalTime checkIn;
     private LocalTime checkOut;
+    private LocalDate date;
     private String status;
 
     public String getEmpId() {
@@ -42,6 +44,16 @@ public class AttendanceRequestDTO {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+	
+	
     
     
 

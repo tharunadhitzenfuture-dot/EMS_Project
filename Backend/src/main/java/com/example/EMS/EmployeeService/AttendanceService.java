@@ -10,10 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+
 import com.example.EMS.EmployeeDTO.AttendanceRequestDTO;
+import com.example.EMS.EmployeeDTO.WorkingHoursDTO;
 import com.example.EMS.EmployeeEntity.Attendance;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeRepository.AttendanceRepository;
+import com.example.EMS.EmployeeRepository.EmpRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -21,17 +24,31 @@ import jakarta.transaction.Transactional;
 public class AttendanceService {
 	
 	private AttendanceRepository attendanceRepo;
+	 public EmpRepository empRepo;
 	
-	
-	
-	public AttendanceService(AttendanceRepository attendanceRepo) {
+	public AttendanceService(AttendanceRepository attendanceRepo, EmpRepository empRepo) {
 		this.attendanceRepo = attendanceRepo;
+		this.empRepo = empRepo;
 	}
+	
+	
+	 public Long getIdByEmployeeId(String empId) {
+	    	return empRepo.findIdByEmployeeId(empId);
+	    }
 
 
 
-	public ResponseEntity<?> registerService(Employee emp, LocalTime checkIn,LocalTime checkOut, String status){
-        LocalDate today = LocalDate.now();
+
+	public ResponseEntity<?> registerService(Employee emp,LocalDate date, LocalTime checkIn,LocalTime checkOut, String status){
+		
+		LocalDate today;
+		if(date == null) {
+			today = LocalDate.now();
+		}
+		else {
+			today = date;
+		}
+		      
         boolean alreadyExists =attendanceRepo.findByEmployee_EmployeeIdAndAttendanceDate(emp.getEmployeeId(),today).isPresent();
 
         if (alreadyExists) {
@@ -61,6 +78,7 @@ public class AttendanceService {
 
         attendance.setCheckOut(checkOut);
 
+     
         attendance.setStatus(status);
 
        
@@ -192,7 +210,22 @@ public class AttendanceService {
                 "Attendance updated successfully");
     }
 	
+    
+    
+    
+    
+    public ResponseEntity<?> getWeeklyHours(WorkingHoursDTO request){
+    	Long empId = empRepo.findIdByEmployeeId(request.getEmpId());
+    	Double hours = attendanceRepo.calculateWeeklyHours(empId, request.getStartDate(), request.getEndDate());
+    	
+    	return ResponseEntity.ok("Employee ID: "+request.getEmpId()+" worked from "+ request.getStartDate()+" to "+request.getEndDate()+" totally "+hours+" hours");
+    }
 	
+    
+    public ResponseEntity<?> getEmpPresent(LocalDate date){
+    	Long count = attendanceRepo.countPresentEmployees(date);
+    	return ResponseEntity.ok(count);
+    }
 	
 	
 	
