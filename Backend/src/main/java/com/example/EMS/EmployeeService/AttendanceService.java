@@ -83,15 +83,32 @@ public class AttendanceService {
 
        
         if (checkIn != null && checkOut != null) {
+        	
+        	
 
             Duration duration =
                     Duration.between(checkIn, checkOut);
+            
+            long hours = duration.toHours();
+        	long minutes = duration.toMinutesPart();
+        	long seconds = duration.toSecondsPart();
+        	
+        	String totalTime =  String.format(
+        			"%02d:%02d:%02d",
+        			hours,
+        			minutes,
+        			seconds
+        			);
 
             attendance.setTotalWorkingHours(
-                    duration.toHours());
+                    totalTime);
+            
+            
         }
 
         attendanceRepo.save(attendance);
+        
+        
 
         return ResponseEntity.ok(
                 "Attendance Registered Successfully");
@@ -149,7 +166,14 @@ public class AttendanceService {
             String empId,
             AttendanceRequestDTO request){
 
-        LocalDate today = LocalDate.now();
+    	LocalDate today;
+		if(request.getDate() == null) {
+			today = LocalDate.now();
+		}
+		else {
+			today = request.getDate();
+		}
+  
 
         Optional<Attendance> attendanceOpt =
                 attendanceRepo
@@ -192,8 +216,19 @@ public class AttendanceService {
                             attendance.getCheckIn(),
                             attendance.getCheckOut());
 
+            long hours = duration.toHours();
+        	long minutes = duration.toMinutesPart();
+        	long seconds = duration.toSecondsPart();
+        	
+        	String totalTime =  String.format(
+        			"%02d:%02d:%02d",
+        			hours,
+        			minutes,
+        			seconds
+        			);
+
             attendance.setTotalWorkingHours(
-                    duration.toHours());
+                    totalTime);
         }
 
         
@@ -209,8 +244,6 @@ public class AttendanceService {
         return ResponseEntity.ok(
                 "Attendance updated successfully");
     }
-	
-    
     
     
     
@@ -227,12 +260,6 @@ public class AttendanceService {
     	return ResponseEntity.ok(count);
     }
 	
-	
-	
-	
-	
-	
-	
-	
+
 	
 }

@@ -31,7 +31,7 @@ public class Attendance {
 	private LocalTime checkIn;
 	private LocalTime checkOut;
 	private String status;
-	private Long totalWorkingHours;
+	private String totalWorkingHours;
 	
 	
 	@ManyToOne
@@ -90,10 +90,10 @@ public class Attendance {
 	public void setEmployee(Employee employee) {
 		this.employee = employee;
 	}
-	public Long getTotalWorkingHours() {
+	public String getTotalWorkingHours() {
 		return totalWorkingHours;
 	}
-	public void setTotalWorkingHours(Long totalWorkingHours) {
+	public void setTotalWorkingHours(String totalWorkingHours) {
 		this.totalWorkingHours = totalWorkingHours;
 	}
 	public LocalDate getAttendanceDate() {
