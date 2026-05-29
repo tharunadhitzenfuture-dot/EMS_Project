@@ -68,9 +68,9 @@ public class LeaveRequestService {
 	
 	 
 	    @Transactional
-	    public ResponseEntity<?> reviewLeave(Long empId, Long leaveId, ReviewLeaveDto dto) {   
-	        
-	        Employee emp = getUserByEmployeeId(empId);
+	    public ResponseEntity<?> reviewLeave(String empId, Long leaveId, ReviewLeaveDto dto) {   
+	    	Long id = empRepository.findIdByEmployeeId(empId);
+	        Employee emp = getUserByEmployeeId(id);
 	        LeaveRequest req = getLeaveById(leaveId);
 	        
 	        
@@ -91,7 +91,8 @@ public class LeaveRequestService {
 
 	            LocalDate current = req.getStartDate();
 
-	            while (!current.isAfter(req.getEndDate())) {
+	            while ( current.isBefore(req.getEndDate()) ||
+	            	    current.isEqual(req.getEndDate())) {
 
 	                int month = current.getMonthValue();
 	                int year = current.getYear();
@@ -114,24 +115,21 @@ public class LeaveRequestService {
 
 
 
-//	                if (balance.getRemainingDays() <= 0) {
-//
-//	                    throw new BadRequestException(
-//	                            "Insufficient leave balance for "
-//	                            + month + "/" + year
-//	                    );
-//	                }
+
+	                
 
 	           
 	                balance.setUsedDays(
-	                        balance.getUsedDays() + 1
-	                );
+	                        balance.getUsedDays() + 1);
+	          
 
+
+	                balance.setRemainingDays(balance.getRemainingDays()); 
 	                leaveBalanceRepository.save(balance);
 
 	               
 	                current = current.plusDays(1);
-	                leaveBalanceRepository.save(balance);
+	               
 	            }
 	        }
 	               
@@ -153,7 +151,94 @@ public class LeaveRequestService {
 
 	        LeaveRequest res = leaveRequestRepository.save(req);
 	        return ResponseEntity.ok(res);
+
 	    }
+	    
+	    
+	    @Transactional
+	    public ResponseEntity<?> reviewHalfDayLeave(String empId, Long leaveId, ReviewLeaveDto dto) {   
+	    	Long id = empRepository.findIdByEmployeeId(empId);
+	        Employee emp = getUserByEmployeeId(id);
+	        LeaveRequest req = getLeaveById(leaveId);
+	        
+	        
+	        if(emp.getRole() != Role.MANAGER && emp.getRole() != Role.HR) {
+	        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not authorized to review leave requests");
+	        }
+	        
+	        
+
+	        if (req.getStatus() == LeaveStatus.CANCELLED)
+	            throw new BadRequestException("Cannot review a cancelled request");
+	        if (req.getStatus() == LeaveStatus.APPROVED || req.getStatus() == LeaveStatus.REJECTED)
+	            throw new BadRequestException("Request has already been reviewed");
+	        if (dto.getStatus() != LeaveStatus.APPROVED && dto.getStatus() != LeaveStatus.REJECTED)
+	            throw new BadRequestException("Status must be APPROVED or REJECTED");
+	        
+	        if (dto.getStatus() == LeaveStatus.APPROVED) {
+
+	            LocalDate current = req.getStartDate();
+
+	            while ( current.isBefore(req.getEndDate()) ||
+	            	    current.isEqual(req.getEndDate())) {
+
+	                int month = current.getMonthValue();
+	                int year = current.getYear();
+
+	                LeaveBalance balance =
+	                        leaveBalanceRepository
+	                        .findByEmployeeIdAndMonthAndYear(
+	                                req.getEmployee().getId(),
+	                                month,
+	                                year
+	                        );
+
+	                if (balance == null) {
+
+	                    throw new BadRequestException(
+	                            "Leave balance not found for "
+	                            + month + "/" + year
+	                    );
+	                }
+
+	                
+
+	           
+	                balance.setUsedDays(
+	                        balance.getUsedDays() + 0.5);
+	          
+
+
+	                balance.setRemainingDays(balance.getRemainingDays()); 
+	                leaveBalanceRepository.save(balance);
+
+	               
+	                current = current.plusDays(1);
+	               
+	            }
+	        }
+	               
+
+//	            if (balance.getRemainingDays() < req.getTotalDays()) {
+//	            	
+//	            	 throw new BadRequestException("Insufficient balance to approve");
+//	            }
+	               
+
+	           
+	           
+	        
+	         
+	        req.setStatus(dto.getStatus());
+	        req.setHrRemarks(dto.getHrRemarks());
+	        req.setReviewedBy(emp);
+	        req.setReviewedAt(LocalDateTime.now());
+
+	        LeaveRequest res = leaveRequestRepository.save(req);
+	        return ResponseEntity.ok(res);
+
+	    }
+	    
 	       
 	 private LeaveRequest getLeaveById(Long id) {
 	        return leaveRequestRepository.findById(id)

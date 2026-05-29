@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.enums.LeaveStatus;
+import com.example.EMS.enums.LeaveType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -40,6 +41,12 @@ public class LeaveRequest {
 	private LocalDate startDate;
 	private LocalDate endDate;
 	private Integer totalDays;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(nullable=true)
+	private LeaveType leaveType = LeaveType.FULL_DAY;
+	
+	
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable=true)
@@ -143,6 +150,14 @@ public class LeaveRequest {
 
 	 public void setReviewedAt(LocalDateTime reviewedAt) {
 		 this.reviewedAt = reviewedAt;
+	 }
+
+	 public LeaveType getLeaveType() {
+		 return leaveType;
+	 }
+
+	 public void setLeaveType(LeaveType leaveType) {
+		 this.leaveType = leaveType;
 	 }
 	 
 	 

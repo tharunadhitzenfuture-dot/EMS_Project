@@ -49,7 +49,7 @@ public class LeavePolicyService {
 			if(existing.isPresent()) {
 				LeaveBalance balance = existing.get();
 				balance.setTotalDays(request.getTotalDays());
-				
+				balance.setRemainingDays(request.getTotalDays());
 				leaveBalRepository.save(balance);
 				
 			}
@@ -69,7 +69,8 @@ public class LeavePolicyService {
 		            balance.setTotalDays(
 		                    request.getTotalDays()
 		            );
-
+		            
+		            balance.setRemainingDays(request.getTotalDays());
 		            balance.setUsedDays(0);
 
 		            leaveBalRepository.save(balance);

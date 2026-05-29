@@ -25,10 +25,13 @@ public class LeaveBalance {
     private Employee employee;
 
     @Column(nullable = false)
-    private Integer totalDays;
+    private double totalDays;
 
     @Column(nullable = false)
-    private Integer usedDays;
+    private double usedDays;
+    
+    @Column(nullable = true)
+    private double remainingDays;
 
     @Column(nullable = false)
     private Integer year;
@@ -36,7 +39,7 @@ public class LeaveBalance {
     @Column(nullable = false)
     private Integer month;
 
-    public Integer getRemainingDays() {
+    public double getRemainingDays() {
         return totalDays - usedDays;
     }
 
@@ -56,7 +59,7 @@ public class LeaveBalance {
 		this.employee = employee;
 	}
 
-	public Integer getTotalDays() {
+	public double getTotalDays() {
 		return totalDays;
 	}
 
@@ -64,7 +67,7 @@ public class LeaveBalance {
 		this.totalDays = totalDays;
 	}
 
-	public Integer getUsedDays() {
+	public double getUsedDays() {
 		return usedDays;
 	}
 
@@ -87,6 +90,20 @@ public class LeaveBalance {
 	public void setMonth(Integer month) {
 		this.month = month;
 	}
+
+	public void setTotalDays(double totalDays) {
+		this.totalDays = totalDays;
+	}
+
+	public void setUsedDays(double usedDays) {
+		this.usedDays = usedDays;
+	}
+
+	public void setRemainingDays(double remainingDays) {
+		this.remainingDays = remainingDays;
+	}
+	
+	
     
     
 }

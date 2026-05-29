@@ -3,6 +3,7 @@ package com.example.EMS.EmployeeDTO;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import com.example.EMS.enums.LeaveStatus;
+import com.example.EMS.enums.LeaveType;
 
 import lombok.Data;
 
@@ -23,7 +24,7 @@ public class ReviewLeaveDto {
 	public void setHrRemarks(String hrRemarks) {
 		this.hrRemarks = hrRemarks;
 	}
-    
+	
     
     
     

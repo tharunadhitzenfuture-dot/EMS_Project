@@ -10,17 +10,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
+import com.example.EMS.EmployeeException.ResourceNotFoundException;
+import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
 import com.example.EMS.EmployeeService.LeaveService.LeaveRequestService;
+import com.example.EMS.enums.LeaveType;
 
 @RestController
 @RequestMapping("/api/leave")
 public class LeaveRequestController {
 	
 	private final LeaveRequestService requestService;
+	private final LeaveRequestRepository requestRepository;
 	
 
-	public LeaveRequestController(LeaveRequestService requestService) {
+	public LeaveRequestController(LeaveRequestService requestService, LeaveRequestRepository requestRepository) {
 		this.requestService = requestService;
+		this.requestRepository = requestRepository;
 	}
 
 
@@ -34,12 +39,26 @@ public class LeaveRequestController {
 	}
 	
 	@PostMapping("/review/{empId}/{leaveId}")
-	 public ResponseEntity<?> reviewLeave(@PathVariable Long empId,@PathVariable Long leaveId,@RequestBody ReviewLeaveDto dto) {
+	 public ResponseEntity<?> reviewLeave(@PathVariable String empId,@PathVariable Long leaveId,@RequestBody ReviewLeaveDto dto) {
 		
 		if(empId == null || leaveId == null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please provide employee id and leave id");
 		}
 		
-		return requestService.reviewLeave(empId, leaveId, dto);
+		LeaveRequest req = getLeaveById(leaveId);
+		
+		if(req.getLeaveType() == LeaveType.FULL_DAY) {
+			return requestService.reviewLeave(empId, leaveId, dto);
+		}
+		else if(req.getLeaveType() == LeaveType.HALF_DAY) {
+			return requestService.reviewHalfDayLeave(empId, leaveId, dto);
+		}
+		
+		return ResponseEntity.badRequest().body("Please mention correct leave type FULL_DAY, HALF_DAY, PERMISSION");
 	}
+	
+	private LeaveRequest getLeaveById(Long id) {
+        return requestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave request not found: " + id));
+    }
 }
