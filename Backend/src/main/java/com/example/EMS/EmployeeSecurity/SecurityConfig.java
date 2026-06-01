@@ -45,6 +45,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("images/**").permitAll()
                 .requestMatchers("/api/employee/**").hasAnyRole("ADMIN","HR","MANAGER")
+                .requestMatchers("/api/attendance/**").hasAnyRole("ADMIN","HR","MANAGER")
+                .requestMatchers("/api/weekly/**").hasAnyRole("ADMIN","HR","MANAGER")
                 .requestMatchers("/api/employeeInvite/**").hasAnyRole("ADMIN","HR")
                 .requestMatchers("/api/invite/**").hasAnyRole("ADMIN","HR")
                 .requestMatchers("/uploads/**", "/uploadsPdf/**", "/onBoardingProfiles/**", "/onBoardingProfilesPdf/**").permitAll()

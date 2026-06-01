@@ -21,17 +21,17 @@ public class WeeklyCalculationService {
 
 	public ResponseEntity<?> createWeeklyRecord(WeeklyCalculation request){
 		
-		Optional<WeeklyCalculation> calcStart =  calcRepository.findByStartDate(request.getStartDate());
+		Optional<WeeklyCalculation> calcStart =  calcRepository.findByDeptName(request.getDeptName());
 		
 		if(calcStart.isPresent()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Start date record already presented");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Department weekly records for "+request.getDeptName()+" already presented");
 		}
 		
-		Optional<WeeklyCalculation> calcEnd =  calcRepository.findByEndDate(request.getEndDate());
-		
-		if(calcEnd.isPresent()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("End date record already presented");
-		}
+//		Optional<WeeklyCalculation> calcEnd =  calcRepository.findByEndDate(request.getEndDate());
+//		
+//		if(calcEnd.isPresent()) {
+//			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("End date record already presented");
+//		}
 		
 		WeeklyCalculation res = calcRepository.save(request);
 		return ResponseEntity.ok(res);
@@ -41,14 +41,14 @@ public class WeeklyCalculationService {
 	}
 	
 	public ResponseEntity<?> getWeeklyHours(WorkingHoursDTO request){
-		Optional<WeeklyCalculation> calc = calcRepository.findByStartDate(request.getStartDate());
+		Optional<WeeklyCalculation> calc = calcRepository.findByDeptName(request.getDeptName());
 		
 		if(calc.isEmpty() || calc == null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is no record found with start date: "+request.getStartDate());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is no record found with department: "+request.getStartDate());
 		}
 		
 		WeeklyCalculation res = calc.get();
-		return  ResponseEntity.ok("Total working hours with start date: "+request.getStartDate()+" is "+res.getTotalWorkHours());
+		return  ResponseEntity.ok("Total working hours with department: "+request.getDeptName()+" is "+res.getTotalWorkHours());
 		
 	}
 

@@ -9,8 +9,12 @@ import lombok.Data;
 public class WorkingHoursDTO {
 	
 	private String empId;
+	private String deptName;
 	private LocalDate startDate;
 	private LocalDate endDate;
+	
+	
+	
 	public String getEmpId() {
 		return empId;
 	}
@@ -29,6 +33,13 @@ public class WorkingHoursDTO {
 	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
 	}
+	public String getDeptName() {
+		return deptName;
+	}
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
+	}
+	
 	
 	
 	

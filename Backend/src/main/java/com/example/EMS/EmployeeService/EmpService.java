@@ -919,18 +919,33 @@ public class EmpService {
 
 	                exp.setEmp_end(
 	                        parseDate(row.getCell(52)));
+	                
+	                
+	                exp.setContact_Name(
+	                		 getCellValue(row.getCell(53)));
+	                
+	                exp.setContact_Designation(
+	                		 getCellValue(row.getCell(54)));
+	                
+	                exp.setContact_Number(
+	                		 getCellValue(row.getCell(55)));
+	                
+	                exp.setContact_Email(
+	                		 getCellValue(row.getCell(56)));
+	                
+	                
 
 	                exp.setCurrently_working(
-	                        getCellValue(row.getCell(53)));
+	                        getCellValue(row.getCell(57)));
 
 	                exp.setDuration(
-	                        getCellValue(row.getCell(54)));
+	                        getCellValue(row.getCell(58)));
 
 	                exp.setTech_used(
 	                        getCellValue(row.getCell(55)));
 
 	                exp.setRoles_responsibilities(
-	                        getCellValue(row.getCell(56)));
+	                        getCellValue(row.getCell(59)));
 
 	                // PREVIOUS EXPERIENCE LETTER
 
@@ -2326,18 +2341,31 @@ public class EmpService {
 
                 exp.setEmp_end(
                         parseDate(row.getCell(60)));
+                
+                exp.setContact_Name(
+               		 getCellValue(row.getCell(61)));
+               
+               exp.setContact_Designation(
+               		 getCellValue(row.getCell(62)));
+               
+               exp.setContact_Number(
+               		 getCellValue(row.getCell(63)));
+               
+               exp.setContact_Email(
+               		 getCellValue(row.getCell(64)));
+               
 
                 exp.setCurrently_working(
-                        getCellValue(row.getCell(61)));
+                        getCellValue(row.getCell(65)));
 
                 exp.setDuration(
-                        getCellValue(row.getCell(62)));
+                        getCellValue(row.getCell(66)));
 
                 exp.setTech_used(
-                        getCellValue(row.getCell(63)));
+                        getCellValue(row.getCell(67)));
 
                 exp.setRoles_responsibilities(
-                        getCellValue(row.getCell(64)));
+                        getCellValue(row.getCell(68)));
 
                 // PREVIOUS EXPERIENCE LETTER
 

@@ -1,8 +1,10 @@
 package com.example.EMS.EmployeeService;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,8 +17,14 @@ import com.example.EMS.EmployeeDTO.AttendanceRequestDTO;
 import com.example.EMS.EmployeeDTO.WorkingHoursDTO;
 import com.example.EMS.EmployeeEntity.Attendance;
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
+import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyCalculation;
 import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
+import com.example.EMS.EmployeeRepository.WeeklyCalculationRepository;
+import com.example.EMS.EmployeeService.LeaveService.LeaveRequestService;
+import com.example.EMS.enums.LeaveType;
+
 
 import jakarta.transaction.Transactional;
 
@@ -24,11 +32,16 @@ import jakarta.transaction.Transactional;
 public class AttendanceService {
 	
 	private AttendanceRepository attendanceRepo;
-	 public EmpRepository empRepo;
+	private EmpRepository empRepo;
+	private WeeklyCalculationRepository weekly;
+	private LeaveRequestService leaveService;
 	
-	public AttendanceService(AttendanceRepository attendanceRepo, EmpRepository empRepo) {
+	public AttendanceService(AttendanceRepository attendanceRepo, EmpRepository empRepo, WeeklyCalculationRepository weekly,
+			LeaveRequestService leaveService) {
 		this.attendanceRepo = attendanceRepo;
 		this.empRepo = empRepo;
+		this.weekly = weekly;
+		this.leaveService = leaveService;
 	}
 	
 	
@@ -103,6 +116,52 @@ public class AttendanceService {
             attendance.setTotalWorkingHours(
                     totalTime);
             
+           
+           if(emp.getProfessional_details().getProfessional_department().equals("IT")) {
+        	   Optional<WeeklyCalculation> week = weekly.findByDeptName("IT");
+        	   if(week.isEmpty()) {
+        		   return ResponseEntity.badRequest().body("There is no weekly record for IT");
+        	   }
+        	   WeeklyCalculation res = week.get();
+        	   long n = res.getTotalWorkHours()/res.getTotalWorkDays();
+        	   
+        	   if(hours < n/2.0) {
+        		   
+        		   LeaveRequest request = new LeaveRequest();
+        		   
+        		   request.setStartDate(date);
+        		   request.setEndDate(date);
+        		   request.setLeaveType(LeaveType.HALF_DAY);
+        		   request.setReason("Auto-generated due to insufficient work hours on: "+date);
+        		   
+        		   leaveService.applyLeave(emp.getEmployeeId(), request);
+        		   
+        		   
+        	   }
+        	   
+           }
+           else if(emp.getProfessional_details().getProfessional_department().equals("Insurance")) {
+        	   Optional<WeeklyCalculation> week = weekly.findByDeptName("Insurance");
+        	   if(week.isEmpty()) {
+        		   return ResponseEntity.badRequest().body("There is no weekly record for insurance");
+        	   }
+        	   WeeklyCalculation res = week.get();
+        	   long n = res.getTotalWorkHours()/res.getTotalWorkDays();
+        	   
+        	   if(hours < n/2.0) {
+        		   
+        		   LeaveRequest request = new LeaveRequest();
+        		   
+        		   request.setStartDate(date);
+        		   request.setEndDate(date);
+        		   request.setLeaveType(LeaveType.HALF_DAY);
+        		   request.setReason("Auto-generated due to insufficient work hours on: "+date);
+        		   
+        		   leaveService.applyLeave(emp.getEmployeeId(), request);
+        		           		   
+        	   }
+           }
+         
             
         }
 
@@ -258,6 +317,24 @@ public class AttendanceService {
     public ResponseEntity<?> getEmpPresent(LocalDate date){
     	Long count = attendanceRepo.countPresentEmployees(date);
     	return ResponseEntity.ok(count);
+    }
+    
+
+    public ResponseEntity<?> calculateWeeklyHours(String empId) {
+    	
+    	 LocalDate today = LocalDate.now();
+    	 Long empid = empRepo.findIdByEmployeeId(empId);
+
+         LocalDate startOfWeek =
+                 today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+         LocalDate endOfWeek =
+                 today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+         
+         Double hours = attendanceRepo.calculateWeeklyHours(empid, startOfWeek, endOfWeek);
+     	
+     	return ResponseEntity.ok("Employee ID: "+empId+" worked from "+ startOfWeek+" to "+endOfWeek+" totally "+hours+" hours");
+    		
     }
 	
 

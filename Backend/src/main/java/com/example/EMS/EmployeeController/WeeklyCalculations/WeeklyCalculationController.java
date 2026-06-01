@@ -31,24 +31,33 @@ public class WeeklyCalculationController {
 	@PostMapping("/create")
 	public ResponseEntity<?> createWeeklyRecord(@RequestBody WeeklyCalculation request){
 	
-		if (request.getStartDate() == null) {
+		
+		if (request.getDeptName() == null) {
 		    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-		            .body("Please enter start date");
+		            .body("Please enter department name");
 		}
-
-		if (request.getEndDate() == null) {
-		    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-		            .body("Please enter end date");
-		}
+	
 
 		if (request.getTotalWorkDays() == null) {
 		    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 		            .body("Please enter total work days");
 		}
+		
+			
 
 		if (request.getTotalWorkHours() == null) {
-		    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-		            .body("Please enter total work hours");
+			if(request.getWorkHours() != null) {
+				request.setTotalWorkHours(request.getWorkHours() * request.getTotalWorkDays());
+			}
+			else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			            .body("Please enter total work hours or per day hour");
+			}
+		    
+		}
+		
+		if (request.getWorkHours() == null) {
+		    request.setWorkHours(request.getTotalWorkHours());
 		}
 		
 		return calcService.createWeeklyRecord(request);
@@ -59,15 +68,11 @@ public class WeeklyCalculationController {
 	@GetMapping("/getHours")
 	public ResponseEntity<?> getWeeklyTotalHours(@RequestBody WorkingHoursDTO request){
 		
-		if (request.getStartDate() == null) {
+		if (request.getDeptName() == null) {
 		    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-		            .body("Please enter start date");
+		            .body("Please enter department name");
 		}
 
-		if (request.getEndDate() == null) {
-		    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-		            .body("Please enter end date");
-		}
        
 		return calcService.getWeeklyHours(request);
 	}

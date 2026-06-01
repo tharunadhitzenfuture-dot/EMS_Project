@@ -3,7 +3,7 @@ package com.example.EMS.EmployeeEntity;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +23,11 @@ public class Experience {
 	private String emp_type_prev;
 	private Date emp_start;
 	private Date emp_end;
+	
+	private String Contact_Name;
+	private String Contact_Designation;
+	private String Contact_Number;
+	private String Contact_Email;
 	
 	private String currently_working;
 	private String Duration;
@@ -144,6 +149,31 @@ public class Experience {
 	public void setEmployeeInvite(EmployeeInvite employeeInvite) {
 		this.employeeInvite = employeeInvite;
 	}
+	public String getContact_Name() {
+		return Contact_Name;
+	}
+	public void setContact_Name(String contact_Name) {
+		Contact_Name = contact_Name;
+	}
+	public String getContact_Designation() {
+		return Contact_Designation;
+	}
+	public void setContact_Designation(String contact_Designation) {
+		Contact_Designation = contact_Designation;
+	}
+	public String getContact_Number() {
+		return Contact_Number;
+	}
+	public void setContact_Number(String contact_Number) {
+		Contact_Number = contact_Number;
+	}
+	public String getContact_Email() {
+		return Contact_Email;
+	}
+	public void setContact_Email(String contact_Email) {
+		Contact_Email = contact_Email;
+	}
+	
 	
 	
 	

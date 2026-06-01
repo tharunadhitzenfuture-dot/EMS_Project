@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,6 +34,11 @@ public class Attendance {
 	private String status;
 	private String totalWorkingHours;
 	
+	
+	@JsonProperty("empId")
+	public String getEmpId() {
+	    return employee != null ? employee.getEmployeeId() : null;
+	}
 	
 	@ManyToOne
 	@JoinColumn(name = "employee_id")

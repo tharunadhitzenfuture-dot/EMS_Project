@@ -123,8 +123,6 @@ public class AttendanceController {
 	    
 	    @GetMapping("/getworkingHours")
 	    public ResponseEntity<?> getWorkingHoursById(@RequestBody WorkingHoursDTO request){
-	    	//Get weekly worked hours by empId - /getworkingHours
-	    	//Get total week hours - /api/weekly/getHours
 	    	if (request.getEmpId() == null || request.getEmpId().isBlank()) {
 	    	    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 	    	            .body("Please enter employee id");
@@ -152,6 +150,19 @@ public class AttendanceController {
 	    	return attendanceService.getEmpPresent(date);
 	    	
 	    }
+	    
+	    
+	    @GetMapping("/getHoursWeekly/{empId}")
+	    public ResponseEntity<?> getHoursWeekly(
+	            @PathVariable String empId){
+	    	
+	    	if(empId == null) {
+	    		return ResponseEntity.badRequest().body("Employee id is null");
+	    	}
+
+	        return attendanceService.calculateWeeklyHours(empId);
+	    }
+
 	    
 	    
 	  

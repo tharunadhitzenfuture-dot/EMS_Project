@@ -9,8 +9,7 @@ import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyCalculation;
 
 public interface WeeklyCalculationRepository extends JpaRepository<WeeklyCalculation, Long> {
 
-	Optional<WeeklyCalculation> findByStartDate(LocalDate date);
-	Optional<WeeklyCalculation> findByEndDate(LocalDate date);
+	Optional<WeeklyCalculation> findByDeptName(String name);
 	
 	
 }
