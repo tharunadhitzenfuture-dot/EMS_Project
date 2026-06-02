@@ -313,20 +313,19 @@ public class AttendanceService {
          	   if(hours < n/2.0) {
          		   
          		   LeaveRequest requestDTO = new LeaveRequest();
-         		  System.out.println("Noos");
          		   requestDTO.setStartDate(attendance.getAttendanceDate());
          		   requestDTO.setEndDate(attendance.getAttendanceDate());
          		   requestDTO.setLeaveType(LeaveType.HALF_DAY);
          		   requestDTO.setReason("Auto-generated due to insufficient work hours on: "+attendance.getAttendanceDate());
          		   
-         		   attendance.setStatus("Half-Time");
+         		   attendance.setStatus("HALF-TIME");
          		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
          		   
          		   
          		   
          	   }
          	   else {
-         		   attendance.setStatus("Present");
+         		   attendance.setStatus("PRESENT");
          	   }
          	   
          	   
