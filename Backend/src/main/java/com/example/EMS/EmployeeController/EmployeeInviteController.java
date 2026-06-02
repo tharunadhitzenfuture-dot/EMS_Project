@@ -2,6 +2,7 @@ package com.example.EMS.EmployeeController;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +45,174 @@ public class EmployeeInviteController {
 			@RequestPart(value="offerLetter",required=false) MultipartFile offerLetter,
 			@RequestPart(value="prevExpLetter",required=false) List<MultipartFile> prevExpLetter,
 			@RequestPart(value="experienceLetter",required=false) List<MultipartFile> experienceLetter){
+		
+		if (file != null && !file.isEmpty()) {
+
+		    String fileType = file.getOriginalFilename();
+
+		    boolean isPdfExtension =
+	                fileType != null &&
+	                fileType.toLowerCase().endsWith(".jpeg") ||
+	                fileType.toLowerCase().endsWith(".jpg") ||
+	                fileType.toLowerCase().endsWith(".png") ;
+		 
+
+		    if (!isPdfExtension) {
+
+		        return ResponseEntity.badRequest()
+		                .body("Only JPG, JPEG, PNG images are allowed for profile");
+		    }
+		}
+		
+
+		if(aadhar != null && !aadhar.isEmpty()) {
+			String fileType = aadhar.getOriginalFilename();
+
+			 boolean isPdfExtension =
+		                fileType != null &&
+		                fileType.toLowerCase().endsWith(".pdf");
+			 
+			 if(!isPdfExtension) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload aadhar pdf format");
+			 }
+		}
+		
+		if(pan_card != null && !pan_card.isEmpty()) {
+			String fileType = pan_card.getOriginalFilename();
+
+			 boolean isPdfExtension =
+		                fileType != null &&
+		                fileType.toLowerCase().endsWith(".pdf");
+			 
+			 if(!isPdfExtension) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload pan card pdf format");
+			 }
+		}
+		
+		if(passbook != null && !passbook.isEmpty()) {
+			String fileType = passbook.getOriginalFilename();
+
+			 boolean isPdfExtension =
+		                fileType != null &&
+		                fileType.toLowerCase().endsWith(".pdf");
+			 
+			 if(!isPdfExtension) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload passbook pdf format");
+			 }
+		}
+		
+		if(education != null && !education.isEmpty()) {
+			String fileType = education.getOriginalFilename();
+
+			 boolean isPdfExtension =
+		                fileType != null &&
+		                fileType.toLowerCase().endsWith(".pdf");
+			 
+			 if(!isPdfExtension) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload education pdf format");
+			 }
+		}
+		
+		if(resume != null && !resume.isEmpty()) {
+			String fileType = resume.getOriginalFilename();
+
+			 boolean isPdfExtension =
+		                fileType != null &&
+		                fileType.toLowerCase().endsWith(".pdf");
+			 
+			 if(!isPdfExtension) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload resume pdf format");
+			 }
+		}
+		
+		if(offerLetter != null && !offerLetter.isEmpty()) {
+			String fileType = offerLetter.getOriginalFilename();
+
+			 boolean isPdfExtension =
+		                fileType != null &&
+		                fileType.toLowerCase().endsWith(".pdf");
+			 
+			 if(!isPdfExtension) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload Offer Letter pdf format");
+			 }
+		}
+		
+		if (salarySlip != null && !salarySlip.isEmpty()) {
+
+		    for (MultipartFile pdf : salarySlip) {
+		    	String fileType = pdf.getOriginalFilename();
+
+				 boolean isPdfExtension =
+			                fileType != null &&
+			                fileType.toLowerCase().endsWith(".pdf");
+				 
+				 if(!isPdfExtension) {
+					 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload salary slip pdf format");
+				 }
+		    }
+		}
+		
+		if (higherEducation != null && !higherEducation.isEmpty()) {
+
+		    for (MultipartFile pdf : higherEducation) {
+		    	String fileType = pdf.getOriginalFilename();
+
+				 boolean isPdfExtension =
+			                fileType != null &&
+			                fileType.toLowerCase().endsWith(".pdf");
+				 
+				 if(!isPdfExtension) {
+					 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload higher education pdf format");
+				 }
+		    }
+		}
+		
+		
+		if (bankStatement != null && !bankStatement.isEmpty()) {
+
+		    for (MultipartFile pdf : bankStatement) {
+		    	String fileType = pdf.getOriginalFilename();
+
+				 boolean isPdfExtension =
+			                fileType != null &&
+			                fileType.toLowerCase().endsWith(".pdf");
+				 
+				 if(!isPdfExtension) {
+					 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload bank statement pdf format");
+				 }
+		    }
+		}
+		
+
+		if (prevExpLetter != null && !prevExpLetter.isEmpty()) {
+
+		    for (MultipartFile pdf : prevExpLetter) {
+		    	String fileType = pdf.getOriginalFilename();
+
+				 boolean isPdfExtension =
+			                fileType != null &&
+			                fileType.toLowerCase().endsWith(".pdf");
+				 
+				 if(!isPdfExtension) {
+					 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload previous offer letters pdf format");
+				 }
+		    }
+		}
+		
+		if (experienceLetter != null && !experienceLetter.isEmpty()) {
+
+		    for (MultipartFile pdf : experienceLetter) {
+		    	String fileType = pdf.getOriginalFilename();
+
+				 boolean isPdfExtension =
+			                fileType != null &&
+			                fileType.toLowerCase().endsWith(".pdf");
+				 
+				 if(!isPdfExtension) {
+					 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload experience letter pdf format");
+				 }
+		    }
+		}
 		
 		return empInviteService.saveEmployee(empInvite, file,aadhar,pan_card, higherEducation,bankStatement, salarySlip, passbook, education, resume, offerLetter, prevExpLetter, experienceLetter);
 	}
@@ -91,6 +260,175 @@ public class EmployeeInviteController {
 			@RequestPart(value="offerLetter",required=false) MultipartFile offerLetter,
 			@RequestPart(value="prevExpLetter",required=false) List<MultipartFile> prevExpLetter,
 			@RequestPart(value="experienceLetter",required=false) List<MultipartFile> experienceLetter) throws Exception{
+		
+		if (file != null && !file.isEmpty()) {
+
+		    String fileType = file.getOriginalFilename();
+
+		    boolean isPdfExtension =
+	                fileType != null &&
+	                fileType.toLowerCase().endsWith(".jpeg") ||
+	                fileType.toLowerCase().endsWith(".jpg") ||
+	                fileType.toLowerCase().endsWith(".png") ;
+		 
+
+		    if (!isPdfExtension) {
+
+		        return ResponseEntity.badRequest()
+		                .body("Only JPG, JPEG, PNG images are allowed for profile");
+		    }
+		}
+		
+
+		if(aadhar != null && !aadhar.isEmpty()) {
+			String fileType = aadhar.getOriginalFilename();
+
+			 boolean isPdfExtension =
+		                fileType != null &&
+		                fileType.toLowerCase().endsWith(".pdf");
+			 
+			 if(!isPdfExtension) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload aadhar pdf format");
+			 }
+		}
+		
+		if(pan_card != null && !pan_card.isEmpty()) {
+			String fileType = pan_card.getOriginalFilename();
+
+			 boolean isPdfExtension =
+		                fileType != null &&
+		                fileType.toLowerCase().endsWith(".pdf");
+			 
+			 if(!isPdfExtension) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload pan card pdf format");
+			 }
+		}
+		
+		if(passbook != null && !passbook.isEmpty()) {
+			String fileType = passbook.getOriginalFilename();
+
+			 boolean isPdfExtension =
+		                fileType != null &&
+		                fileType.toLowerCase().endsWith(".pdf");
+			 
+			 if(!isPdfExtension) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload passbook pdf format");
+			 }
+		}
+		
+		if(education != null && !education.isEmpty()) {
+			String fileType = education.getOriginalFilename();
+
+			 boolean isPdfExtension =
+		                fileType != null &&
+		                fileType.toLowerCase().endsWith(".pdf");
+			 
+			 if(!isPdfExtension) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload education pdf format");
+			 }
+		}
+		
+		if(resume != null && !resume.isEmpty()) {
+			String fileType = resume.getOriginalFilename();
+
+			 boolean isPdfExtension =
+		                fileType != null &&
+		                fileType.toLowerCase().endsWith(".pdf");
+			 
+			 if(!isPdfExtension) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload resume pdf format");
+			 }
+		}
+		
+		if(offerLetter != null && !offerLetter.isEmpty()) {
+			String fileType = offerLetter.getOriginalFilename();
+
+			 boolean isPdfExtension =
+		                fileType != null &&
+		                fileType.toLowerCase().endsWith(".pdf");
+			 
+			 if(!isPdfExtension) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload Offer Letter pdf format");
+			 }
+		}
+		
+		if (salarySlip != null && !salarySlip.isEmpty()) {
+
+		    for (MultipartFile pdf : salarySlip) {
+		    	String fileType = pdf.getOriginalFilename();
+
+				 boolean isPdfExtension =
+			                fileType != null &&
+			                fileType.toLowerCase().endsWith(".pdf");
+				 
+				 if(!isPdfExtension) {
+					 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload salary slip pdf format");
+				 }
+		    }
+		}
+		
+		if (higherEducation != null && !higherEducation.isEmpty()) {
+
+		    for (MultipartFile pdf : higherEducation) {
+		    	String fileType = pdf.getOriginalFilename();
+
+				 boolean isPdfExtension =
+			                fileType != null &&
+			                fileType.toLowerCase().endsWith(".pdf");
+				 
+				 if(!isPdfExtension) {
+					 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload higher education pdf format");
+				 }
+		    }
+		}
+		
+		
+		if (bankStatement != null && !bankStatement.isEmpty()) {
+
+		    for (MultipartFile pdf : bankStatement) {
+		    	String fileType = pdf.getOriginalFilename();
+
+				 boolean isPdfExtension =
+			                fileType != null &&
+			                fileType.toLowerCase().endsWith(".pdf");
+				 
+				 if(!isPdfExtension) {
+					 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload bank statement pdf format");
+				 }
+		    }
+		}
+		
+
+		if (prevExpLetter != null && !prevExpLetter.isEmpty()) {
+
+		    for (MultipartFile pdf : prevExpLetter) {
+		    	String fileType = pdf.getOriginalFilename();
+
+				 boolean isPdfExtension =
+			                fileType != null &&
+			                fileType.toLowerCase().endsWith(".pdf");
+				 
+				 if(!isPdfExtension) {
+					 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload previous offer letters pdf format");
+				 }
+		    }
+		}
+		
+		if (experienceLetter != null && !experienceLetter.isEmpty()) {
+
+		    for (MultipartFile pdf : experienceLetter) {
+		    	String fileType = pdf.getOriginalFilename();
+
+				 boolean isPdfExtension =
+			                fileType != null &&
+			                fileType.toLowerCase().endsWith(".pdf");
+				 
+				 if(!isPdfExtension) {
+					 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload experience letter pdf format");
+				 }
+		    }
+		}
+		
 		return empInviteService.updateFormById(id, empInvite, file, aadhar, pan_card, higherEducation,bankStatement,salarySlip, passbook, education, resume, offerLetter,prevExpLetter, experienceLetter);
 	}
 	
