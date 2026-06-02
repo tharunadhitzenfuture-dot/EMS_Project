@@ -349,7 +349,7 @@ public class AttendanceService {
          		   requestDTO.setLeaveType(LeaveType.HALF_DAY);
          		   requestDTO.setReason("Auto-generated due to insufficient work hours on: "+attendance.getAttendanceDate());
          		   
-         		   attendance.setStatus("HALF_TIME");
+         		   attendance.setStatus("HALF-TIME");
          		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
          		   
          		   
