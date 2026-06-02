@@ -134,14 +134,14 @@ public class AttendanceService {
         		   request.setLeaveType(LeaveType.HALF_DAY);
         		   request.setReason("Auto-generated due to insufficient work hours on: "+date);
         		   
-        		   attendance.setStatus("Half-Time");
+        		   attendance.setStatus("HALF-TIME");
         		   leaveService.applyLeave(emp.getEmployeeId(), request);
         		   
         		   
         		   
         	   }
         	   else {
-        		   attendance.setStatus("Present");
+        		   attendance.setStatus("PRESENT");
         	   }
         	   
         	   
@@ -163,13 +163,13 @@ public class AttendanceService {
         		   request.setLeaveType(LeaveType.HALF_DAY);
         		   request.setReason("Auto-generated due to insufficient work hours on: "+date);
         		   
-        		   attendance.setStatus("Half-Time");
+        		   attendance.setStatus("HALF_TIME");
         		   
         		   leaveService.applyLeave(emp.getEmployeeId(), request);
         		           		   
         	   }
         	   else {
-        		   attendance.setStatus("Present");
+        		   attendance.setStatus("PRESENT");
         	   }
            }
            
@@ -309,7 +309,7 @@ public class AttendanceService {
          	   }
          	   WeeklyCalculation res = week.get();
          	   long n = res.getTotalWorkHours()/res.getTotalWorkDays();
-         	  System.out.println("Noo: "+n+"Hours:"+hours);
+ 
          	   if(hours < n/2.0) {
          		   
          		   LeaveRequest requestDTO = new LeaveRequest();
@@ -349,7 +349,7 @@ public class AttendanceService {
          		   requestDTO.setLeaveType(LeaveType.HALF_DAY);
          		   requestDTO.setReason("Auto-generated due to insufficient work hours on: "+attendance.getAttendanceDate());
          		   
-         		   attendance.setStatus("Half-Time");
+         		   attendance.setStatus("HALF_TIME");
          		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
          		   
          		   
@@ -357,7 +357,7 @@ public class AttendanceService {
          		           		   
          	   }
          	   else {
-         		   attendance.setStatus("Present");
+         		   attendance.setStatus("PRESENT");
          	   }
             }
         }
