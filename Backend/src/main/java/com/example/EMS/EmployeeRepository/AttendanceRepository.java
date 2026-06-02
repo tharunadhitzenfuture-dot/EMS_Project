@@ -50,4 +50,10 @@ public interface AttendanceRepository
      Long countPresentEmployees(
              @Param("date") LocalDate date
      );
+    
+    List<Attendance> findByEmployeeIdAndAttendanceDateBetween(
+            Long empId,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 }

@@ -379,9 +379,45 @@ public class AttendanceService {
     
     public ResponseEntity<?> getWeeklyHours(WorkingHoursDTO request){
     	Long empId = empRepo.findIdByEmployeeId(request.getEmpId());
-    	Double hours = attendanceRepo.calculateWeeklyHours(empId, request.getStartDate(), request.getEndDate());
+//    	Double hours = attendanceRepo.calculateWeeklyHours(empId, request.getStartDate(), request.getEndDate());
     	
-    	return ResponseEntity.ok("Employee ID: "+request.getEmpId()+" worked from "+ request.getStartDate()+" to "+request.getEndDate()+" totally "+hours+" hours");
+        List<Attendance> records =
+    	        attendanceRepo.findByEmployeeIdAndAttendanceDateBetween(
+    	                empId,
+    	                request.getStartDate(),
+    	                request.getEndDate()
+    	        );
+     
+     long totalSeconds = 0;
+
+     for (Attendance att : records) {
+
+         String[] parts =
+                 att.getTotalWorkingHours().split(":");
+
+         long hours = Long.parseLong(parts[0]);
+         long minutes = Long.parseLong(parts[1]);
+         long seconds = Long.parseLong(parts[2]);
+
+         totalSeconds +=
+                 hours * 3600 +
+                 minutes * 60 +
+                 seconds;
+     }
+     
+     long hrs = totalSeconds / 3600;
+     long mins = (totalSeconds % 3600) / 60;
+     long secs = totalSeconds % 60;
+
+     String weeklyHours =
+             String.format(
+                     "%02d:%02d:%02d",
+                     hrs,
+                     mins,
+                     secs
+             );
+    	
+    	return ResponseEntity.ok("Employee ID: "+request.getEmpId()+" worked from "+ request.getStartDate()+" to "+request.getEndDate()+" totally "+weeklyHours+" hours");
     }
 	
     
@@ -402,9 +438,45 @@ public class AttendanceService {
          LocalDate endOfWeek =
                  today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
          
-         Double hours = attendanceRepo.calculateWeeklyHours(empid, startOfWeek, endOfWeek);
+//         Double hours = attendanceRepo.calculateWeeklyHours(empid, startOfWeek, endOfWeek);
+         
+         List<Attendance> records =
+        	        attendanceRepo.findByEmployeeIdAndAttendanceDateBetween(
+        	                empid,
+        	                startOfWeek,
+        	                endOfWeek
+        	        );
+         
+         long totalSeconds = 0;
+
+         for (Attendance att : records) {
+
+             String[] parts =
+                     att.getTotalWorkingHours().split(":");
+
+             long hours = Long.parseLong(parts[0]);
+             long minutes = Long.parseLong(parts[1]);
+             long seconds = Long.parseLong(parts[2]);
+
+             totalSeconds +=
+                     hours * 3600 +
+                     minutes * 60 +
+                     seconds;
+         }
+         
+         long hrs = totalSeconds / 3600;
+         long mins = (totalSeconds % 3600) / 60;
+         long secs = totalSeconds % 60;
+
+         String weeklyHours =
+                 String.format(
+                         "%02d:%02d:%02d",
+                         hrs,
+                         mins,
+                         secs
+                 );
      	
-     	return ResponseEntity.ok("Employee ID: "+empId+" worked from "+ startOfWeek+" to "+endOfWeek+" totally "+hours+" hours");
+     	return ResponseEntity.ok("Employee ID: "+empId+" worked from "+ startOfWeek+" to "+endOfWeek+" totally :"+weeklyHours);
     		
     }
 	
