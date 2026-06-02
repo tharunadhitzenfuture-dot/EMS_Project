@@ -2,6 +2,8 @@ package com.example.EMS.EmployeeEntity.WeeklyCalculations;
 
 
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,8 +16,8 @@ public class WeeklyCalculation {
 	@Id
 	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private Long id;
-//	private LocalDate startDate;
-//	private LocalDate endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	
 	@Column(unique=true)
 	private String deptName;
@@ -66,6 +68,19 @@ public class WeeklyCalculation {
 	public void setTotalWorkHours(Long totalWorkHours) {
 		this.totalWorkHours = totalWorkHours;
 	}
+	public LocalDate getStartDate() {
+		return startDate;
+	}
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
+	}
+	public LocalDate getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(LocalDate endDate) {
+		this.endDate = endDate;
+	}
+	
 	
 
 	
