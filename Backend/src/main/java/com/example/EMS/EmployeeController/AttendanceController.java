@@ -23,6 +23,7 @@ import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeService.AttendanceService;
 
+
 @RestController
 @RequestMapping("/api/attendance")
 public class AttendanceController {
@@ -115,8 +116,20 @@ public class AttendanceController {
 	    public ResponseEntity<?> updateAttendance(
 	            @PathVariable String empId,
 	            @RequestBody AttendanceRequestDTO request){
+	    	
+
+	        Optional<Employee> emp =
+	                empRepo.findByEmployeeId(
+	                        request.getEmpId());
+
+	        if(emp.isEmpty()){
+	        	return ResponseEntity.badRequest().body("Employee not found with id: "+empId);
+	        }
+
+	        
 
 	        return attendanceService.updateAttendance(
+	        		emp.get(),
 	                empId,
 	                request);
 	    }

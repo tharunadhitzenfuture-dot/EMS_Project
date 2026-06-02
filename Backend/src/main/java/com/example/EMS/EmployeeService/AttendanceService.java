@@ -92,7 +92,7 @@ public class AttendanceService {
         attendance.setCheckOut(checkOut);
 
      
-        attendance.setStatus(status);
+        //attendance.setStatus(status);
 
        
         if (checkIn != null && checkOut != null) {
@@ -134,10 +134,16 @@ public class AttendanceService {
         		   request.setLeaveType(LeaveType.HALF_DAY);
         		   request.setReason("Auto-generated due to insufficient work hours on: "+date);
         		   
+        		   attendance.setStatus("Half-Time");
         		   leaveService.applyLeave(emp.getEmployeeId(), request);
         		   
         		   
+        		   
         	   }
+        	   else {
+        		   attendance.setStatus("Present");
+        	   }
+        	   
         	   
            }
            else if(emp.getProfessional_details().getProfessional_department().equals("Insurance")) {
@@ -157,10 +163,16 @@ public class AttendanceService {
         		   request.setLeaveType(LeaveType.HALF_DAY);
         		   request.setReason("Auto-generated due to insufficient work hours on: "+date);
         		   
+        		   attendance.setStatus("Half-Time");
+        		   
         		   leaveService.applyLeave(emp.getEmployeeId(), request);
         		           		   
         	   }
+        	   else {
+        		   attendance.setStatus("Present");
+        	   }
            }
+           
          
             
         }
@@ -222,6 +234,7 @@ public class AttendanceService {
 
     
     public ResponseEntity<?> updateAttendance(
+    		Employee emp,
             String empId,
             AttendanceRequestDTO request){
 
@@ -266,7 +279,7 @@ public class AttendanceService {
         }
 
         
-       
+        
         if(attendance.getCheckIn() != null
                 && attendance.getCheckOut() != null){
 
@@ -274,7 +287,7 @@ public class AttendanceService {
                     Duration.between(
                             attendance.getCheckIn(),
                             attendance.getCheckOut());
-
+            
             long hours = duration.toHours();
         	long minutes = duration.toMinutesPart();
         	long seconds = duration.toSecondsPart();
@@ -288,15 +301,74 @@ public class AttendanceService {
 
             attendance.setTotalWorkingHours(
                     totalTime);
+            
+            if(emp.getProfessional_details().getProfessional_department().equals("IT")) {
+         	   Optional<WeeklyCalculation> week = weekly.findByDeptName("IT");
+         	   if(week.isEmpty()) {
+         		   return ResponseEntity.badRequest().body("There is no weekly record for IT");
+         	   }
+         	   WeeklyCalculation res = week.get();
+         	   long n = res.getTotalWorkHours()/res.getTotalWorkDays();
+         	  System.out.println("Noo: "+n+"Hours:"+hours);
+         	   if(hours < n/2.0) {
+         		   
+         		   LeaveRequest requestDTO = new LeaveRequest();
+         		  System.out.println("Noos");
+         		   requestDTO.setStartDate(attendance.getAttendanceDate());
+         		   requestDTO.setEndDate(attendance.getAttendanceDate());
+         		   requestDTO.setLeaveType(LeaveType.HALF_DAY);
+         		   requestDTO.setReason("Auto-generated due to insufficient work hours on: "+attendance.getAttendanceDate());
+         		   
+         		   attendance.setStatus("Half-Time");
+         		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
+         		   
+         		   
+         		   
+         	   }
+         	   else {
+         		   attendance.setStatus("Present");
+         	   }
+         	   
+         	   
+            }
+            else if(emp.getProfessional_details().getProfessional_department().equals("Insurance")) {
+         	   Optional<WeeklyCalculation> week = weekly.findByDeptName("Insurance");
+         	   if(week.isEmpty()) {
+         		   return ResponseEntity.badRequest().body("There is no weekly record for insurance");
+         	   }
+         	   WeeklyCalculation res = week.get();
+         	   long n = res.getTotalWorkHours()/res.getTotalWorkDays();
+         	   
+         	   
+         	   if(hours < n/2.0) {
+         		   
+         		   LeaveRequest requestDTO = new LeaveRequest();
+         		   
+         		   requestDTO.setStartDate(attendance.getAttendanceDate());
+         		   requestDTO.setEndDate(attendance.getAttendanceDate());
+         		   requestDTO.setLeaveType(LeaveType.HALF_DAY);
+         		   requestDTO.setReason("Auto-generated due to insufficient work hours on: "+attendance.getAttendanceDate());
+         		   
+         		   attendance.setStatus("Half-Time");
+         		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
+         		   
+         		   
+         		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
+         		           		   
+         	   }
+         	   else {
+         		   attendance.setStatus("Present");
+         	   }
+            }
         }
 
         
         
-        if(request.getStatus() != null){
-
-            attendance.setStatus(
-                    request.getStatus());
-        }
+//        if(request.getStatus() != null){
+//
+//            attendance.setStatus(
+//                    request.getStatus());
+//        }
 
         attendanceRepo.save(attendance);
 
