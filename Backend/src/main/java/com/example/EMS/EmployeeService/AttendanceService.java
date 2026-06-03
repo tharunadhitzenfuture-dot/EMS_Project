@@ -139,14 +139,14 @@ public class AttendanceService {
         		   request.setLeaveType(LeaveType.HALF_DAY);
         		   request.setReason("Auto-generated due to insufficient work hours on: "+date);
         		   
-        		   attendance.setStatus("HALF-TIME");
+        		   attendance.setStatus(LeaveType.HALF_DAY);
         		   leaveService.applyLeave(emp.getEmployeeId(), request);
         		   
         		   
         		   
         	   }
         	   else {
-        		   attendance.setStatus("PRESENT");
+        		   attendance.setStatus(LeaveType.PRESENT);
         	   }
         	   
         	   
@@ -168,13 +168,13 @@ public class AttendanceService {
         		   request.setLeaveType(LeaveType.HALF_DAY);
         		   request.setReason("Auto-generated due to insufficient work hours on: "+date);
         		   
-        		   attendance.setStatus("HALF_TIME");
+        		   attendance.setStatus(LeaveType.HALF_DAY);
         		   
         		   leaveService.applyLeave(emp.getEmployeeId(), request);
         		           		   
         	   }
         	   else {
-        		   attendance.setStatus("PRESENT");
+        		   attendance.setStatus(LeaveType.PRESENT);
         	   }
            }
            
@@ -323,14 +323,14 @@ public class AttendanceService {
          		   requestDTO.setLeaveType(LeaveType.HALF_DAY);
          		   requestDTO.setReason("Auto-generated due to insufficient work hours on: "+attendance.getAttendanceDate());
          		   
-         		   attendance.setStatus("HALF-TIME");
+         		   attendance.setStatus(LeaveType.HALF_DAY);
          		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
          		   
          		   
          		   
          	   }
          	   else {
-         		   attendance.setStatus("PRESENT");
+         		   attendance.setStatus(LeaveType.PRESENT);
          	   }
          	   
          	   
@@ -353,7 +353,7 @@ public class AttendanceService {
          		   requestDTO.setLeaveType(LeaveType.HALF_DAY);
          		   requestDTO.setReason("Auto-generated due to insufficient work hours on: "+attendance.getAttendanceDate());
          		   
-         		   attendance.setStatus("HALF-TIME");
+         		   attendance.setStatus(LeaveType.HALF_DAY);
          		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
          		   
          		   
@@ -361,7 +361,7 @@ public class AttendanceService {
          		           		   
          	   }
          	   else {
-         		   attendance.setStatus("PRESENT");
+         		   attendance.setStatus(LeaveType.PRESENT);
          	   }
             }
         }
