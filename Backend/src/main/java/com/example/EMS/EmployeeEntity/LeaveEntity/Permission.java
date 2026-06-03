@@ -37,7 +37,7 @@ public class Permission {
 	
 	@ManyToOne
 	@JoinColumn(name = "employee_id")
-	@JsonBackReference("employee-leaveRequest")
+	@JsonBackReference("employee-permissionRequest")
 	private Employee employee;
 	
 	@Enumerated(EnumType.STRING)
