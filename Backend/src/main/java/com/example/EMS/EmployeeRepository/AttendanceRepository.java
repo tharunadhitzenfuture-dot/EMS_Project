@@ -56,4 +56,24 @@ public interface AttendanceRepository
             LocalDate startDate,
             LocalDate endDate
     );
+    
+    
+    @Query("""
+    	       SELECT a
+    	       FROM Attendance a
+    	       WHERE a.employee.id = :empId
+    	       AND a.attendanceDate BETWEEN :startDate AND :endDate
+    	       ORDER BY a.attendanceDate
+    	       """)
+    List<Attendance> calculateWeeklyHoursByDay(
+
+            @Param("empId") Long empId,
+
+            @Param("startDate")
+            LocalDate startDate,
+
+            @Param("endDate")
+            LocalDate endDate
+    );
+    
 }

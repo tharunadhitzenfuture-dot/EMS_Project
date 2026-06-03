@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
+import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
 import com.example.EMS.enums.Role;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -92,6 +93,13 @@ public class Employee {
 			@JsonManagedReference("employee-leaveBalance")
 			private List<LeaveBalance> leaveBalance;
 	
+			
+			@OneToMany(mappedBy = "employee",
+			cascade = CascadeType.ALL,
+			orphanRemoval = true)
+			@JsonManagedReference("employee-permissionRequest")
+			private List<Permission> permissionRequest;
+
 	
 	
 	
@@ -111,7 +119,7 @@ public class Employee {
 	public ProfessionalDetails getProfessional_details() {
 		return professional_details;
 	}
-
+    
 
 	public void setProfessional_details(ProfessionalDetails professional_details) {
 		this.professional_details = professional_details;

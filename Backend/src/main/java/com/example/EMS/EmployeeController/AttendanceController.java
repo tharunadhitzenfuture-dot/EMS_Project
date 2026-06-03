@@ -29,12 +29,12 @@ import com.example.EMS.EmployeeService.AttendanceService;
 public class AttendanceController {
 	
 	private AttendanceService attendanceService;
-	
+	private AttendanceRepository attendanceRepo;
 	private EmpRepository empRepo;
 	
 	public AttendanceController(AttendanceService attendanceService, AttendanceRepository attendanceRepo, EmpRepository empRepo) {
 		this.attendanceService = attendanceService;
-		
+		this.attendanceRepo = attendanceRepo;
 		this.empRepo = empRepo;
 	}
 
@@ -134,7 +134,7 @@ public class AttendanceController {
 	                request);
 	    }
 	    
-	    @GetMapping("/getworkingHours")
+	    @PostMapping("/getworkingHours")
 	    public ResponseEntity<?> getWorkingHoursById(@RequestBody WorkingHoursDTO request){
 	    	if (request.getEmpId() == null || request.getEmpId().isBlank()) {
 	    	    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -178,7 +178,22 @@ public class AttendanceController {
 
 	    
 	    
-	  
+	  @GetMapping("/getWeeklyReport")
+	  public ResponseEntity<?> getWeeklyReport(){
+		  
+		 List<Employee> lst =  empRepo.findAll();
+		 List<String> ids = new ArrayList<>();
+		 
+		 for(Employee emp: lst) {
+			String id =  emp.getEmployeeId();
+			ids.add(id);
+		 }
+		 
+		 
+		 return attendanceService.getWeeklyReport(ids);
+		  
+		  
+	  }
 
 	
 

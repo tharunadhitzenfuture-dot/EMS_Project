@@ -4,10 +4,14 @@ package com.example.EMS.EmployeeEntity;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import com.example.EMS.enums.LeaveType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,7 +35,10 @@ public class Attendance {
 	private LocalDate attendanceDate;
 	private LocalTime checkIn;
 	private LocalTime checkOut;
-	private String status;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(nullable=true)
+	private LeaveType status = LeaveType.PRESENT;
 	private String totalWorkingHours;
 	
 	
@@ -84,12 +91,7 @@ public class Attendance {
 	public void setCheckOut(LocalTime checkOut) {
 		this.checkOut = checkOut;
 	}
-	public String getStatus() {
-		return status;
-	}
-	public void setStatus(String status) {
-		this.status = status;
-	}
+	
 	public Employee getEmployee() {
 		return employee;
 	}
@@ -107,6 +109,12 @@ public class Attendance {
 	}
 	public void setAttendanceDate(LocalDate attendanceDate) {
 		this.attendanceDate = attendanceDate;
+	}
+	public LeaveType getStatus() {
+		return status;
+	}
+	public void setStatus(LeaveType status) {
+		this.status = status;
 	}
 
 	
