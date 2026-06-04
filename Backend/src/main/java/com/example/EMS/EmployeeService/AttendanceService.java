@@ -24,11 +24,9 @@ import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyCalculation;
 import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyReportDTO;
 import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
-import com.example.EMS.EmployeeRepository.WeeklyCalculationRepository;
-
+import com.example.EMS.EmployeeRepository.WeeklyCalculations.WeeklyCalculationRepository;
 import com.example.EMS.EmployeeService.LeaveService.LeaveRequestService;
 import com.example.EMS.enums.LeaveType;
-
 
 import jakarta.transaction.Transactional;
 
@@ -128,7 +126,18 @@ public class AttendanceService {
         		   return ResponseEntity.badRequest().body("There is no weekly record for IT");
         	   }
         	   WeeklyCalculation res = week.get();
-        	   long n = res.getTotalWorkHours()/res.getTotalWorkDays();
+        	   
+        	   String[] parts = res.getWorkHours().split(":");
+
+               if (parts.length != 3) {
+                   return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                           .body("workHours must be in HH:mm:ss format");
+               }
+
+               long hour = Long.parseLong(parts[0]);
+               
+
+        	   long n = hour/res.getTotalWorkDays();
         	   
         	   if(hours < n) {
         		   
@@ -157,7 +166,17 @@ public class AttendanceService {
         		   return ResponseEntity.badRequest().body("There is no weekly record for insurance");
         	   }
         	   WeeklyCalculation res = week.get();
-        	   long n = res.getTotalWorkHours()/res.getTotalWorkDays();
+        	   String[] parts = res.getWorkHours().split(":");
+
+               if (parts.length != 3) {
+                   return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                           .body("workHours must be in HH:mm:ss format");
+               }
+
+               long hour = Long.parseLong(parts[0]);
+               
+
+        	   long n = hour/res.getTotalWorkDays();
         	   
         	   if(hours < n) {
         		   
@@ -313,7 +332,17 @@ public class AttendanceService {
          		   return ResponseEntity.badRequest().body("There is no weekly record for IT");
          	   }
          	   WeeklyCalculation res = week.get();
-         	   long n = res.getTotalWorkHours()/res.getTotalWorkDays();
+         	  String[] parts = res.getWorkHours().split(":");
+
+              if (parts.length != 3) {
+                  return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                          .body("workHours must be in HH:mm:ss format");
+              }
+
+              long hour = Long.parseLong(parts[0]);
+              
+
+       	   long n = hour/res.getTotalWorkDays();
  
          	   if(hours < n) {
          		   
@@ -341,7 +370,17 @@ public class AttendanceService {
          		   return ResponseEntity.badRequest().body("There is no weekly record for insurance");
          	   }
          	   WeeklyCalculation res = week.get();
-         	   long n = res.getTotalWorkHours()/res.getTotalWorkDays();
+         	  String[] parts = res.getWorkHours().split(":");
+
+              if (parts.length != 3) {
+                  return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                          .body("workHours must be in HH:mm:ss format");
+              }
+
+              long hour = Long.parseLong(parts[0]);
+              
+
+       	      long n = hour/res.getTotalWorkDays();
          	   
          	   
          	   if(hours < n) {

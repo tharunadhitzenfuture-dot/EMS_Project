@@ -22,8 +22,8 @@ public class WeeklyCalculation {
 	@Column(unique=true)
 	private String deptName;
 	private Long totalWorkDays;
-	private Long workHours;
-	private Long totalWorkHours;
+	private String workHours;
+	private String totalWorkHours;
 	
 	public Long getId() {
 		return id;
@@ -56,16 +56,18 @@ public class WeeklyCalculation {
 		this.totalWorkDays = totalWorkDays;
 	}
 	
-	public Long getWorkHours() {
+	
+    
+	public String getWorkHours() {
 		return workHours;
 	}
-	public void setWorkHours(Long workHours) {
+	public void setWorkHours(String workHours) {
 		this.workHours = workHours;
 	}
-	public Long getTotalWorkHours() {
+	public String getTotalWorkHours() {
 		return totalWorkHours;
 	}
-	public void setTotalWorkHours(Long totalWorkHours) {
+	public void setTotalWorkHours(String totalWorkHours) {
 		this.totalWorkHours = totalWorkHours;
 	}
 	public LocalDate getStartDate() {

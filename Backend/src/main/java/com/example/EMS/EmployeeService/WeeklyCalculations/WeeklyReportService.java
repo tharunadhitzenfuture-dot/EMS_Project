@@ -8,34 +8,39 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.EMS.EmployeeEntity.Attendance;
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
+import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyCalculation;
 import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyReportDTO;
 import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
+import com.example.EMS.EmployeeRepository.LeaveRepository.PermissionRepository;
+import com.example.EMS.EmployeeRepository.WeeklyCalculations.WeeklyCalculationRepository;
 
 @Service
 public class WeeklyReportService {
 	
 	private final EmpRepository empRepo;
 	private final AttendanceRepository attendanceRepo;
-	
-	
-	
-	
-	public WeeklyReportService(EmpRepository empRepo, AttendanceRepository attendanceRepo) {
+	private final WeeklyCalculationRepository weeklyCalculation;
+	private final PermissionRepository permissionRepository;
+
+	 public WeeklyReportService(EmpRepository empRepo, AttendanceRepository attendanceRepo,
+			WeeklyCalculationRepository weeklyCalculation, PermissionRepository permissionRepository) {
+		
 		this.empRepo = empRepo;
 		this.attendanceRepo = attendanceRepo;
+		this.weeklyCalculation = weeklyCalculation;
+		this.permissionRepository = permissionRepository;
 	}
 
 
-	
-
-
-	   public ResponseEntity<?> getWeeklyReport(List<String> ids){
+	 public ResponseEntity<?> getWeeklyReport(List<String> ids){
 	    	
 	    	List<WeeklyReportDTO> dto = new ArrayList<>();
 	    	LocalDate today = LocalDate.now();
@@ -73,6 +78,9 @@ public class WeeklyReportService {
 	             LocalDate end =
 	                     today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 	             
+	             req.setStartDate(start);
+	             req.setEndDate(end);
+	             
 	            
 	    		
 	             List<Attendance> total_list = attendanceRepo.calculateWeeklyHoursByDay(empid, start, end);
@@ -102,7 +110,6 @@ public class WeeklyReportService {
 	             LocalDate endOfWeek =
 	                     today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 	             
-//	             Double hours = attendanceRepo.calculateWeeklyHours(empid, startOfWeek, endOfWeek);
 	             
 	             List<Attendance> records =
 	            	        attendanceRepo.findByEmployeeIdAndAttendanceDateBetween(
@@ -142,20 +149,139 @@ public class WeeklyReportService {
 	             
 	             req.setTotalHours(weeklyHours);
 	    		
-	    		//Need to implement remaining
-	             
-	    		
+
+	            String permission =  getPermissionHours(empId, startOfWeek, endOfWeek);	            
+	            //Permission
+	            req.setPermission(permission);
+	            
+	            
+	            String dept = emp.get().getProfessional_details().getProfessional_department();
+	            
+	            if(!dept.equalsIgnoreCase("IT") && !dept.equalsIgnoreCase("Finance")) {
+	            	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee id: "+emp.get().getEmployeeId()+" department mismatched with: "+dept);
+	            }
+	       
+	            String total = getByDepartment(emp.get().getProfessional_details().getProfessional_department());
+	            
+	            req.setDepartment_workHours(total);
+	                                
+	                              //9:00:00                 //8:30:00
+	           long balance =   timeToSeconds(weeklyHours) -  timeToSeconds(total);
+	           System.out.println(emp.get().getEmployeeId() +" "+balance);
+	           System.out.println(secondsToTime(timeToSeconds(weeklyHours))+" "+secondsToTime(timeToSeconds(total)));
+	           if(balance >0) {
+	        	   long sec = timeToSeconds(weeklyHours) - timeToSeconds(total);  
+	        	                     
+	        	                     //00:15:00
+	        	   if(timeToSeconds(permission) >0) {
+	        		   long compensation = sec - timeToSeconds(permission);
+	        		   sec = compensation;
+	        		   
+	        		   //Compensation
+	        		   if(compensation >= timeToSeconds(permission)) {
+	        			   req.setCompensation(permission);
+	        			   
+	        		   }
+	        		   else {
+	        			   long comp = timeToSeconds(permission) - compensation;
+	        			   req.setCompensation(secondsToTime(comp));
+	        		   }
+	        		   
+	        		        
+	        	   }
+	        	   
+	        	   if(sec >= 0) {
+	        		   //OverTime
+	        		   req.setOverTime(secondsToTime(sec));
+	        		   req.setShortFall("00:00:00");
+	        	   }
+	        	   else {
+	        		   //Shortfall
+	        			 req.setShortFall(secondsToTime(sec)); 
+	        			 req.setOverTime("00:00:00");
+	        	   }
+	        	   
+	        	   
+	        	   if(req.getShortFall().equals("00:00:00")) {
+	        		   //status
+	        		   req.setStatus("Completed");
+	        	   }
+	        	   else {
+	        		 //status
+	        		   req.setStatus("Pending");   
+	        	   }
+  
+	           }
+
 	    		dto.add(req);
 	    		
 	    		
 	    	}
 	    	
 	    	return ResponseEntity.ok(dto);
-	    	
-	    	
-	    	
-	    	
+
 	    	
 	    }
+	 
+	 
+	 public static long timeToSeconds(String time) {
+
+		    if (time == null || time.isBlank()) {
+		        return 0;
+		    }
+
+		    String[] parts = time.split(":");
+
+		    long hours = Long.parseLong(parts[0]);
+		    long minutes = Long.parseLong(parts[1]);
+		    long seconds = Long.parseLong(parts[2]);
+
+		    return (hours * 3600) + (minutes * 60) + seconds;
+		}
+	 
+	 public static String secondsToTime(long totalSeconds) {
+
+		    long hours = totalSeconds / 3600;
+		    long minutes = (totalSeconds % 3600) / 60;
+		    long seconds = totalSeconds % 60;
+
+		    return String.format(
+		            "%02d:%02d:%02d",
+		            hours,
+		            minutes,
+		            seconds
+		    );
+		}
+	 
+	 
+	 public String getPermissionHours(String empId, LocalDate start, LocalDate end) {
+		String res = "";
+		Long id = empRepo.findIdByEmployeeId(empId);
+		Optional<Permission> hours =  permissionRepository.findByEmployeeIdAndStartDateAndEndDate(id, start, end);
+		if(hours.isPresent()) {
+			res = hours.get().getHours();
+		}
+		else {
+			res = "00:00:00";
+		}
+		
+		return res;
+	 }
+	 
+	
+
+	  public String getByDepartment(String dept) {
+		  Optional<WeeklyCalculation> calcStart =  weeklyCalculation.findByDeptName(dept);		  
+		  WeeklyCalculation res = calcStart.get();
+		  return res.getTotalWorkHours();
+	  }
+	  
+	  public Long getHours(String hour) {
+		  String[] parts = hour.split(":");
+
+          long hr = Long.parseLong(parts[0]);
+
+   	      return hr;
+	  }
 
 }

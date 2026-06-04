@@ -1251,6 +1251,72 @@ public class EmpService {
                 existingBank.setEmployee(existing);
                 existing.setBankDetails(existingBank);
             }
+            
+         // ================= Professional Details =================
+            if (emp.getProfessional_details() != null) {
+
+                ProfessionalDetails newProfessional =
+                        emp.getProfessional_details();
+
+                ProfessionalDetails existingProfessional =
+                        existing.getProfessional_details();
+
+                if (existingProfessional == null) {
+                    existingProfessional = new ProfessionalDetails();
+                }
+
+                if (newProfessional.getProfessional_designation() != null)
+                    existingProfessional.setProfessional_designation(
+                            newProfessional.getProfessional_designation());
+
+                if (newProfessional.getProfessional_department() != null)
+                    existingProfessional.setProfessional_department(
+                            newProfessional.getProfessional_department());
+
+                if (newProfessional.getEmp_type() != null)
+                    existingProfessional.setEmp_type(
+                            newProfessional.getEmp_type());
+
+                if (newProfessional.getLocation() != null)
+                    existingProfessional.setLocation(
+                            newProfessional.getLocation());
+
+                if (newProfessional.getEmp_status() != null)
+                    existingProfessional.setEmp_status(
+                            newProfessional.getEmp_status());
+
+                if (newProfessional.getDoj() != null)
+                    existingProfessional.setDoj(
+                            newProfessional.getDoj());
+
+                if (newProfessional.getProbation_period() != null)
+                    existingProfessional.setProbation_period(
+                            newProfessional.getProbation_period());
+
+                if (newProfessional.getConfirmation_date() != null)
+                    existingProfessional.setConfirmation_date(
+                            newProfessional.getConfirmation_date());
+
+                if (newProfessional.getSkills() != null)
+                    existingProfessional.setSkills(
+                            newProfessional.getSkills());
+
+                if (newProfessional.getExp_level() != null)
+                    existingProfessional.setExp_level(
+                            newProfessional.getExp_level());
+
+                if (newProfessional.getResume() != null)
+                    existingProfessional.setResume(
+                            newProfessional.getResume());
+
+                if (newProfessional.getOffer_letter() != null)
+                    existingProfessional.setOffer_letter(
+                            newProfessional.getOffer_letter());
+
+                existingProfessional.setEmployee(existing);
+
+                existing.setProfessional_details(existingProfessional);
+            }
 
             // ================= PAYROLL =================
             if (emp.getEmpPayroll() != null) {

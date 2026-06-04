@@ -4,6 +4,7 @@ package com.example.EMS.EmployeeEntity;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import com.example.EMS.enums.Department;
 import com.example.EMS.enums.LeaveType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;

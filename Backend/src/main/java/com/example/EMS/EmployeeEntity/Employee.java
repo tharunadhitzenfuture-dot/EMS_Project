@@ -6,6 +6,7 @@ import java.util.List;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
+import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyReportDTO;
 import com.example.EMS.enums.Role;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -100,6 +101,12 @@ public class Employee {
 			@JsonManagedReference("employee-permissionRequest")
 			private List<Permission> permissionRequest;
 
+
+			@OneToMany(mappedBy = "employee",
+			cascade = CascadeType.ALL,
+			orphanRemoval = true)
+			@JsonManagedReference("employee-weeklyReport")
+			private List<WeeklyReportDTO> weeklyReport;
 	
 	
 	
@@ -344,6 +351,18 @@ public class Employee {
 	}
 	public void setPan_number(String pan_number) {
 		this.pan_number = pan_number;
+	}
+	public List<Permission> getPermissionRequest() {
+		return permissionRequest;
+	}
+	public void setPermissionRequest(List<Permission> permissionRequest) {
+		this.permissionRequest = permissionRequest;
+	}
+	public List<WeeklyReportDTO> getWeeklyReport() {
+		return weeklyReport;
+	}
+	public void setWeeklyReport(List<WeeklyReportDTO> weeklyReport) {
+		this.weeklyReport = weeklyReport;
 	}
 	
 	

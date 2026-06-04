@@ -2,6 +2,7 @@ package com.example.EMS.EmployeeController.WeeklyCalculations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,11 +18,15 @@ import com.example.EMS.EmployeeService.WeeklyCalculations.WeeklyReportService;
 public class WeeklyReportController {
 	
 	private final WeeklyReportService reportService;
-	private EmpRepository empRepo;
-	
-	public WeeklyReportController(WeeklyReportService reportService) {
+	private final EmpRepository empRepo;
+
+	  public WeeklyReportController(WeeklyReportService reportService, EmpRepository empRepo) {
+		
 		this.reportService = reportService;
+		this.empRepo = empRepo;
 	}
+
+
 
 
 

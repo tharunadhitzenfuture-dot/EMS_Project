@@ -2,9 +2,9 @@ package com.example.EMS.EmployeeEntity;
 
 import java.util.Date;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +19,8 @@ public class ProfessionalDetails {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String professional_designation;
+	
+	
 	private String professional_department;
 	private String emp_type;
 	private String location;

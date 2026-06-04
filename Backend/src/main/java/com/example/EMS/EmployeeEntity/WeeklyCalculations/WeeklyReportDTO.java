@@ -1,14 +1,21 @@
 package com.example.EMS.EmployeeEntity.WeeklyCalculations;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import com.example.EMS.EmployeeEntity.Employee;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 
-@Data
+@Entity
 public class WeeklyReportDTO {
 	
 	@Id
@@ -20,14 +27,22 @@ public class WeeklyReportDTO {
 	private List<String> hours;
 	private String totalHours;
 	
-	private String startDate;
-	private String endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
+	
+	private String department_workHours;
 	
 	private String permission;
 	private String compensation;
 	private String overTime;
 	private String shortFall;
 	private String status;
+	
+	
+	@ManyToOne
+	@JoinColumn(name = "employee_id")
+	@JsonBackReference("employee-weeklyReport")
+	private Employee employee;
 	
 	public String getEmpId() {
 		return empId;
@@ -59,19 +74,19 @@ public class WeeklyReportDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public String getStartDate() {
+
+	public LocalDate getStartDate() {
 		return startDate;
 	}
-	public void setStartDate(String startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
-	public String getEndDate() {
+	public LocalDate getEndDate() {
 		return endDate;
 	}
-	public void setEndDate(String endDate) {
+	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
 	}
-	
 	public String getPermission() {
 		return permission;
 	}
@@ -102,6 +117,20 @@ public class WeeklyReportDTO {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+	public Employee getEmployee() {
+		return employee;
+	}
+	public void setEmployee(Employee employee) {
+		this.employee = employee;
+	}
+	public String getDepartment_workHours() {
+		return department_workHours;
+	}
+	public void setDepartment_workHours(String department_workHours) {
+		this.department_workHours = department_workHours;
+	}
+	
+	
 	
 
 }

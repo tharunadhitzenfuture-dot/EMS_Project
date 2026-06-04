@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.EMS.EmployeeDTO.WorkingHoursDTO;
 import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyCalculation;
-import com.example.EMS.EmployeeRepository.WeeklyCalculationRepository;
+import com.example.EMS.EmployeeRepository.WeeklyCalculations.WeeklyCalculationRepository;
 
 @Service
 public class WeeklyCalculationService {

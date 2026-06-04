@@ -1,4 +1,4 @@
-package com.example.EMS.EmployeeRepository;
+package com.example.EMS.EmployeeRepository.WeeklyCalculations;
 
 import java.time.LocalDate;
 import java.util.Optional;
