@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.WorkingHoursDTO;
 import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyCalculation;
-import com.example.EMS.EmployeeService.WeeklyCalculationService;
+import com.example.EMS.EmployeeService.WeeklyCalculations.WeeklyCalculationService;
 
 @RestController
 @RequestMapping("/api/weekly")
@@ -65,7 +65,7 @@ public class WeeklyCalculationController {
 		
 	}
 	
-	@GetMapping("/getHours")
+	@PostMapping("/getHours")
 	public ResponseEntity<?> getWeeklyTotalHours(@RequestBody WorkingHoursDTO request){
 		
 		if (request.getDeptName() == null) {

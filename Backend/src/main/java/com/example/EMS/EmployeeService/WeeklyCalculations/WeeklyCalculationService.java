@@ -1,4 +1,4 @@
-package com.example.EMS.EmployeeService;
+package com.example.EMS.EmployeeService.WeeklyCalculations;
 
 import java.util.Optional;
 

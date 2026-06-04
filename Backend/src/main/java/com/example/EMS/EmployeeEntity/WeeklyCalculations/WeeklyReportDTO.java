@@ -2,16 +2,19 @@ package com.example.EMS.EmployeeEntity.WeeklyCalculations;
 
 import java.util.List;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Data;
 
 
 @Data
 public class WeeklyReportDTO {
 	
-//	@Id
-//	@GeneratedValue(strategy=GenerationType.IDENTITY)
-//	private Long id;
-//	
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long id;
+	
 	private String empId;
 	private String empName;
 	private List<String> hours;
@@ -50,12 +53,12 @@ public class WeeklyReportDTO {
 	public void setTotalHours(String totalHours) {
 		this.totalHours = totalHours;
 	}
-//	public Long getId() {
-//		return id;
-//	}
-//	public void setId(Long id) {
-//		this.id = id;
-//	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	public String getStartDate() {
 		return startDate;
 	}
@@ -69,36 +72,36 @@ public class WeeklyReportDTO {
 		this.endDate = endDate;
 	}
 	
-//	public String getPermission() {
-//		return permission;
-//	}
-//	public void setPermission(String permission) {
-//		this.permission = permission;
-//	}
-//	public String getCompensation() {
-//		return compensation;
-//	}
-//	public void setCompensation(String compensation) {
-//		this.compensation = compensation;
-//	}
-//	public String getOverTime() {
-//		return overTime;
-//	}
-//	public void setOverTime(String overTime) {
-//		this.overTime = overTime;
-//	}
-//	public String getShortFall() {
-//		return shortFall;
-//	}
-//	public void setShortFall(String shortFall) {
-//		this.shortFall = shortFall;
-//	}
-//	public String getStatus() {
-//		return status;
-//	}
-//	public void setStatus(String status) {
-//		this.status = status;
-//	}
+	public String getPermission() {
+		return permission;
+	}
+	public void setPermission(String permission) {
+		this.permission = permission;
+	}
+	public String getCompensation() {
+		return compensation;
+	}
+	public void setCompensation(String compensation) {
+		this.compensation = compensation;
+	}
+	public String getOverTime() {
+		return overTime;
+	}
+	public void setOverTime(String overTime) {
+		this.overTime = overTime;
+	}
+	public String getShortFall() {
+		return shortFall;
+	}
+	public void setShortFall(String shortFall) {
+		this.shortFall = shortFall;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 	
 
 }

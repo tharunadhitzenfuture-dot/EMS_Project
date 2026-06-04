@@ -28,17 +28,20 @@ import com.example.EMS.EmployeeService.AttendanceService;
 @RequestMapping("/api/attendance")
 public class AttendanceController {
 	
-	private AttendanceService attendanceService;
-	private AttendanceRepository attendanceRepo;
-	private EmpRepository empRepo;
+	private final AttendanceService attendanceService;
+	private final AttendanceRepository attendanceRepo;
+	private final EmpRepository empRepo;
 	
-	public AttendanceController(AttendanceService attendanceService, AttendanceRepository attendanceRepo, EmpRepository empRepo) {
+	
+
+
+
+	public AttendanceController(AttendanceService attendanceService, AttendanceRepository attendanceRepo,
+			EmpRepository empRepo) {
 		this.attendanceService = attendanceService;
 		this.attendanceRepo = attendanceRepo;
 		this.empRepo = empRepo;
 	}
-
-
 
 	@PostMapping("/register")
 	public ResponseEntity<?> registerAttendance(
@@ -119,8 +122,7 @@ public class AttendanceController {
 	    	
 
 	        Optional<Employee> emp =
-	                empRepo.findByEmployeeId(
-	                        request.getEmpId());
+	                empRepo.findByEmployeeId(empId);
 
 	        if(emp.isEmpty()){
 	        	return ResponseEntity.badRequest().body("Employee not found with id: "+empId);
@@ -178,22 +180,7 @@ public class AttendanceController {
 
 	    
 	    
-	  @GetMapping("/getWeeklyReport")
-	  public ResponseEntity<?> getWeeklyReport(){
-		  
-		 List<Employee> lst =  empRepo.findAll();
-		 List<String> ids = new ArrayList<>();
-		 
-		 for(Employee emp: lst) {
-			String id =  emp.getEmployeeId();
-			ids.add(id);
-		 }
-		 
-		 
-		 return attendanceService.getWeeklyReport(ids);
-		  
-		  
-	  }
+	
 
 	
 

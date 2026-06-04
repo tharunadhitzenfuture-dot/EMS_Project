@@ -35,6 +35,8 @@ public class Permission {
 	private LocalDate startDate;
 	private LocalDate endDate;
 	
+	private LocalDate permissionDate;
+	
 	@ManyToOne
 	@JoinColumn(name = "employee_id")
 	@JsonBackReference("employee-permissionRequest")
@@ -174,9 +176,16 @@ public class Permission {
 
 
 
-	
+	 public LocalDate getPermissionDate() {
+		 return permissionDate;
+	 }
+
+
+
+	 public void setPermissionDate(LocalDate permissionDate) {
+		 this.permissionDate = permissionDate;
+	 }
 	 
 
 	
-
 }
