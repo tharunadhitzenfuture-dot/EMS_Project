@@ -21,6 +21,7 @@ import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.PermissionRepository;
 import com.example.EMS.EmployeeRepository.WeeklyCalculations.WeeklyCalculationRepository;
+import com.example.EMS.enums.LeaveStatus;
 
 @Service
 public class WeeklyReportService {
@@ -167,8 +168,7 @@ public class WeeklyReportService {
 	                                
 	                              //9:00:00                 //8:30:00
 	           long balance =   timeToSeconds(weeklyHours) -  timeToSeconds(total);
-	           System.out.println(emp.get().getEmployeeId() +" "+balance);
-	           System.out.println(secondsToTime(timeToSeconds(weeklyHours))+" "+secondsToTime(timeToSeconds(total)));
+	           
 	           if(balance >0) {
 	        	   long sec = timeToSeconds(weeklyHours) - timeToSeconds(total);  
 	        	                     
@@ -258,7 +258,7 @@ public class WeeklyReportService {
 		String res = "";
 		Long id = empRepo.findIdByEmployeeId(empId);
 		Optional<Permission> hours =  permissionRepository.findByEmployeeIdAndStartDateAndEndDate(id, start, end);
-		if(hours.isPresent()) {
+		if(hours.isPresent() && hours.get().getStatus() == LeaveStatus.APPROVED) {
 			res = hours.get().getHours();
 		}
 		else {
