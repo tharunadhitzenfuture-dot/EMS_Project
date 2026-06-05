@@ -1275,9 +1275,11 @@ public class EmpService {
                 	
                 	
             		String detail =  emp.getProfessional_details().getEmp_type();
+            		System.out.println(detail);
             		String id = existing.getEmployeeId();
+            		System.out.println(id);
             		String updatedId = id.substring(0, 2) + detail.charAt(0) + id.substring(3);
-            		emp.setEmployeeId(updatedId);
+            		existing.setEmployeeId(updatedId);
             		
                 }
                     
