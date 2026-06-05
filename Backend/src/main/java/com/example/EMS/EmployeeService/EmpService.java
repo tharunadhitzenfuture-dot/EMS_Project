@@ -1269,9 +1269,19 @@ public class EmpService {
                     existingProfessional.setProfessional_designation(
                             newProfessional.getProfessional_designation());
 
-                if (newProfessional.getProfessional_department() != null)
-                    existingProfessional.setProfessional_department(
+                if (newProfessional.getProfessional_department() != null) {
+                	existingProfessional.setProfessional_department(
                             newProfessional.getProfessional_department());
+                	
+                	
+            		String detail =  emp.getProfessional_details().getEmp_type();
+            		String id = existing.getEmployeeId();
+            		String updatedId = id.substring(0, 2) + detail.charAt(0) + id.substring(3);
+            		emp.setEmployeeId(updatedId);
+            		
+                }
+                    
+                
 
                 if (newProfessional.getEmp_type() != null)
                     existingProfessional.setEmp_type(
