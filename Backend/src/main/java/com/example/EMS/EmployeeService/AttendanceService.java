@@ -135,7 +135,6 @@ public class AttendanceService {
                }
 
                long hour_Per_Day = Long.parseLong(parts[0]);
-               System.out.println(hours+" "+hour_Per_Day);
         	   
         	   if(hours < hour_Per_Day/2) {
         		   LeaveRequest request = new LeaveRequest();
@@ -145,7 +144,7 @@ public class AttendanceService {
         		   request.setLeaveType(LeaveType.FULL_DAY);
         		   request.setReason("Auto-generated due to insufficient work hours "+ totalTime+" on: "+date);
         		   
-        		   attendance.setStatus(LeaveType.FULL_DAY);
+        		   attendance.setStatus(LeaveType.ABSENT);
         		   leaveService.applyLeave(emp.getEmployeeId(), request);
         		   
         	   }
@@ -197,7 +196,7 @@ public class AttendanceService {
         		   request.setLeaveType(LeaveType.FULL_DAY);
         		   request.setReason("Auto-generated due to insufficient work hours "+totalTime +" on: "+date);
         		   
-        		   attendance.setStatus(LeaveType.FULL_DAY);
+        		   attendance.setStatus(LeaveType.ABSENT);
         		   leaveService.applyLeave(emp.getEmployeeId(), request);
         		   
         	   }
@@ -365,9 +364,22 @@ public class AttendanceService {
               long hour_Per_Day = Long.parseLong(parts[0]);
               
 
-       	  
- 
-         	   if(hours < hour_Per_Day) {
+              if(hours < hour_Per_Day/2) {
+         		  LeaveRequest requestDTO = new LeaveRequest();
+       		   
+       		   requestDTO.setStartDate(attendance.getAttendanceDate());
+       		   requestDTO.setEndDate(attendance.getAttendanceDate());
+       		   requestDTO.setLeaveType(LeaveType.FULL_DAY);
+       		   requestDTO.setReason("Auto-generated due to insufficient work hours "+hours+" on: "+attendance.getAttendanceDate());
+       		   
+       		   attendance.setStatus(LeaveType.ABSENT);
+       		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
+       		   
+       		   
+       		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
+       		   
+       	       }
+              else if(hours < hour_Per_Day) {
          		   
          		   LeaveRequest requestDTO = new LeaveRequest();
          		   requestDTO.setStartDate(attendance.getAttendanceDate());
@@ -381,6 +393,7 @@ public class AttendanceService {
          		   
          		   
          	   }
+         	   
          	   else {
          		   attendance.setStatus(LeaveType.PRESENT);
          	   }
@@ -401,12 +414,25 @@ public class AttendanceService {
               }
 
               long hour_Per_Day = Long.parseLong(parts[0]);
+  
               
-
-       	    
+              if(hours < hour_Per_Day/2) {
+         		  LeaveRequest requestDTO = new LeaveRequest();
+       		   
+       		   requestDTO.setStartDate(attendance.getAttendanceDate());
+       		   requestDTO.setEndDate(attendance.getAttendanceDate());
+       		   requestDTO.setLeaveType(LeaveType.FULL_DAY);
+       		   requestDTO.setReason("Auto-generated due to insufficient work hours "+hours+" on: "+attendance.getAttendanceDate());
+       		   
+       		   attendance.setStatus(LeaveType.ABSENT);
+       		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
+       		   
+       		   
+       		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
+       		   
+       	   }
          	   
-         	   
-         	   if(hours < hour_Per_Day) {
+              else if(hours < hour_Per_Day) {
          		   
          		   LeaveRequest requestDTO = new LeaveRequest();
          		   
@@ -422,21 +448,7 @@ public class AttendanceService {
          		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
          		           		   
          	   }
-         	  else if(hours < hour_Per_Day/2) {
-         		  LeaveRequest requestDTO = new LeaveRequest();
-       		   
-       		   requestDTO.setStartDate(attendance.getAttendanceDate());
-       		   requestDTO.setEndDate(attendance.getAttendanceDate());
-       		   requestDTO.setLeaveType(LeaveType.FULL_DAY);
-       		   requestDTO.setReason("Auto-generated due to insufficient work hours "+hours+" on: "+attendance.getAttendanceDate());
-       		   
-       		   attendance.setStatus(LeaveType.FULL_DAY);
-       		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
-       		   
-       		   
-       		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
-       		   
-       	   }
+         	 
          	   
          	   else {
          		   attendance.setStatus(LeaveType.PRESENT);

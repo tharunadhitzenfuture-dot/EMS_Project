@@ -76,4 +76,7 @@ public interface AttendanceRepository
             LocalDate endDate
     );
     
+    
+    Optional<Attendance> findByAttendanceDate(LocalDate date);
+    
 }

@@ -2,21 +2,25 @@ package com.example.EMS.EmployeeService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
+import com.example.EMS.EmployeeEntity.Attendance;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
 import com.example.EMS.EmployeeException.BadRequestException;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
+import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.PermissionRepository;
 import com.example.EMS.enums.LeaveStatus;
+import com.example.EMS.enums.LeaveType;
 import com.example.EMS.enums.Role;
 
 @Service
@@ -24,14 +28,16 @@ public class PermissionService {
 	
 	private final EmpRepository empRepository;
 	private final PermissionRepository permissionRepo;
+	private final AttendanceRepository attendanceRepo;
 	
 	
 	
 
-	public PermissionService(EmpRepository empRepository, PermissionRepository permissionRepo) {
-		
+	public PermissionService(EmpRepository empRepository, PermissionRepository permissionRepo,
+			AttendanceRepository attendanceRepo) {
 		this.empRepository = empRepository;
 		this.permissionRepo = permissionRepo;
+		this.attendanceRepo = attendanceRepo;
 	}
 
 
@@ -73,10 +79,20 @@ public class PermissionService {
         if (dto.getStatus() != LeaveStatus.APPROVED && dto.getStatus() != LeaveStatus.REJECTED)
             throw new BadRequestException("Status must be APPROVED or REJECTED");
        
+        
         req.setStatus(dto.getStatus());
         req.setHrRemarks(dto.getHrRemarks());
         req.setReviewedBy(emp);
         req.setReviewedAt(LocalDateTime.now());
+        
+        LocalDate permissionDate = req.getPermissionDate();
+        Optional<Attendance> attendance =  attendanceRepo.findByAttendanceDate(permissionDate);
+        
+        if(attendance.isEmpty()) {
+        	return ResponseEntity.badRequest().body("Attendance not recorded for date: "+permissionDate);
+        }
+        
+        attendance.get().setStatus(LeaveType.PERMISSION);
 
         Permission res = permissionRepo.save(req);
         return ResponseEntity.ok(res);
