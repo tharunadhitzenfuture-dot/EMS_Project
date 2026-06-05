@@ -3,6 +3,7 @@ package com.example.EMS.EmployeeController.LeaveController;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,15 +47,22 @@ public class PermissionController {
 		
 		
 		LocalDate permissionDate = request.getPermissionDate();
+		Optional<Permission> opt = permissionRepo.findByPermissionDate(permissionDate);
+		if(opt.isPresent()) {
+			return ResponseEntity.badRequest().body("Permission already applied for date :"+permissionDate);
+		}
 
-		LocalDate startOfWeek = permissionDate.with(
-		        TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		if(request.getStartDate() == null && request.getEndDate() == null) {
+			LocalDate startOfWeek = permissionDate.with(
+			        TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
-		LocalDate endOfWeek = permissionDate.with(
-		        TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+			LocalDate endOfWeek = permissionDate.with(
+			        TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+			
+			request.setStartDate(startOfWeek);
+			request.setEndDate(endOfWeek);
+		}
 		
-		request.setStartDate(startOfWeek);
-		request.setEndDate(endOfWeek);
 		
 		
 		return  permissionService.applyPermission(empId, request);

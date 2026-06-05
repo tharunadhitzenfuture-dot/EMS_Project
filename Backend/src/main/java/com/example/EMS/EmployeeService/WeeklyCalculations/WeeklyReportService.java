@@ -255,17 +255,19 @@ public class WeeklyReportService {
 	 
 	 
 	 public String getPermissionHours(String empId, LocalDate start, LocalDate end) {
-		String res = "";
+		long sec = 0;
 		Long id = empRepo.findIdByEmployeeId(empId);
-		Optional<Permission> hours =  permissionRepository.findByEmployeeIdAndStartDateAndEndDate(id, start, end);
-		if(hours.isPresent() && hours.get().getStatus() == LeaveStatus.APPROVED) {
-			res = hours.get().getHours();
-		}
-		else {
-			res = "00:00:00";
+		
+		List<Permission> hoursList =  permissionRepository.findByEmployeeIdAndStartDateAndEndDate(id, start, end);
+		for(Permission hours: hoursList) {
+			if( hours.getStatus() == LeaveStatus.APPROVED) {
+				sec += timeToSeconds(hours.getHours());
+			}
 		}
 		
-		return res;
+		
+		
+		return secondsToTime(sec);
 	 }
 	 
 	
