@@ -169,7 +169,7 @@ public class WeeklyReportService {
 	                              //9:00:00                 //8:30:00
 	           long balance =   timeToSeconds(weeklyHours) -  timeToSeconds(total);
 	           
-	           if(balance >0) {
+	          
 	        	   long sec = timeToSeconds(weeklyHours) - timeToSeconds(total);  
 	        	                     
 	        	                     //00:15:00
@@ -183,11 +183,16 @@ public class WeeklyReportService {
 	        			   
 	        		   }
 	        		   else {
-	        			   long comp = timeToSeconds(permission) - compensation;
-	        			   req.setCompensation(secondsToTime(comp));
+//	        			   System.out.println("Emp: "+empId+" "+permission+" "+secondsToTime(compensation));
+//	        			   long comp = timeToSeconds(permission) - compensation;
+//	        			   req.setCompensation(secondsToTime(comp));
+	        			   req.setCompensation("Total working hours didn't meet compensation hours");
 	        		   }
 	        		   
 	        		        
+	        	   }
+	        	   else {
+	        		   req.setCompensation(secondsToTime(0));
 	        	   }
 	        	   
 	        	   if(sec >= 0) {
@@ -211,7 +216,7 @@ public class WeeklyReportService {
 	        		   req.setStatus("Pending");   
 	        	   }
   
-	           }
+	           
 
 	    		dto.add(req);
 	    		

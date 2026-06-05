@@ -2,10 +2,10 @@ package com.example.EMS.EmployeeController.WeeklyCalculations;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,6 +32,8 @@ public class WeeklyReportController {
 
 	  @GetMapping("/getWeeklyReport")
 	  public ResponseEntity<?> getWeeklyReport(){
+		  
+		  
 		  
 		 List<Employee> lst =  empRepo.findAll();
 		 List<String> ids = new ArrayList<>();
