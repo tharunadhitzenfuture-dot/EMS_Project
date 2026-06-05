@@ -35,7 +35,6 @@ public class Permission {
 	private LocalDate startDate;
 	private LocalDate endDate;
 	
-	@Column(unique=true)
 	private LocalDate permissionDate;
 	
 	@ManyToOne
