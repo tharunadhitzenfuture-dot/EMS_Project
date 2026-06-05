@@ -17,6 +17,6 @@ public interface PermissionRepository extends JpaRepository<Permission, Long>{
 	        LocalDate startDate,
 	        LocalDate endDate);
 	
-	Optional<Permission> findByPermissionDate(LocalDate date);
+	Optional<Permission> findByPermissionDateAndEmployeeId(LocalDate date,Long id);
 
 }

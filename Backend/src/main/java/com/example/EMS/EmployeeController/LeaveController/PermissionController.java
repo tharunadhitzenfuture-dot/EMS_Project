@@ -14,13 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
-import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
+
 import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
-import com.example.EMS.EmployeeException.ResourceNotFoundException;
+import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.PermissionRepository;
 import com.example.EMS.EmployeeService.PermissionService;
-import com.example.EMS.enums.LeaveType;
+
 
 @RestController
 @RequestMapping("/api/permission")
@@ -28,17 +27,31 @@ public class PermissionController {
 	
 	private final PermissionRepository permissionRepo;
 	private final PermissionService permissionService;
+	private final EmpRepository empRepo;
 	
-	public PermissionController(PermissionRepository permissionRepo, PermissionService permissionService) {
+	
+	
+	
+	public PermissionController(PermissionRepository permissionRepo, PermissionService permissionService,
+			EmpRepository empRepo) {
+		
 		this.permissionRepo = permissionRepo;
 		this.permissionService = permissionService;
+		this.empRepo = empRepo;
 	}
-	
-	
+
+
 	@PostMapping("/apply/{empId}")
 	public ResponseEntity<?> applyLeave(@PathVariable String empId, @RequestBody Permission request){
 		if(request.getPermissionDate() == null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please provide permission date");
+		}
+		
+		Long id = empRepo.findIdByEmployeeId(empId);
+		
+		Optional<Permission> permission = permissionRepo.findByPermissionDateAndEmployeeId(request.getPermissionDate(), id);
+		if(permission.isPresent()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Permission already applied for date: "+request.getPermissionDate());
 		}
 		
 		if(request.getHours() == null) {
@@ -47,7 +60,8 @@ public class PermissionController {
 		
 		
 		LocalDate permissionDate = request.getPermissionDate();
-		Optional<Permission> opt = permissionRepo.findByPermissionDate(permissionDate);
+		
+		Optional<Permission> opt = permissionRepo.findByPermissionDateAndEmployeeId(permissionDate,id);
 		if(opt.isPresent()) {
 			return ResponseEntity.badRequest().body("Permission already applied for date :"+permissionDate);
 		}
