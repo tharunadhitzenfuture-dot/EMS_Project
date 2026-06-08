@@ -60,6 +60,9 @@ public class AttendanceController {
 	            continue;
 	        }
 
+	        if(request.getCheckIn() == null) {
+	        	return ResponseEntity.badRequest().body("Please enter check-in for employee id: "+ request.getEmpId());
+	        }
 	        
 	     
 	        Optional<Employee> emp =
