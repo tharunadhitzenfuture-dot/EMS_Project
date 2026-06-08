@@ -49,11 +49,6 @@ public class PermissionController {
 		
 		Long id = empRepo.findIdByEmployeeId(empId);
 		
-		Optional<Permission> permission = permissionRepo.findByPermissionDateAndEmployeeId(request.getPermissionDate(), id);
-		if(permission.isPresent()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Permission already applied for date: "+request.getPermissionDate());
-		}
-		
 		if(request.getHours() == null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please provide week permission hours");
 		}
@@ -61,7 +56,7 @@ public class PermissionController {
 		
 		LocalDate permissionDate = request.getPermissionDate();
 		
-		Optional<Permission> opt = permissionRepo.findByPermissionDateAndEmployeeId(permissionDate,id);
+		Optional<Permission> opt = permissionRepo.findByPermissionDateAndEmployee_Id(permissionDate,id);
 		if(opt.isPresent()) {
 			return ResponseEntity.badRequest().body("Permission already applied for date :"+permissionDate);
 		}

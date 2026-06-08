@@ -48,7 +48,7 @@ public class WeeklyCalculationService {
 		}
 		
 		WeeklyCalculation res = calc.get();
-		return  ResponseEntity.ok("Total working hours with department: "+request.getDeptName()+" is "+res.getTotalWorkHours());
+		return  ResponseEntity.ok("Total working hours with department: "+request.getDeptName()+" is "+res.getTotalWorkHours()+" and "+res.getWorkHours()+" per day");
 		
 	}
 
