@@ -84,7 +84,7 @@ public class PermissionService {
         req.setReviewedAt(LocalDateTime.now());
         
         LocalDate permissionDate = req.getPermissionDate();
-        Optional<Attendance> attendance =  attendanceRepo.findByAttendanceDate(permissionDate);
+        Optional<Attendance> attendance =  attendanceRepo.findByEmployee_EmployeeIdAndAttendanceDate(empId,permissionDate);
         
         if(attendance.isEmpty()) {
         	return ResponseEntity.badRequest().body("Attendance not recorded for date: "+permissionDate);
