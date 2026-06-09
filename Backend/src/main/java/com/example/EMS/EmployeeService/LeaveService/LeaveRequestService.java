@@ -297,10 +297,67 @@ public class LeaveRequestService {
 	    }
 	    
 	       
-	 private LeaveRequest getLeaveById(Long id) {
+	 public LeaveRequest getLeaveById(Long id) {
 	        return leaveRequestRepository.findById(id)
 	                .orElseThrow(() -> new ResourceNotFoundException("Leave request not found: " + id));
 	    }
+	 
+	 
+	 @Transactional
+	 public ResponseEntity<?> updateLeave(
+	         String empId,
+	         Long leaveId,
+	         LeaveRequest request) {
+
+	     Long id = empRepository.findIdByEmployeeId(empId);
+
+	     LeaveRequest leave = getLeaveById(leaveId);
+
+	     if (!leave.getEmployee().getId().equals(id)) {
+	         return ResponseEntity.status(HttpStatus.FORBIDDEN)
+	                 .body("You can update only your own leave request");
+	     }
+
+	     if (leave.getStatus() != LeaveStatus.PENDING) {
+	         return ResponseEntity.badRequest()
+	                 .body("Only pending leave requests can be updated");
+	     }
+
+	     if (request.getStartDate() != null) {
+	         leave.setStartDate(request.getStartDate());
+	     }
+
+	     if (request.getEndDate() != null) {
+	         leave.setEndDate(request.getEndDate());
+	     }
+
+	     if (request.getReason() != null) {
+	         leave.setReason(request.getReason());
+	     }
+
+	     if (request.getLeaveType() != null) {
+	         leave.setLeaveType(request.getLeaveType());
+	     }
+
+	     List<LeaveRequest> overlaps =
+	             leaveRequestRepository.findOverlappingLeaves(
+	                     id,
+	                     leave.getStartDate(),
+	                     leave.getEndDate());
+
+	     overlaps.removeIf(l ->
+	             l.getId().equals(leaveId));
+
+	     if (!overlaps.isEmpty()) {
+	         return ResponseEntity.badRequest()
+	                 .body("Updated leave dates overlap with existing leave request");
+	     }
+
+	     LeaveRequest updated =
+	             leaveRequestRepository.save(leave);
+
+	     return ResponseEntity.ok(updated);
+	 }
 	
 	private int countWorkingDays(LocalDate start, LocalDate end) {
         int count = 0;
@@ -309,6 +366,38 @@ public class LeaveRequestService {
                 count++;
         return count;
     }
+	
+	@Transactional
+	public ResponseEntity<?> deleteLeave(
+	        String empId,
+	        Long leaveId) {
+
+	    Long id = empRepository.findIdByEmployeeId(empId);
+
+	    LeaveRequest leave = getLeaveById(leaveId);
+
+	    if (!leave.getEmployee().getId().equals(id)) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+	                .body("You can delete only your own leave request");
+	    }
+
+	    if (leave.getStatus() != LeaveStatus.PENDING) {
+	        return ResponseEntity.badRequest()
+	                .body("Only pending leave requests can be deleted");
+	    }
+
+	    leaveRequestRepository.delete(leave);
+
+	    return ResponseEntity.ok(
+	            "Leave request deleted successfully");
+	}
+	
+	public List<LeaveRequest> getAllLeaves() {
+	    return leaveRequestRepository
+	            .findAllByOrderByCreatedAtDesc();
+	}
+	
+	
 	
 	
 	 private Employee getUserByEmployeeId(Long empId) {

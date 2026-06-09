@@ -1,9 +1,14 @@
 package com.example.EMS.EmployeeController.LeaveController;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,8 +62,41 @@ public class LeaveRequestController {
 		return ResponseEntity.badRequest().body("Please mention correct leave type FULL_DAY, HALF_DAY, PERMISSION");
 	}
 	
-	private LeaveRequest getLeaveById(Long id) {
+	@GetMapping("/getAll")
+	public ResponseEntity<?> getAllLeaves() {
+		List<LeaveRequest> lst = requestService.getAllLeaves();
+		if(lst.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Leave requests list empty");
+		}
+	    return ResponseEntity.ok(lst);
+	}
+	
+	
+	@GetMapping("/getById/{id}")
+	private LeaveRequest getLeaveById(@PathVariable Long id) {
         return requestRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Leave request not found: " + id));
     }
+	
+	@PutMapping("/update/{empId}/{leaveId}")
+	public ResponseEntity<?> updateLeave(
+	        @PathVariable String empId,
+	        @PathVariable Long leaveId,
+	        @RequestBody LeaveRequest request) {
+
+	    return requestService.updateLeave(
+	            empId,
+	            leaveId,
+	            request);
+	}
+	
+	@DeleteMapping("/delete/{empId}/{leaveId}")
+	public ResponseEntity<?> deleteLeave(
+	        @PathVariable String empId,
+	        @PathVariable Long leaveId) {
+
+	    return requestService.deleteLeave(
+	            empId,
+	            leaveId);
+	}
 }
