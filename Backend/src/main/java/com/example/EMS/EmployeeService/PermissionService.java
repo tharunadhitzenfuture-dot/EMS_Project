@@ -98,6 +98,59 @@ public class PermissionService {
 
     }
     
+    public ResponseEntity<?> updatePermission(
+            String empId,
+            Long permissionId,
+            Permission request) {
+
+        Long id = empRepository.findIdByEmployeeId(empId);
+
+        Permission permission = getPermissionById(permissionId);
+
+        if (!permission.getEmployee().getId().equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("You can update only your own permission request");
+        }
+
+        if (permission.getStatus() != LeaveStatus.PENDING) {
+            return ResponseEntity.badRequest()
+                    .body("Only pending permission requests can be updated");
+        }
+
+        if (request.getReason() != null) {
+            permission.setReason(request.getReason());
+        }
+
+        if (request.getHours() != null) {
+            permission.setHours(request.getHours());
+        }
+
+        if (request.getPermissionDate() != null) {
+
+            Optional<Permission> existing =
+                    permissionRepo.findByPermissionDateAndEmployee_Id(
+                            request.getPermissionDate(),
+                            id
+                    );
+
+            if (existing.isPresent()
+                    && !existing.get().getId().equals(permissionId)) {
+
+                return ResponseEntity.badRequest()
+                        .body("Permission already applied for date: "
+                                + request.getPermissionDate());
+            }
+
+            permission.setPermissionDate(
+                    request.getPermissionDate()
+            );
+        }
+
+        Permission updated = permissionRepo.save(permission);
+
+        return ResponseEntity.ok(updated);
+    }
+    
     public List<Permission> getAllPermission(){
     	return permissionRepo.findAll();
     }

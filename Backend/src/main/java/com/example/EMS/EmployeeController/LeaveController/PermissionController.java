@@ -120,7 +120,23 @@ public class PermissionController {
 		return ResponseEntity.ok(permission);
 	}
 	
-	
+	 @PutMapping("/update/{empId}/{permissionId}")
+	 public ResponseEntity<?> updatePermission(
+	         @PathVariable String empId,
+	         @PathVariable Long permissionId,
+	         @RequestBody Permission request) {
+
+	     if (empId == null || permissionId == null) {
+	         return ResponseEntity.badRequest()
+	                 .body("Please provide employee id and permission id");
+	     }
+
+	     return permissionService.updatePermission(
+	             empId,
+	             permissionId,
+	             request
+	     );
+	 }
 	
 
 }
