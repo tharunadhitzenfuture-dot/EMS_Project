@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -138,5 +139,20 @@ public class PermissionController {
 	     );
 	 }
 	
+	 @DeleteMapping("/delete/{empId}/{permissionId}")
+	 public ResponseEntity<?> deletePermission(
+	         @PathVariable String empId,
+	         @PathVariable Long permissionId) {
+
+	     if (empId == null || permissionId == null) {
+	         return ResponseEntity.badRequest()
+	                 .body("Please provide employee id and permission id");
+	     }
+
+	     return permissionService.deletePermission(
+	             empId,
+	             permissionId
+	     );
+	 }
 
 }

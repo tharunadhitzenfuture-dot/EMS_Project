@@ -151,6 +151,31 @@ public class PermissionService {
         return ResponseEntity.ok(updated);
     }
     
+    public ResponseEntity<?> deletePermission(
+            String empId,
+            Long permissionId) {
+
+        Long id = empRepository.findIdByEmployeeId(empId);
+
+        Permission permission = getPermissionById(permissionId);
+
+        if (!permission.getEmployee().getId().equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("You can delete only your own permission request");
+        }
+
+        if (permission.getStatus() != LeaveStatus.PENDING) {
+            return ResponseEntity.badRequest()
+                    .body("Only pending permission requests can be deleted");
+        }
+
+        permissionRepo.delete(permission);
+
+        return ResponseEntity.ok(
+                "Permission request deleted successfully"
+        );
+    }
+    
     public List<Permission> getAllPermission(){
     	return permissionRepo.findAll();
     }
