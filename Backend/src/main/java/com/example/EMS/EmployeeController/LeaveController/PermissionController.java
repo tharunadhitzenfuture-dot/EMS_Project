@@ -106,6 +106,19 @@ public class PermissionController {
 		}
 		return ResponseEntity.ok(list);
 	}
+	 
+	 @GetMapping("/getPermissionById/{id}")
+	 public ResponseEntity<?> getAllPermission(@PathVariable Long id) {
+		
+		 if(id == null) {
+			 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter permission id");
+		 }
+		Permission permission = permissionService.getPermissionById(id);
+		if(permission == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Permission not found with id: "+id);
+		}
+		return ResponseEntity.ok(permission);
+	}
 	
 	
 	

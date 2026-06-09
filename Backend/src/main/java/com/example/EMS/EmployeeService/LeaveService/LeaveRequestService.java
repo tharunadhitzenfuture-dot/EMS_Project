@@ -40,11 +40,6 @@ public class LeaveRequestService {
 	private final AttendanceRepository attRepository;
 	
 
-	
-
-
-	
-
 	public LeaveRequestService(EmpRepository empRepository, LeaveBalanceRepository leaveBalanceRepository,
 			LeaveRequestRepository leaveRequestRepository, LeaveRecordService leaveRecord,
 			AttendanceRepository attRepository) {

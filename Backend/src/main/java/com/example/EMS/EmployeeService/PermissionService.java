@@ -110,7 +110,7 @@ public class PermissionService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + empId));
     }
 
-	private Permission getPermissionById(Long id) {
+	public Permission getPermissionById(Long id) {
         return permissionRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Permission request not found: " + id));
     }
