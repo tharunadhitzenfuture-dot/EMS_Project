@@ -3,6 +3,7 @@ package com.example.EMS.EmployeeService.LeaveService;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.example.EMS.EmployeeDTO.AttendanceRequestDTO;
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
 import com.example.EMS.EmployeeEntity.Attendance;
 import com.example.EMS.EmployeeEntity.Employee;
@@ -21,6 +23,7 @@ import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveBalanceRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
+import com.example.EMS.EmployeeService.AttendanceService;
 import com.example.EMS.enums.LeaveStatus;
 import com.example.EMS.enums.LeaveType;
 import com.example.EMS.enums.Role;
@@ -33,23 +36,34 @@ public class LeaveRequestService {
 	private final EmpRepository empRepository;
 	private final LeaveBalanceRepository leaveBalanceRepository;
 	private final LeaveRequestRepository leaveRequestRepository;
-	private final AttendanceRepository attendanceRepo;
-		
+	private final LeaveRecordService leaveRecord;
+	private final AttendanceRepository attRepository;
+	
+
 	
 
 
+	
+
 	public LeaveRequestService(EmpRepository empRepository, LeaveBalanceRepository leaveBalanceRepository,
-			LeaveRequestRepository leaveRequestRepository, AttendanceRepository attendanceRepo) {
+			LeaveRequestRepository leaveRequestRepository, LeaveRecordService leaveRecord,
+			AttendanceRepository attRepository) {
 		this.empRepository = empRepository;
 		this.leaveBalanceRepository = leaveBalanceRepository;
 		this.leaveRequestRepository = leaveRequestRepository;
-		this.attendanceRepo = attendanceRepo;
+		this.leaveRecord = leaveRecord;
+		this.attRepository = attRepository;
 	}
 
 
-	public LeaveRequest applyLeave(String empId, LeaveRequest request){
+	public ResponseEntity<?> applyLeave(String empId, LeaveRequest request){
 		Long id = empRepository.findIdByEmployeeId(empId);
 		Employee emp = getUserByEmployeeId(id);
+		
+		List<LeaveRequest> res = leaveRequestRepository.findOverlappingLeaves(id, request.getStartDate(), request.getEndDate());
+		if(!res.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Leave request dates overlapping with dates: "+request.getStartDate()+" and "+request.getEndDate());
+		}
 		
 //		 if (request.getStartDate().isBefore(LocalDate.now()))
 //	            throw new BadRequestException("Start date cannot be in the past");
@@ -71,7 +85,8 @@ public class LeaveRequestService {
 //        
         
         request.setEmployee(emp);
-        return leaveRequestRepository.save(request);
+        LeaveRequest req = leaveRequestRepository.save(request);
+        return ResponseEntity.ok(req);
         
 	      	
 		
@@ -140,8 +155,37 @@ public class LeaveRequestService {
 
 	               
 	                current = current.plusDays(1);
+	                
+	                
 	               
 	            }
+	            if(req.getReason() == null || !req.getReason().startsWith("Auto-generated")) {
+	            	 for (LocalDate date = req.getStartDate();!date.isAfter(req.getEndDate());date = date.plusDays(1)) {
+	 	            	Optional<Attendance> record =attRepository.findByEmployee_EmployeeIdAndAttendanceDate(req.getEmployee().getEmployeeId(), date);
+	 	            	if(record.isEmpty()) {
+	 	            		leaveRecord.markAbsent(
+	 			        		    req.getEmployee(),
+	 			        		    date,
+	 			        		    LocalTime.parse("00:00:00"),
+	 			        		    LocalTime.parse("00:00:00"),
+	 			        		    LeaveType.ABSENT.name()
+	 			        		);
+	 	            	}
+	 	            	else {
+	 	            		AttendanceRequestDTO dto1 = new AttendanceRequestDTO();
+	 	            		dto1.setEmpId(req.getEmployee().getEmployeeId());
+	 	            		dto1.setCheckIn(LocalTime.parse("00:00:00"));
+	 	            		dto1.setCheckOut(LocalTime.parse("00:00:00"));
+	 	            		dto1.setDate(date);
+	 	            		dto1.setStatus(LeaveType.ABSENT.name());
+	 	            	    
+	 	            		leaveRecord.updateAbsent(req.getEmployee(), req.getEmployee().getEmployeeId(), dto1);
+	 	            	}
+	 		        	
+	 		        	}
+	            }
+	           
+		        
 	        }
 	               
 
@@ -151,13 +195,16 @@ public class LeaveRequestService {
 //	            }
 	               
 
-	           
-	        List<Attendance> attendanceList =  attendanceRepo.findByEmployeeIdAndAttendanceDateBetween(id,req.getStartDate(), req.getEndDate());
+//	           
+//	        List<Attendance> attendanceList =  attendanceRepo.findByEmployeeIdAndAttendanceDateBetween(id,req.getStartDate(), req.getEndDate());
+//	        
+//	       for(Attendance obj: attendanceList) {
+//	    	   obj.setStatus(LeaveType.ABSENT);
+//	       }
 	        
-	       for(Attendance obj: attendanceList) {
-	    	   obj.setStatus(LeaveType.ABSENT);
-	       }
+	     
 	        
+	       
 	         
 	        req.setStatus(dto.getStatus());
 	        req.setHrRemarks(dto.getHrRemarks());

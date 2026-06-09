@@ -2,6 +2,7 @@ package com.example.EMS.EmployeeService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
@@ -97,6 +98,12 @@ public class PermissionService {
 
     }
     
+    public List<Permission> getAllPermission(){
+    	return permissionRepo.findAll();
+    }
+    
+    
+    
 	
 	private Employee getUserByEmployeeId(Long empId) {
         return empRepository.findById(empId)
@@ -105,6 +112,6 @@ public class PermissionService {
 
 	private Permission getPermissionById(Long id) {
         return permissionRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Leave request not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Permission request not found: " + id));
     }
 }

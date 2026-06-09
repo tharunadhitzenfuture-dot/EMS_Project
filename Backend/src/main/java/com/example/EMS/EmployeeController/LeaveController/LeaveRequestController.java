@@ -34,8 +34,8 @@ public class LeaveRequestController {
 		if(request.getStartDate() == null || request.getEndDate() == null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please provide start date and end date");
 		}
-		LeaveRequest req = requestService.applyLeave(empId, request);
-		return ResponseEntity.status(HttpStatus.ACCEPTED).body(req);
+		return requestService.applyLeave(empId, request);
+
 	}
 	
 	@PostMapping("/review/{empId}/{leaveId}")
