@@ -27,7 +27,10 @@ public class HolidayCalanderController {
     @PostMapping("/create")
     public ResponseEntity<?> createLeaveCalander(
             @RequestBody HolidayCalander request) {
-
+    	
+    	if(request.getDate() == null) {
+    		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter holiday date");
+    	}
         Optional<HolidayCalander> cal =
                 calanderRepo.findByDate(request.getDate());
 
@@ -62,6 +65,11 @@ public class HolidayCalanderController {
     public ResponseEntity<?> updateCalanderById(
             @PathVariable Long id,
             @RequestBody HolidayCalander request) {
+    	
+    	if(request.getDate() == null) {
+    		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter holiday date");
+    	}
+    	
         return calanderService.updateCalanderById(id, request);
     }
 }
