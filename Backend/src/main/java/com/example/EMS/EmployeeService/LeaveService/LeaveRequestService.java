@@ -3,28 +3,24 @@ package com.example.EMS.EmployeeService.LeaveService;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
+
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.example.EMS.EmployeeDTO.AttendanceRequestDTO;
+
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
-import com.example.EMS.EmployeeEntity.Attendance;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeException.BadRequestException;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
-import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveBalanceRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
 import com.example.EMS.enums.LeaveStatus;
-import com.example.EMS.enums.LeaveType;
 import com.example.EMS.enums.Role;
 
 import jakarta.transaction.Transactional;
@@ -35,18 +31,14 @@ public class LeaveRequestService {
 	private final EmpRepository empRepository;
 	private final LeaveBalanceRepository leaveBalanceRepository;
 	private final LeaveRequestRepository leaveRequestRepository;
-	private final LeaveRecordService leaveRecord;
-	private final AttendanceRepository attRepository;
 	
 
 	public LeaveRequestService(EmpRepository empRepository, LeaveBalanceRepository leaveBalanceRepository,
-			LeaveRequestRepository leaveRequestRepository, LeaveRecordService leaveRecord,
-			AttendanceRepository attRepository) {
+			LeaveRequestRepository leaveRequestRepository) {
 		this.empRepository = empRepository;
 		this.leaveBalanceRepository = leaveBalanceRepository;
 		this.leaveRequestRepository = leaveRequestRepository;
-		this.leaveRecord = leaveRecord;
-		this.attRepository = attRepository;
+		
 	}
 
 
