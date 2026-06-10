@@ -26,6 +26,7 @@ public class User {
 	private String name;
 	private String email;
 	private String password;
+	private boolean active = true;
 	
 	@Enumerated(EnumType.STRING)
 	@ElementCollection(fetch= FetchType.EAGER)
@@ -56,11 +57,18 @@ public class User {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+	
 	public Set<Role> getRoles() {
 		return roles;
 	}
 	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
+	}
+	public boolean isActive() {
+		return active;
+	}
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 	
 	

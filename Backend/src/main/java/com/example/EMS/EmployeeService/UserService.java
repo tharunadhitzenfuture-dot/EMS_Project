@@ -22,11 +22,6 @@ public class UserService {
 	public final PasswordEncoder passwordEncoder;
 	public final Jwtutil jwt;
 	
-	
-	
-	
-
-
 
 	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, Jwtutil jwt) {
 		this.userRepository = userRepository;
@@ -75,8 +70,14 @@ public class UserService {
 		                .status(HttpStatus.UNAUTHORIZED)
 		                .body("User not found");
 		    }
-
+            
 		    User existingUser = user.get();
+		    
+		    if(!existingUser.isActive()) {
+		    	return ResponseEntity
+		                .status(HttpStatus.UNAUTHORIZED)
+		                .body("User not active");
+		    }
 
 		    if (!passwordEncoder.matches(
 		            login.getPassword(),
