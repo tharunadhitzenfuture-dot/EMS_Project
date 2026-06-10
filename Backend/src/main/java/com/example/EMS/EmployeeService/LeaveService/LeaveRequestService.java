@@ -153,32 +153,32 @@ public class LeaveRequestService {
 	                
 	               
 	            }
-	            if(req.getReason() == null || !req.getReason().startsWith("Auto-generated")) {
-	            	 for (LocalDate date = req.getStartDate();!date.isAfter(req.getEndDate());date = date.plusDays(1)) {
-	 	            	Optional<Attendance> record =attRepository.findByEmployee_EmployeeIdAndAttendanceDate(req.getEmployee().getEmployeeId(), date);
-	 	            	if(record.isEmpty()) {
-	 	            		leaveRecord.markAbsent(
-	 			        		    req.getEmployee(),
-	 			        		    date,
-	 			        		    LocalTime.parse("00:00:00"),
-	 			        		    LocalTime.parse("00:00:00"),
-	 			        		    LeaveType.ABSENT.name()
-	 			        		);
-	 	            	}
-	 	            	else {
-	 	            		AttendanceRequestDTO dto1 = new AttendanceRequestDTO();
-	 	            		dto1.setEmpId(req.getEmployee().getEmployeeId());
-	 	            		dto1.setCheckIn(LocalTime.parse("00:00:00"));
-	 	            		dto1.setCheckOut(LocalTime.parse("00:00:00"));
-	 	            		dto1.setDate(date);
-	 	            		dto1.setStatus(LeaveType.ABSENT.name());
-	 	            	    
-	 	            		leaveRecord.updateAbsent(req.getEmployee(), req.getEmployee().getEmployeeId(), dto1);
-	 	            	}
-	 		        	
-	 		        	}
-	            }
-	           
+//	            if(req.getReason() == null || !req.getReason().startsWith("Auto-generated")) {
+//	            	 for (LocalDate date = req.getStartDate();!date.isAfter(req.getEndDate());date = date.plusDays(1)) {
+//	 	            	Optional<Attendance> record =attRepository.findByEmployee_EmployeeIdAndAttendanceDate(req.getEmployee().getEmployeeId(), date);
+//	 	            	if(record.isEmpty()) {
+//	 	            		leaveRecord.markAbsent(
+//	 			        		    req.getEmployee(),
+//	 			        		    date,
+//	 			        		    LocalTime.parse("00:00:00"),
+//	 			        		    LocalTime.parse("00:00:00"),
+//	 			        		    LeaveType.ABSENT.name()
+//	 			        		);
+//	 	            	}
+//	 	            	else {
+//	 	            		AttendanceRequestDTO dto1 = new AttendanceRequestDTO();
+//	 	            		dto1.setEmpId(req.getEmployee().getEmployeeId());
+//	 	            		dto1.setCheckIn(LocalTime.parse("00:00:00"));
+//	 	            		dto1.setCheckOut(LocalTime.parse("00:00:00"));
+//	 	            		dto1.setDate(date);
+//	 	            		dto1.setStatus(LeaveType.ABSENT.name());
+//	 	            	    
+//	 	            		leaveRecord.updateAbsent(req.getEmployee(), req.getEmployee().getEmployeeId(), dto1);
+//	 	            	}
+//	 		        	
+//	 		        	}
+//	            }
+//	           
 		        
 	        }
 	               

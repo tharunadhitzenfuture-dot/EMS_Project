@@ -364,6 +364,10 @@ public class AttendanceService {
             attendance.setTotalWorkingHours(
                     totalTime);
             
+            Optional<Permission> permission = permissionRepository.findByPermissionDateAndEmployee_Id(today, emp.getId());
+          
+            
+            if(permission == null || permission.isEmpty()) {
             if(emp.getProfessional_details().getProfessional_department().equals("IT")) {
          	   Optional<WeeklyCalculation> week = weekly.findByDeptName("IT");
          	   if(week.isEmpty()) {
@@ -469,6 +473,8 @@ public class AttendanceService {
          	   else {
          		   attendance.setStatus(LeaveType.PRESENT);
          	   }
+            }
+            
             }
         }
 
