@@ -1,5 +1,6 @@
 package com.example.EMS.EmployeeController.LeaveController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
+import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
+import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
 import com.example.EMS.EmployeeService.LeaveService.LeaveRequestService;
 import com.example.EMS.enums.LeaveType;
@@ -26,13 +29,18 @@ public class LeaveRequestController {
 	
 	private final LeaveRequestService requestService;
 	private final LeaveRequestRepository requestRepository;
+	private final EmpRepository empRepo;
 	
 
-	public LeaveRequestController(LeaveRequestService requestService, LeaveRequestRepository requestRepository) {
+	
+
+
+	public LeaveRequestController(LeaveRequestService requestService, LeaveRequestRepository requestRepository,
+			EmpRepository empRepo) {
 		this.requestService = requestService;
 		this.requestRepository = requestRepository;
+		this.empRepo = empRepo;
 	}
-
 
 	@PostMapping("/apply/{empId}")
 	public ResponseEntity<?> applyLeave(@PathVariable String empId, @RequestBody LeaveRequest request){
@@ -77,6 +85,20 @@ public class LeaveRequestController {
         return requestRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Leave request not found: " + id));
     }
+	
+	 @GetMapping("/getListLeaveById/{empId}/{date}")
+	 public ResponseEntity<?> getListPermission(@PathVariable String empId, @PathVariable LocalDate date) {
+		
+		 if(empId == null) {
+			 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter employee id");
+		 }
+		 Long id = empRepo.findIdByEmployeeId(empId);
+		List<LeaveRequest> leave = requestRepository.findLeavesContainingDate(id, date);
+		if(leave == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Leave not found with id: "+empId+" Date "+date);
+		}
+		return ResponseEntity.ok(leave);
+	}
 	
 	@PutMapping("/update/{empId}/{leaveId}")
 	public ResponseEntity<?> updateLeave(
