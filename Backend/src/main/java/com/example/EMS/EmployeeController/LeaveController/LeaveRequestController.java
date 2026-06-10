@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
-import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
@@ -31,9 +30,6 @@ public class LeaveRequestController {
 	private final LeaveRequestRepository requestRepository;
 	private final EmpRepository empRepo;
 	
-
-	
-
 
 	public LeaveRequestController(LeaveRequestService requestService, LeaveRequestRepository requestRepository,
 			EmpRepository empRepo) {

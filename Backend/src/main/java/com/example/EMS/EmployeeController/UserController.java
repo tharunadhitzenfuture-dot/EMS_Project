@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.example.EMS.EmployeeDTO.LoginRequest;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeService.UserService;
 
@@ -31,6 +33,12 @@ public class UserController {
 		 return userService.getUserById(id);
 
 	}
+	
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+	    return userService.empLoginService(request);
+	}
+		
 	
 
 }

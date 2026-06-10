@@ -42,7 +42,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfig()))
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/users/**").permitAll()
                 .requestMatchers("images/**").permitAll()
                 .requestMatchers("/api/employee/**").hasAnyRole("ADMIN","HR","MANAGER")
                 .requestMatchers("/api/attendance/**").hasAnyRole("ADMIN","HR","MANAGER")
