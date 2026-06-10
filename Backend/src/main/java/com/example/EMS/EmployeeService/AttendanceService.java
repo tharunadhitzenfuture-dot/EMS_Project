@@ -136,7 +136,7 @@ public class AttendanceService {
             Optional<Permission> permission = permissionRepository.findByPermissionDateAndEmployee_Id(today, emp.getId());
           
             
-            if(permission == null || permission.isEmpty() || permission.get().getStatus() == LeaveStatus.PENDING) {
+            if(permission == null || permission.isEmpty()) {
             	  if(emp.getProfessional_details().getProfessional_department().equals("IT")) {
                	   Optional<WeeklyCalculation> week = weekly.findByDeptName("IT");
                	   if(week.isEmpty()) {
