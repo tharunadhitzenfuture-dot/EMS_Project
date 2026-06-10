@@ -28,15 +28,20 @@ public class PermissionService {
 	private final EmpRepository empRepository;
 	private final PermissionRepository permissionRepo;
 	private final AttendanceRepository attendanceRepo;
+	private final AttendanceService attendanceService;
 	
 	
 	
 
+	
+
+
 	public PermissionService(EmpRepository empRepository, PermissionRepository permissionRepo,
-			AttendanceRepository attendanceRepo) {
+			AttendanceRepository attendanceRepo, AttendanceService attendanceService) {
 		this.empRepository = empRepository;
 		this.permissionRepo = permissionRepo;
 		this.attendanceRepo = attendanceRepo;
+		this.attendanceService = attendanceService;
 	}
 
 
@@ -88,10 +93,14 @@ public class PermissionService {
         Optional<Attendance> attendance =  attendanceRepo.findByEmployee_EmployeeIdAndAttendanceDate(empId,permissionDate);
         
         if(attendance.isEmpty()) {
-        	return ResponseEntity.badRequest().body("Attendance not recorded for date: "+permissionDate);
+        	attendanceService.registerService(emp, permissionDate, null, null, LeaveType.PERMISSION.name());
+        }
+        else {
+        	attendance.get().setStatus(LeaveType.PERMISSION);
         }
         
-        attendance.get().setStatus(LeaveType.PERMISSION);
+        
+        
 
         Permission res = permissionRepo.save(req);
         return ResponseEntity.ok(res);
