@@ -70,7 +70,7 @@ public class PermissionService {
         Permission req = getPermissionById(permissionId);
         
         
-        if(emp.getRole() != Role.MANAGER && emp.getRole() != Role.HR) {
+        if(emp.getRole() != Role.MANAGER && emp.getRole() != Role.HR && emp.getRole() != Role.ADMIN) {
         	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not authorized to review leave requests");
         }
         
