@@ -18,10 +18,13 @@ import com.example.EMS.EmployeeDTO.WorkingHoursDTO;
 import com.example.EMS.EmployeeEntity.Attendance;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
+import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
 import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyCalculation;
 import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyReportDTO;
 import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
+import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
+import com.example.EMS.EmployeeRepository.LeaveRepository.PermissionRepository;
 import com.example.EMS.EmployeeRepository.WeeklyCalculations.WeeklyCalculationRepository;
 import com.example.EMS.EmployeeService.LeaveService.LeaveRequestService;
 import com.example.EMS.enums.LeaveType;
@@ -35,17 +38,28 @@ public class AttendanceService {
 	private EmpRepository empRepo;
 	private WeeklyCalculationRepository weekly;
 	private LeaveRequestService leaveService;
+	private PermissionRepository permissionRepository;
+	private LeaveRequestRepository leaveRepository;
+
 	
-	public AttendanceService(AttendanceRepository attendanceRepo, EmpRepository empRepo, WeeklyCalculationRepository weekly,
-			LeaveRequestService leaveService) {
+	
+
+
+
+	 public AttendanceService(AttendanceRepository attendanceRepo, EmpRepository empRepo,
+			WeeklyCalculationRepository weekly, LeaveRequestService leaveService,
+			PermissionRepository permissionRepository, LeaveRequestRepository leaveRepository) {
 		this.attendanceRepo = attendanceRepo;
 		this.empRepo = empRepo;
 		this.weekly = weekly;
 		this.leaveService = leaveService;
-		
+		this.permissionRepository = permissionRepository;
+		this.leaveRepository = leaveRepository;
 	}
-	
-	
+
+
+
+
 	 public Long getIdByEmployeeId(String empId) {
 	    	return empRepo.findIdByEmployeeId(empId);
 	    }
@@ -117,106 +131,111 @@ public class AttendanceService {
             attendance.setTotalWorkingHours(
                     totalTime);
             
+          
+            Optional<Permission> permission = permissionRepository.findByPermissionDateAndEmployee_Id(today, emp.getId());
+          
+            
+            if(permission == null || permission.isEmpty()) {
+            	  if(emp.getProfessional_details().getProfessional_department().equals("IT")) {
+               	   Optional<WeeklyCalculation> week = weekly.findByDeptName("IT");
+               	   if(week.isEmpty()) {
+               		   return ResponseEntity.badRequest().body("There is no weekly record for IT");
+               	   }
+               	   WeeklyCalculation res = week.get();
+               	   
+               	   String[] parts = res.getWorkHours().split(":");
+
+                      if (parts.length != 3) {
+                          return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                  .body("workHours must be in HH:mm:ss format");
+                      }
+
+                      long hour_Per_Day = Long.parseLong(parts[0]);
+               	   
+               	   if(hours < hour_Per_Day/2) {
+               		   LeaveRequest request = new LeaveRequest();
+               		   
+               		   request.setStartDate(date);
+               		   request.setEndDate(date);
+               		   request.setLeaveType(LeaveType.FULL_DAY);
+               		   request.setReason("Auto-generated due to insufficient work hours "+ totalTime+" on: "+date);
+               		   
+               		   attendance.setStatus(LeaveType.ABSENT);
+               		   leaveService.applyLeave(emp.getEmployeeId(), request);
+               		   
+               	   }
+               	   else if(hours < hour_Per_Day) {
+               		   LeaveRequest request = new LeaveRequest();
+               		   
+               		   request.setStartDate(date);
+               		   request.setEndDate(date);
+               		   request.setLeaveType(LeaveType.HALF_DAY);
+               		   request.setReason("Auto-generated due to insufficient work hours "+totalTime+" on: "+date);
+               		   
+               		   attendance.setStatus(LeaveType.HALF_DAY);
+               		   leaveService.applyLeave(emp.getEmployeeId(), request);
+               		   
+               		   
+               		   
+               	   }
+               	   else {
+               		   attendance.setStatus(LeaveType.PRESENT);
+               	   }
+               	   
+               	   
+                  }
+                  else if(emp.getProfessional_details().getProfessional_department().equals("Insurance")) {
+               	   Optional<WeeklyCalculation> week = weekly.findByDeptName("Insurance");
+               	   if(week.isEmpty()) {
+               		   return ResponseEntity.badRequest().body("There is no weekly record for insurance");
+               	   }
+               	   WeeklyCalculation res = week.get();
+               	   String[] parts = res.getWorkHours().split(":");
+
+                      if (parts.length != 3) {
+                          return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                  .body("workHours must be in HH:mm:ss format");
+                      }
+
+                      long hour = Long.parseLong(parts[0]);
+                      
+
+               	   long n = hour/res.getTotalWorkDays();
+               	   
+               	  
+               	   if(hours < n/2) {
+               		   LeaveRequest request = new LeaveRequest();
+               		   
+               		   request.setStartDate(date);
+               		   request.setEndDate(date);
+               		   request.setLeaveType(LeaveType.FULL_DAY);
+               		   request.setReason("Auto-generated due to insufficient work hours "+totalTime +" on: "+date);
+               		   
+               		   attendance.setStatus(LeaveType.ABSENT);
+               		   leaveService.applyLeave(emp.getEmployeeId(), request);
+               		   
+               	   }
+               	   else  if(hours < n) {
+               		   
+               		   LeaveRequest request = new LeaveRequest();
+               		   
+               		   request.setStartDate(date);
+               		   request.setEndDate(date);
+               		   request.setLeaveType(LeaveType.HALF_DAY);
+               		   request.setReason("Auto-generated due to insufficient work hours "+totalTime+" on: "+date);
+               		   
+               		   attendance.setStatus(LeaveType.HALF_DAY);
+               		   
+               		   leaveService.applyLeave(emp.getEmployeeId(), request);
+               		           		   
+               	   }
+               	   else {
+               		   attendance.setStatus(LeaveType.PRESENT);
+               	   }
+                  }
+            }
            
-           if(emp.getProfessional_details().getProfessional_department().equals("IT")) {
-        	   Optional<WeeklyCalculation> week = weekly.findByDeptName("IT");
-        	   if(week.isEmpty()) {
-        		   return ResponseEntity.badRequest().body("There is no weekly record for IT");
-        	   }
-        	   WeeklyCalculation res = week.get();
-        	   
-        	   String[] parts = res.getWorkHours().split(":");
-
-               if (parts.length != 3) {
-                   return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                           .body("workHours must be in HH:mm:ss format");
-               }
-
-               long hour_Per_Day = Long.parseLong(parts[0]);
-        	   
-        	   if(hours < hour_Per_Day/2) {
-        		   LeaveRequest request = new LeaveRequest();
-        		   
-        		   request.setStartDate(date);
-        		   request.setEndDate(date);
-        		   request.setLeaveType(LeaveType.FULL_DAY);
-        		   request.setReason("Auto-generated due to insufficient work hours "+ totalTime+" on: "+date);
-        		   
-        		   attendance.setStatus(LeaveType.ABSENT);
-        		   leaveService.applyLeave(emp.getEmployeeId(), request);
-        		   
-        	   }
-        	   else if(hours < hour_Per_Day) {
-        		   LeaveRequest request = new LeaveRequest();
-        		   
-        		   request.setStartDate(date);
-        		   request.setEndDate(date);
-        		   request.setLeaveType(LeaveType.HALF_DAY);
-        		   request.setReason("Auto-generated due to insufficient work hours "+totalTime+" on: "+date);
-        		   
-        		   attendance.setStatus(LeaveType.HALF_DAY);
-        		   leaveService.applyLeave(emp.getEmployeeId(), request);
-        		   
-        		   
-        		   
-        	   }
-        	   else {
-        		   attendance.setStatus(LeaveType.PRESENT);
-        	   }
-        	   
-        	   
-           }
-           else if(emp.getProfessional_details().getProfessional_department().equals("Insurance")) {
-        	   Optional<WeeklyCalculation> week = weekly.findByDeptName("Insurance");
-        	   if(week.isEmpty()) {
-        		   return ResponseEntity.badRequest().body("There is no weekly record for insurance");
-        	   }
-        	   WeeklyCalculation res = week.get();
-        	   String[] parts = res.getWorkHours().split(":");
-
-               if (parts.length != 3) {
-                   return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                           .body("workHours must be in HH:mm:ss format");
-               }
-
-               long hour = Long.parseLong(parts[0]);
-               
-
-        	   long n = hour/res.getTotalWorkDays();
-        	   
-        	  
-        	   if(hours < n/2) {
-        		   LeaveRequest request = new LeaveRequest();
-        		   
-        		   request.setStartDate(date);
-        		   request.setEndDate(date);
-        		   request.setLeaveType(LeaveType.FULL_DAY);
-        		   request.setReason("Auto-generated due to insufficient work hours "+totalTime +" on: "+date);
-        		   
-        		   attendance.setStatus(LeaveType.ABSENT);
-        		   leaveService.applyLeave(emp.getEmployeeId(), request);
-        		   
-        	   }
-        	   else  if(hours < n) {
-        		   
-        		   LeaveRequest request = new LeaveRequest();
-        		   
-        		   request.setStartDate(date);
-        		   request.setEndDate(date);
-        		   request.setLeaveType(LeaveType.HALF_DAY);
-        		   request.setReason("Auto-generated due to insufficient work hours "+totalTime+" on: "+date);
-        		   
-        		   attendance.setStatus(LeaveType.HALF_DAY);
-        		   
-        		   leaveService.applyLeave(emp.getEmployeeId(), request);
-        		           		   
-        	   }
-        	   else {
-        		   attendance.setStatus(LeaveType.PRESENT);
-        	   }
-           }
-           
-         
+ 
             
         }
 
