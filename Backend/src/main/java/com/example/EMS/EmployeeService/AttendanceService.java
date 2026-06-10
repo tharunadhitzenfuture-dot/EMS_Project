@@ -147,7 +147,6 @@ public class AttendanceService {
         		   
         	   }
         	   else if(hours < hour_Per_Day) {
-        		   System.out.println("Inn");
         		   LeaveRequest request = new LeaveRequest();
         		   
         		   request.setStartDate(date);

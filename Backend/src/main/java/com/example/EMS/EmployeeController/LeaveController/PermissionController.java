@@ -120,6 +120,19 @@ public class PermissionController {
 		}
 		return ResponseEntity.ok(permission);
 	}
+	 
+	 @GetMapping("/getListPermissionById/{empId}")
+	 public ResponseEntity<?> getListPermission(@PathVariable Long empId) {
+		
+		 if(empId == null) {
+			 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter employee id");
+		 }
+		List<Permission> permission = permissionService.getListPermissionById(empId);
+		if(permission == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Permission not found with id: "+empId);
+		}
+		return ResponseEntity.ok(permission);
+	}
 	
 	 @PutMapping("/update/{empId}/{permissionId}")
 	 public ResponseEntity<?> updatePermission(
@@ -154,5 +167,6 @@ public class PermissionController {
 	             permissionId
 	     );
 	 }
+	 
 
 }

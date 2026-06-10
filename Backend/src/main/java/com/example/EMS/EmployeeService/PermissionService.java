@@ -89,15 +89,17 @@ public class PermissionService {
         req.setReviewedBy(emp);
         req.setReviewedAt(LocalDateTime.now());
         
-        LocalDate permissionDate = req.getPermissionDate();
-        Optional<Attendance> attendance =  attendanceRepo.findByEmployee_EmployeeIdAndAttendanceDate(empId,permissionDate);
+ //       LocalDate permissionDate = req.getPermissionDate();
+ //      Optional<Attendance> attendance =  attendanceRepo.findByEmployee_EmployeeIdAndAttendanceDate(empId,permissionDate);
         
-        if(attendance.isEmpty()) {
-        	attendanceService.registerService(emp, permissionDate, null, null, LeaveType.PERMISSION.name());
-        }
-        else {
-        	attendance.get().setStatus(LeaveType.PERMISSION);
-        }
+//        if(attendance.isEmpty()) {
+//        	attendanceService.registerService(emp, permissionDate, null, null, LeaveType.PERMISSION.name());
+//        }
+//        else {
+//        	attendance.get().setStatus(LeaveType.PERMISSION);
+//        }
+        
+        
         
         
         
@@ -201,4 +203,15 @@ public class PermissionService {
         return permissionRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Permission request not found: " + id));
     }
+	
+	public List<Permission> getListPermissionById(Long empId) {
+	    List<Permission> permissions = permissionRepo.findByEmployeeId(empId);
+
+	    if (permissions.isEmpty()) {
+	        throw new ResourceNotFoundException(
+	                "No permission requests found for employee: " + empId);
+	    }
+
+	    return permissions;
+	}
 }
