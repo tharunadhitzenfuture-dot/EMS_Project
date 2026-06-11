@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.LoginRequest;
+import com.example.EMS.EmployeeDTO.ResetPasswordDTO;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeRepository.EmpRepository;
@@ -67,6 +68,31 @@ public class UserController {
 		User user = e.getUser();
 		
 		return userService.sendMail(empId, user);
+		
+		
+		
+		
+	}
+	
+	@PostMapping("/resetPassword")
+	public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO password){		
+		Optional<Employee>  emp =empRepository.findByEmail(password.getEmail());
+		
+		if(emp.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee not found with email: "+password.getEmail());
+		}
+		
+		Employee e = emp.get();
+		
+		
+		User user = e.getUser();
+		
+		if(user == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not created with id: "+password.getEmail());
+		}
+		
+		
+		return userService.resetPassword(password.getEmail(), user, password);
 		
 		
 		

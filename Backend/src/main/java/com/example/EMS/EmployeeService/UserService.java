@@ -8,13 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.EMS.EmployeeDTO.LoginRequest;
 import com.example.EMS.EmployeeDTO.LoginResponse;
+import com.example.EMS.EmployeeDTO.ResetPasswordDTO;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeRepository.UserRepository;
 import com.example.EMS.EmployeeSecurity.Jwtutil;
@@ -139,18 +139,19 @@ public class UserService {
 		        }
 
 		        String token = UUID.randomUUID().toString();
-		        LocalDateTime expiry = LocalDateTime.now().plusHours(24);
 
 		        String rawPassword = "Temp@123";
 
 		        user.setPassword(passwordEncoder.encode(rawPassword));
+		        user.setConfirmPassword(user.getPassword());
+
 		        userRepository.save(user);
-		        
 
 		        String resetLink =
 		                "http://localhost:3000/setpassword?token=" + token;
 
 		        MimeMessage message = mailSender.createMimeMessage();
+
 		        MimeMessageHelper helper =
 		                new MimeMessageHelper(message, true);
 
@@ -201,8 +202,25 @@ public class UserService {
 
 		                                <p style="color:#6b7280;line-height:1.8;">
 		                                    Your employee account has been created successfully.
-		                                    Click the button below to set your password and activate your account.
+		                                    Please use the following credentials to login.
 		                                </p>
+
+		                                <div style="
+		                                    background:#f8fafc;
+		                                    border:1px solid #cbd5e1;
+		                                    padding:15px;
+		                                    border-radius:8px;
+		                                    margin:20px 0;">
+
+		                                    <p style="margin:0 0 10px 0;">
+		                                        <strong>Email:</strong> %s
+		                                    </p>
+
+		                                    <p style="margin:0;">
+		                                        <strong>Temporary Password:</strong> %s
+		                                    </p>
+
+		                                </div>
 
 		                                <div style="margin:30px 0;text-align:center;">
 		                                    <a href="%s"
@@ -212,17 +230,26 @@ public class UserService {
 		                                       text-decoration:none;
 		                                       padding:14px 25px;
 		                                       border-radius:6px;
-		                                       font-weight:bold;">
+		                                       font-weight:bold;
+		                                       display:inline-block;">
 		                                       Set Password
 		                                    </a>
 		                                </div>
 
+		                                <p style="font-size:13px;color:#6b7280;">
+		                                    If the button doesn't work, copy and paste this URL into your browser:
+		                                </p>
+
+		                                <p>
+		                                    <a href="%s">%s</a>
+		                                </p>
+
 		                                <div style="
-		                                background:#fffbeb;
-		                                border:1px solid #fde68a;
-		                                padding:12px;
-		                                border-radius:6px;
-		                                color:#92400e;">
+		                                    background:#fffbeb;
+		                                    border:1px solid #fde68a;
+		                                    padding:12px;
+		                                    border-radius:6px;
+		                                    color:#92400e;">
 		                                    This link is valid for 24 hours.
 		                                </div>
 
@@ -260,6 +287,10 @@ public class UserService {
 		        </html>
 		        """.formatted(
 		                user.getName() != null ? user.getName() : "Employee",
+		                user.getEmail(),
+		                rawPassword,
+		                resetLink,
+		                resetLink,
 		                resetLink
 		        );
 
@@ -279,6 +310,19 @@ public class UserService {
 		        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 		                .body("Failed to send email : " + e.getMessage());
 		    }
+		}
+		
+		
+		public ResponseEntity<?> resetPassword(String email, User user, ResetPasswordDTO password){
+			
+			 if(!passwordEncoder.matches(password.getOneTimePassword(), user.getPassword())) {
+				 return ResponseEntity.badRequest().body("One time password not matched");
+			 }
+			 
+			 user.setPassword(passwordEncoder.encode(password.getPassword()));
+			 
+			 return ResponseEntity.ok("Your password has been reset");
+		
 		}
 	
 	
