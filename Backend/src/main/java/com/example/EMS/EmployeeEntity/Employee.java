@@ -18,6 +18,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
@@ -51,6 +52,12 @@ public class Employee {
     private String pan_number;
     @Enumerated(EnumType.STRING)
     private Role role;
+    
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="user_id")
+    private User user;
+   
+    
     
 	@OneToOne(mappedBy="employee", cascade= CascadeType.ALL, orphanRemoval = true)
     private BankDetails bankDetails;
@@ -363,6 +370,12 @@ public class Employee {
 	}
 	public void setWeeklyReport(List<WeeklyReportDTO> weeklyReport) {
 		this.weeklyReport = weeklyReport;
+	}
+	public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
 	}
 	
 	

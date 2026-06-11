@@ -2,9 +2,12 @@ package com.example.EMS.EmployeeController.LeaveController;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
+import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
@@ -45,6 +50,46 @@ public class LeaveRequestController {
 		}
 		return requestService.applyLeave(empId, request);
 
+	}
+	
+	@PostMapping("/empLeaveApply")
+	public ResponseEntity<?> applyEmpLeave(@RequestBody LeaveRequest request){
+		if(request.getStartDate() == null || request.getEndDate() == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please provide start date and end date");
+		}
+		return requestService.applyEmpLeave( request);
+
+	}
+	
+	@PostMapping("/reviewLeave/{leaveId}")
+	 public ResponseEntity<?> reviewLeave(@PathVariable Long leaveId,@RequestBody ReviewLeaveDto dto) {
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		User user = (User) authentication.getPrincipal();
+		
+		Optional<Employee> empUser = empRepo.findByUser(user);
+		
+		if(empUser.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User employee details not found");
+		}
+		
+		String empId = empUser.get().getEmployeeId();
+		
+		if(empId == null || leaveId == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee id not found for user");
+		}
+		
+		LeaveRequest req = getLeaveById(leaveId);
+		
+		if(req.getLeaveType() == LeaveType.FULL_DAY) {
+			return requestService.reviewLeave(empId, leaveId, dto);
+		}
+		else if(req.getLeaveType() == LeaveType.HALF_DAY) {
+			return requestService.reviewHalfDayLeave(empId, leaveId, dto);
+		}
+		
+		return ResponseEntity.badRequest().body("Please mention correct leave type FULL_DAY, HALF_DAY, PERMISSION");
 	}
 	
 	@PostMapping("/review/{empId}/{leaveId}")

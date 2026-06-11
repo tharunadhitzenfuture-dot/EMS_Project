@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -38,6 +39,7 @@ import com.example.EMS.EmployeeEntity.EmployeePayroll;
 import com.example.EMS.EmployeeEntity.Experience;
 import com.example.EMS.EmployeeEntity.HigherEducation;
 import com.example.EMS.EmployeeEntity.ProfessionalDetails;
+import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeRepository.EmpRepository;
@@ -114,6 +116,43 @@ public class EmpService {
 		String type = detail.substring(0, 1).toUpperCase(); 
 		long nextId = (maxId == null) ? 1 : maxId + 1;
 		emp.setEmployeeId(String.format("ZF%s-%03d", type, nextId));
+		
+		if(emp.getUser() != null) {
+			User user = emp.getUser();
+			
+			user.setName(emp.getFirst_name());
+			user.setRoles(Set.of(emp.getRole()));
+			user.setEmail(emp.getEmail());
+			user.setEmployee(emp);
+			
+			if(user.getPassword() != null) {
+				user.setPassword(passwordEncoder.encode(user.getPassword()));
+			}
+			
+			if(user.getConfirmPassword() != null) {
+				user.setConfirmPassword(passwordEncoder.encode(user.getConfirmPassword()));
+			}
+			
+			
+//			if(user.getPassword() == null) {
+//				return  ResponseEntity.status(404).body("Please enter password");
+//			}
+//			
+//			if(user.getConfirmPassword() == null) {
+//				return  ResponseEntity.status(404).body("Please enter confirm password");
+//			}
+//			
+//			if(!user.getPassword().equals(user.getConfirmPassword())) {
+//				return  ResponseEntity.status(404).body("Password and confirm is not matching");
+//			}			
+//			Optional<User> emailuser = userRepository.findByEmail(user.getEmail());
+//			
+//			if(emailuser.isPresent()) {
+//				return  ResponseEntity.status(409).body("User Already exists please login");
+//			}
+//			
+			
+		}
 		
 		
 		if(file != null && !file.isEmpty()) {
@@ -1251,6 +1290,40 @@ public class EmpService {
                 existingBank.setEmployee(existing);
                 existing.setBankDetails(existingBank);
             }
+            
+            
+            if(emp.getUser() != null) {
+    			User user = emp.getUser();
+    			
+    			if (emp.getRole() != null) {
+    			    existing.getUser().setRoles(Set.of(emp.getRole()));
+    			}
+
+    			if (emp.getEmail() != null) {
+    				existing.getUser().setEmail(emp.getEmail());
+    			}
+
+    			if (emp != null) {
+    				existing.getUser().setEmployee(existing);
+    			}
+    			
+    			if(user.getName() != null) {
+    				existing.getUser().setName(emp.getFirst_name()+" "+emp.getLast_name());
+    			}
+    			
+    			if(user.getPassword() != null) {
+    				existing.getUser().setPassword(passwordEncoder.encode(user.getPassword()));
+    			}
+    			
+    			
+    			if(user.getConfirmPassword() != null) {
+    				existing.getUser().setConfirmPassword(passwordEncoder.encode(user.getConfirmPassword()));
+    			}
+    			
+    			
+
+    			
+    		}
             
          // ================= Professional Details =================
             if (emp.getProfessional_details() != null) {

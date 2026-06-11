@@ -3,6 +3,7 @@ package com.example.EMS.EmployeeEntity;
 import java.util.Set;
 
 import com.example.EMS.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -12,6 +13,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -26,11 +28,16 @@ public class User {
 	private String name;
 	private String email;
 	private String password;
+	private String confirmPassword;
 	private boolean active = true;
 	
 	@Enumerated(EnumType.STRING)
 	@ElementCollection(fetch= FetchType.EAGER)
 	private Set<Role> roles;
+	
+	@OneToOne(mappedBy="user")
+	@JsonIgnore 
+	private Employee employee;
 	
 
 	public Long getUserId() {
@@ -70,6 +77,20 @@ public class User {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
+	public String getConfirmPassword() {
+		return confirmPassword;
+	}
+	public void setConfirmPassword(String confirmPassword) {
+		this.confirmPassword = confirmPassword;
+	}
+	public Employee getEmployee() {
+		return employee;
+	}
+	public void setEmployee(Employee employee) {
+		this.employee = employee;
+	}
+	
+	
 	
 	
 	

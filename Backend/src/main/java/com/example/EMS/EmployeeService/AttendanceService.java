@@ -20,14 +20,12 @@ import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
 import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyCalculation;
-import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyReportDTO;
 import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.PermissionRepository;
 import com.example.EMS.EmployeeRepository.WeeklyCalculations.WeeklyCalculationRepository;
 import com.example.EMS.EmployeeService.LeaveService.LeaveRequestService;
-import com.example.EMS.enums.LeaveStatus;
 import com.example.EMS.enums.LeaveType;
 
 import jakarta.transaction.Transactional;
@@ -134,9 +132,11 @@ public class AttendanceService {
             
           
             Optional<Permission> permission = permissionRepository.findByPermissionDateAndEmployee_Id(today, emp.getId());
+            List<LeaveRequest> leaveReq = leaveRepository.findLeavesContainingDate(emp.getId(), today);
+            
           
             
-            if(permission == null || permission.isEmpty()) {
+            if(permission == null || permission.isEmpty() && leaveReq == null || leaveReq.isEmpty()) {
             	  if(emp.getProfessional_details().getProfessional_department().equals("IT")) {
                	   Optional<WeeklyCalculation> week = weekly.findByDeptName("IT");
                	   if(week.isEmpty()) {
@@ -366,9 +366,11 @@ public class AttendanceService {
                     totalTime);
             
             Optional<Permission> permission = permissionRepository.findByPermissionDateAndEmployee_Id(today, emp.getId());
+            List<LeaveRequest> leaveReq = leaveRepository.findLeavesContainingDate(emp.getId(), today);
+            
           
             
-            if(permission == null || permission.isEmpty()) {
+            if(permission == null || permission.isEmpty() && leaveReq == null || leaveReq.isEmpty()) {
             if(emp.getProfessional_details().getProfessional_department().equals("IT")) {
          	   Optional<WeeklyCalculation> week = weekly.findByDeptName("IT");
          	   if(week.isEmpty()) {

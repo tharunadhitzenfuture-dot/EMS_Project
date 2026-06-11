@@ -4,15 +4,18 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeException.BadRequestException;
@@ -43,6 +46,55 @@ public class LeaveRequestService {
 
 
 	public ResponseEntity<?> applyLeave(String empId, LeaveRequest request){
+		Long id = empRepository.findIdByEmployeeId(empId);
+		Employee emp = getUserByEmployeeId(id);
+		
+		List<LeaveRequest> res = leaveRequestRepository.findOverlappingLeaves(id, request.getStartDate(), request.getEndDate());
+		if(!res.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Leave request dates overlapping with dates: "+request.getStartDate()+" and "+request.getEndDate());
+		}
+		
+//		 if (request.getStartDate().isBefore(LocalDate.now()))
+//	            throw new BadRequestException("Start date cannot be in the past");
+		 
+        if (request.getEndDate().isBefore(request.getStartDate()))
+            throw new BadRequestException("End date must be on or after start date");
+        
+        int workingDays = countWorkingDays(request.getStartDate(), request.getEndDate());
+        int month = request.getStartDate().getMonthValue();
+        int year = request.getStartDate().getYear();
+        
+
+        LeaveBalance balance = leaveBalanceRepository
+                .findByEmployeeIdAndMonthAndYear(emp.getId(),month, year);
+        
+//        if (balance.getRemainingDays() < workingDays)
+//            throw new BadRequestException("Insufficient balance. Available: "
+//                    + balance.getRemainingDays() + ", Requested: " + workingDays);
+//        
+        
+        request.setEmployee(emp);
+        LeaveRequest req = leaveRequestRepository.save(request);
+        return ResponseEntity.ok(req);
+        
+	      	
+		
+	}
+	
+	
+	public ResponseEntity<?> applyEmpLeave(LeaveRequest request){
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		User user = (User) authentication.getPrincipal();
+		
+		Optional<Employee> empUser = empRepository.findByUser(user);
+		
+		if(empUser.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User employee details not found");
+		}
+		
+		String empId = empUser.get().getEmployeeId();
+		
 		Long id = empRepository.findIdByEmployeeId(empId);
 		Employee emp = getUserByEmployeeId(id);
 		
