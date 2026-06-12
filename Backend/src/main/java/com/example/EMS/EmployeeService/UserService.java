@@ -216,9 +216,7 @@ public class UserService {
 		                                        <strong>Email:</strong> %s
 		                                    </p>
 
-		                                    <p style="margin:0;">
-		                                        <strong>Temporary Password:</strong> %s
-		                                    </p>
+		                            
 
 		                                </div>
 
