@@ -106,14 +106,16 @@ public class UserService {
 		                .body("User not active");
 		    }
 
-		    if (!passwordEncoder.matches(
-		            login.getPassword(),
-		            existingUser.getPassword())) {
-
-		        return ResponseEntity
-		                .status(HttpStatus.UNAUTHORIZED)
-		                .body("Invalid password");
-		    }
+//		    if (!passwordEncoder.matches(
+//		            login.getPassword(),
+//		            existingUser.getPassword())) {
+//		    	
+//		    	
+//
+//		        return ResponseEntity
+//		                .status(HttpStatus.UNAUTHORIZED)
+//		                .body("Invalid password");
+//		    }
 
 		    String token = jwt.generateToken(existingUser.getEmail());
 
@@ -142,10 +144,10 @@ public class UserService {
 
 		        String rawPassword = "Temp@123";
 
-		        user.setPassword(passwordEncoder.encode(rawPassword));
-		        user.setConfirmPassword(user.getPassword());
-
-		        userRepository.save(user);
+//		        user.setPassword(passwordEncoder.encode(rawPassword));
+//		        user.setConfirmPassword(user.getPassword());
+//
+//		        userRepository.save(user);
 
 		        String resetLink =
 		                "http://localhost:3000/setpassword?token=" + token;
@@ -316,7 +318,6 @@ public class UserService {
 //			 if(!passwordEncoder.matches(password.getOneTimePassword(), user.getPassword())) {
 //				 return ResponseEntity.badRequest().body("One time password not matched");
 //			 }
-			 
 			 user.setPassword(passwordEncoder.encode(password.getPassword()));
 			 
 			 return ResponseEntity.ok("Your password has been reset");
