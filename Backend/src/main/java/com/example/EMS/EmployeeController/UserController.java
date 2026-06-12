@@ -83,8 +83,6 @@ public class UserController {
 		}
 		
 		Employee e = emp.get();
-		
-		
 		User user = e.getUser();
 		
 		if(user == null) {

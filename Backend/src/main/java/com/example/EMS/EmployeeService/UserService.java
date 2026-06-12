@@ -1,6 +1,6 @@
 package com.example.EMS.EmployeeService;
 
-import java.time.LocalDateTime;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -315,9 +315,9 @@ public class UserService {
 		
 		public ResponseEntity<?> resetPassword(String email, User user, ResetPasswordDTO password){
 			
-			 if(!passwordEncoder.matches(password.getOneTimePassword(), user.getPassword())) {
-				 return ResponseEntity.badRequest().body("One time password not matched");
-			 }
+//			 if(!passwordEncoder.matches(password.getOneTimePassword(), user.getPassword())) {
+//				 return ResponseEntity.badRequest().body("One time password not matched");
+//			 }
 			 
 			 user.setPassword(passwordEncoder.encode(password.getPassword()));
 			 
