@@ -1292,38 +1292,41 @@ public class EmpService {
             }
             
             
-            if(emp.getUser() != null) {
-    			User user = emp.getUser();
-    			
-    			if (emp.getRole() != null) {
-    			    existing.getUser().setRoles(Set.of(emp.getRole()));
-    			}
+            if (emp.getUser() != null) {
 
-    			if (emp.getEmail() != null) {
-    				existing.getUser().setEmail(emp.getEmail());
-    			}
+                User requestUser = emp.getUser();
 
-    			if (emp != null) {
-    				existing.getUser().setEmployee(existing);
-    			}
-    			
-    			if(user.getName() != null) {
-    				existing.getUser().setName(emp.getFirst_name()+" "+emp.getLast_name());
-    			}
-    			
-    			if(user.getPassword() != null) {
-    				existing.getUser().setPassword(passwordEncoder.encode(user.getPassword()));
-    			}
-    			
-    			
-    			if(user.getConfirmPassword() != null) {
-    				existing.getUser().setConfirmPassword(passwordEncoder.encode(user.getConfirmPassword()));
-    			}
-    			
-    			
+                if (existing.getUser() == null) {
+                    User newUser = new User();
+                    newUser.setEmployee(existing);
+                    existing.setUser(newUser);
+                }
 
-    			
-    		}
+                User existingUser = existing.getUser();
+
+                if (requestUser.getName() != null) {
+                    existingUser.setName(requestUser.getName());
+                }
+
+                if (requestUser.getEmail() != null) {
+                    existingUser.setEmail(requestUser.getEmail());
+                }
+
+                if (requestUser.getRoles() != null && !requestUser.getRoles().isEmpty()) {
+                    existingUser.setRoles(requestUser.getRoles());
+                }
+
+                if (requestUser.getPassword() != null && !requestUser.getPassword().isBlank()) {
+                    existingUser.setPassword(passwordEncoder.encode(requestUser.getPassword()));
+                }
+
+                if (requestUser.getConfirmPassword() != null && !requestUser.getConfirmPassword().isBlank()) {
+                    existingUser.setConfirmPassword(passwordEncoder.encode(requestUser.getConfirmPassword()));
+                }
+
+                existingUser.setActive(requestUser.isActive());
+                existingUser.setEmployee(existing);
+            }
             
          // ================= Professional Details =================
             if (emp.getProfessional_details() != null) {
