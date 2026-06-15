@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.EMS.EmployeeDTO.LoginRequest;
 import com.example.EMS.EmployeeDTO.LoginResponse;
-import com.example.EMS.EmployeeDTO.ResetPasswordDTO;
+import com.example.EMS.EmployeeEntity.ResetPassword;
 import com.example.EMS.EmployeeEntity.User;
+import com.example.EMS.EmployeeRepository.ResetPasswordRepository;
 import com.example.EMS.EmployeeRepository.UserRepository;
 import com.example.EMS.EmployeeSecurity.Jwtutil;
 
@@ -28,14 +29,18 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private JavaMailSender mailSender;
 	private final Jwtutil jwt;
+	private ResetPasswordRepository resetRepository;
+	
+
 	
 
 	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JavaMailSender mailSender,
-			Jwtutil jwt) {
+			Jwtutil jwt, ResetPasswordRepository resetRepository) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.mailSender = mailSender;
 		this.jwt = jwt;
+		this.resetRepository = resetRepository;
 	}
 
 	public ResponseEntity<?> createUser(@RequestBody User user){		
@@ -106,16 +111,16 @@ public class UserService {
 		                .body("User not active");
 		    }
 
-//		    if (!passwordEncoder.matches(
-//		            login.getPassword(),
-//		            existingUser.getPassword())) {
-//		    	
-//		    	
-//
-//		        return ResponseEntity
-//		                .status(HttpStatus.UNAUTHORIZED)
-//		                .body("Invalid password");
-//		    }
+		    if (!passwordEncoder.matches(
+		            login.getPassword(),
+		            existingUser.getPassword())) {
+		    	
+		    	
+
+		        return ResponseEntity
+		                .status(HttpStatus.UNAUTHORIZED)
+		                .body("Invalid password");
+		    }
 
 		    String token = jwt.generateToken(existingUser.getEmail());
 
@@ -142,15 +147,25 @@ public class UserService {
 
 		        String token = UUID.randomUUID().toString();
 
-		        String rawPassword = "Temp@123";
+		        String rawPassword = "Temp@"+UUID.randomUUID().toString().substring(0,4);
+		        
+		        System.out.println(user.getEmail());
+		        System.out.println(rawPassword);
+		        user.setPassword(passwordEncoder.encode(rawPassword));
+		        user.setConfirmPassword(user.getPassword());
 
-//		        user.setPassword(passwordEncoder.encode(rawPassword));
-//		        user.setConfirmPassword(user.getPassword());
-//
-//		        userRepository.save(user);
+		        userRepository.save(user);
+		        
+		        ResetPassword reset = new ResetPassword();
+		        reset.setEmail(user.getEmail());
+		        reset.setToken(token);
+		        resetRepository.save(reset);
+		        
+		        
+		        
 
 		        String resetLink =
-		                "http://localhost:3000/setpassword?token=" + token;
+		                "http://localhost:3000/Login?token=" + token;
 
 		        MimeMessage message = mailSender.createMimeMessage();
 
@@ -217,7 +232,10 @@ public class UserService {
 		                                    <p style="margin:0 0 10px 0;">
 		                                        <strong>Email:</strong> %s
 		                                    </p>
-
+		        							
+		        							   <p style="margin:0;">
+										        <strong>Temporary Password:</strong> %s
+										    </p>
 		                            
 
 		                                </div>
@@ -300,7 +318,7 @@ public class UserService {
 
 		        return ResponseEntity.ok(
 		                "Password setup mail sent successfully to "
-		                        + user.getEmail()
+		                        + user.getEmail() + "\ntoken: "+token + "\nOTP: "+rawPassword 
 		        );
 
 		    } catch (Exception e) {
@@ -313,12 +331,32 @@ public class UserService {
 		}
 		
 		
-		public ResponseEntity<?> resetPassword(String email, User user, ResetPasswordDTO password){
+		public ResponseEntity<?> resetPassword(String email, User user, ResetPassword passwordDTO){
 			
 //			 if(!passwordEncoder.matches(password.getOneTimePassword(), user.getPassword())) {
 //				 return ResponseEntity.badRequest().body("One time password not matched");
 //			 }
-			 user.setPassword(passwordEncoder.encode(password.getPassword()));
+			//Optional<ResetPassword> opt =  resetRepository.findByEmail(email);
+			Optional<ResetPassword> opt =  resetRepository.findByToken(passwordDTO.getToken());
+			
+			if(opt.isEmpty()) {
+				return ResponseEntity.badRequest().body("Mail not sent to user");
+			}
+			
+			ResetPassword password = opt.get();
+			
+			
+			if(password.isUsed()) {
+				return ResponseEntity.badRequest().body("Password reset already used");
+			}
+			System.out.println("Token : " + passwordDTO.getToken());
+			System.out.println("Password : " + passwordDTO.getPassword());
+			System.out.println("Confirm : " + passwordDTO.getConfirmPassword());
+			password.setUsed(true);
+			password.setPassword(passwordDTO.getPassword());
+			user.setPassword(passwordEncoder.encode(password.getPassword()));
+			
+			userRepository.save(user);
 			 
 			 return ResponseEntity.ok("Your password has been reset");
 		

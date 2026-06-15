@@ -4,7 +4,10 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.LoginRequest;
-import com.example.EMS.EmployeeDTO.ResetPasswordDTO;
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.ResetPassword;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeService.UserService;
@@ -75,22 +78,34 @@ public class UserController {
 	}
 	
 	@PostMapping("/resetPassword")
-	public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO password){		
-		Optional<Employee>  emp =empRepository.findByEmail(password.getEmail());
+	public ResponseEntity<?> resetPassword(@RequestBody ResetPassword passwordReq){
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		User user = (User) authentication.getPrincipal();
+		
+		Optional<Employee> empUser = empRepository.findByUser(user);
+		
+		if(empUser.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User employee details not found");
+		}
+		
+		String email = empUser.get().getEmail();
+
+		Optional<Employee>  emp =empRepository.findByEmail(email);
 		
 		if(emp.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee not found with email: "+password.getEmail());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee not found with email: "+passwordReq.getEmail());
 		}
 		
-		Employee e = emp.get();
-		User user = e.getUser();
 		
 		if(user == null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not created with id: "+password.getEmail());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not created with id: "+passwordReq.getEmail());
 		}
 		
+		System.out.println("Null "+passwordReq.getPassword());
 		
-		return userService.resetPassword(password.getEmail(), user, password);
+		
+		return userService.resetPassword(email, user, passwordReq);
 		
 		
 		
