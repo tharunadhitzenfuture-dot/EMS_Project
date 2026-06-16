@@ -320,7 +320,7 @@ public class UserService {
 		        obj.setEmail(user.getEmail());
 		        obj.setToken(token);
 		        obj.setRawPassword(rawPassword);
-		        return ResponseEntity.ok(user.getEmail());
+		        return ResponseEntity.ok(obj);
 
 		    } catch (Exception e) {
 
