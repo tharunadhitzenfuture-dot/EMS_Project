@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.EMS.EmployeeDTO.LoginRequest;
 import com.example.EMS.EmployeeDTO.LoginResponse;
+import com.example.EMS.EmployeeDTO.MailResponseDTO;
 import com.example.EMS.EmployeeEntity.ResetPassword;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeRepository.ResetPasswordRepository;
@@ -149,8 +150,7 @@ public class UserService {
 
 		        String rawPassword = "Temp@"+UUID.randomUUID().toString().substring(0,4);
 		        
-		        System.out.println(user.getEmail());
-		        System.out.println(rawPassword);
+		      
 		        user.setPassword(passwordEncoder.encode(rawPassword));
 		        user.setConfirmPassword(user.getPassword());
 
@@ -315,11 +315,12 @@ public class UserService {
 		        helper.setText(htmlContent, true);
 
 		        mailSender.send(message);
-
-		        return ResponseEntity.ok(
-		                "Password setup mail sent successfully to "
-		                        + user.getEmail() + "\ntoken: "+token + "\nOTP: "+rawPassword 
-		        );
+		        
+		        MailResponseDTO obj = new MailResponseDTO();
+		        obj.setEmail(user.getEmail());
+		        obj.setToken(token);
+		        obj.setRawPassword(rawPassword);
+		        return ResponseEntity.ok(user.getEmail());
 
 		    } catch (Exception e) {
 
