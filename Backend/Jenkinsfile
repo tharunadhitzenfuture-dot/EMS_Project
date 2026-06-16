@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'JDK21'
+        maven 'Maven'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Source code checked out successfully.'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                bat 'mvn clean compile'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                bat 'mvn test'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                bat 'mvn clean package'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build completed successfully!'
+        }
+        failure {
+            echo 'Build failed!'
+        }
+    }
+}
