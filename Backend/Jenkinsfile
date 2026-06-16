@@ -6,6 +6,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 echo 'Source code checked out successfully.'
@@ -14,19 +15,25 @@ pipeline {
 
         stage('Build') {
             steps {
-                bat 'mvn clean compile'
+                dir('Backend') {
+                    bat 'mvn clean compile'
+                }
             }
         }
 
         stage('Test') {
             steps {
-                bat 'mvn test'
+                dir('Backend') {
+                    bat 'mvn test'
+                }
             }
         }
 
         stage('Package') {
             steps {
-                bat 'mvn clean package'
+                dir('Backend') {
+                    bat 'mvn clean package'
+                }
             }
         }
     }
@@ -35,6 +42,7 @@ pipeline {
         success {
             echo 'Build completed successfully!'
         }
+
         failure {
             echo 'Build failed!'
         }
