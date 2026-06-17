@@ -1,5 +1,6 @@
 package com.example.EMS.EmployeeController;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
@@ -7,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +20,7 @@ import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.ResetPassword;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeRepository.EmpRepository;
+import com.example.EMS.EmployeeRepository.UserRepository;
 import com.example.EMS.EmployeeService.UserService;
 
 @RestController
@@ -28,11 +29,15 @@ public class UserController {
 	
 	private UserService userService;
 	private EmpRepository empRepository;
+	private UserRepository userRepository;
 
 
-	public UserController(UserService userService, EmpRepository empRepository) {
+	
+
+	public UserController(UserService userService, EmpRepository empRepository, UserRepository userRepository) {
 		this.userService = userService;
 		this.empRepository = empRepository;
+		this.userRepository = userRepository;
 	}
 
 	@PostMapping("/register")
@@ -110,6 +115,12 @@ public class UserController {
 		
 		
 		
+	}
+	
+	@GetMapping("/getAllUsers")
+	public ResponseEntity<?> getAllUsers(){
+		List<User> lst =userRepository.findAll();
+		return ResponseEntity.ok(lst);
 	}
 		
 	
