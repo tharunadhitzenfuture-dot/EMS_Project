@@ -122,6 +122,15 @@ public class UserController {
 		List<User> lst =userRepository.findAll();
 		return ResponseEntity.ok(lst);
 	}
+	
+	@GetMapping("/getUserById/{id}")
+	public ResponseEntity<?> getAllUsers(@PathVariable Long id){
+		Optional<User> opt =userRepository.findById(id);
+		if(opt.isEmpty()) {
+			return ResponseEntity.badRequest().body("User not found with id:"+id);
+		}
+		return ResponseEntity.ok(opt.get());
+	}
 		
 	
 
