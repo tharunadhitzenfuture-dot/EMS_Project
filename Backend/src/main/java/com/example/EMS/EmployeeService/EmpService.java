@@ -6,7 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -1272,7 +1272,9 @@ public class EmpService {
             if (emp.getAddress() != null) existing.setAddress(emp.getAddress());
             if (emp.getRole() != null) {
             	existing.setRole(emp.getRole());
-            	existingUser.setRoles(Set.of(emp.getRole()));
+            	Set<Role> roles = new HashSet<>();
+            	roles.add(emp.getRole());
+            	existingUser.setRoles(roles);
             	existing.setUser(existingUser);
             }
 
