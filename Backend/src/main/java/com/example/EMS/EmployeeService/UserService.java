@@ -362,6 +362,46 @@ public class UserService {
 			 return ResponseEntity.ok("Your password has been reset");
 		
 		}
+		
+		public ResponseEntity<?> updateUser(Long id, User updatedUser) {
+
+		    Optional<User> optionalUser = userRepository.findById(id);
+
+		    if (optionalUser.isEmpty()) {
+		        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+		                .body("User not found");
+		    }
+
+		    User existing = optionalUser.get();
+
+		    if (updatedUser.getName() != null) {
+		        existing.setName(updatedUser.getName());
+		    }
+
+		    if (updatedUser.getEmail() != null) {
+		        existing.setEmail(updatedUser.getEmail());
+		    }
+
+		    if (updatedUser.getRoles() != null) {
+		        existing.setRoles(updatedUser.getRoles());
+		    }
+
+		    if (updatedUser.getPassword() != null &&
+		        !updatedUser.getPassword().isBlank()) {
+
+		        String encodedPassword =
+		                passwordEncoder.encode(updatedUser.getPassword());
+
+		        existing.setPassword(encodedPassword);
+		        existing.setConfirmPassword(encodedPassword);
+		    }
+
+		    existing.setActive(updatedUser.isActive());
+
+		    userRepository.save(existing);
+
+		    return ResponseEntity.ok("User updated successfully");
+		}
 	
 	
 	 

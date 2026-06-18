@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -132,6 +133,30 @@ public class UserController {
 		return ResponseEntity.ok(opt.get());
 	}
 		
+	@PutMapping("/update/{id}")
+	public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
+	    return userService.updateUser(id, user);
+	}
+	
+	@GetMapping("/getDetails")
+	public ResponseEntity<?> getEmployeeDetails(){
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		User user = (User) authentication.getPrincipal();
+		
+		Optional<Employee> empUser = empRepository.findByUser(user);
+		
+		if(empUser.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User employee details not found");
+		}
+		
+		String empId = empUser.get().getEmployeeId();
+		
+		Optional<Employee>  emp = empRepository.findByEmployeeId(empId);
+		return ResponseEntity.ok(emp);
+
+	}
 	
 
 }

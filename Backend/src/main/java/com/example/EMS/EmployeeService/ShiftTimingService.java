@@ -1,5 +1,6 @@
 package com.example.EMS.EmployeeService;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,16 @@ public class ShiftTimingService {
 		if(sft.isPresent()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Shift code already presented");
 		}
+		
+		Duration duration = Duration.between(shift.getStartTime(), shift.getEndTime());
+
+		long hours = duration.toHours();
+		long minutes = duration.toMinutesPart();
+		long seconds = duration.toSecondsPart();
+
+		String workingHours = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+
+		shift.setTotalHours(workingHours);
 		
 		EmployeeShift res =  shiftRepository.save(shift);
 		return ResponseEntity.ok(res);
@@ -66,19 +77,42 @@ public class ShiftTimingService {
 
 	    EmployeeShift update = existing.get();
 
-	    Optional<EmployeeShift> shiftCode = shiftRepository.findByShiftCode(shift.getShiftCode());
 
-	    if (shiftCode.isPresent() && !shiftCode.get().getId().equals(id)) {
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-	                .body("Shift code already exists");
+	    if(shift.getShiftName() != null && !shift.getShiftName().isBlank()) {
+	    	update.setShiftName(shift.getShiftName());
+	    }    
+	    
+	    if (shift.getShiftType() != null && !shift.getShiftType().isBlank()) {
+	        update.setShiftType(shift.getShiftType());
 	    }
 
-	    update.setShiftCode(shift.getShiftCode());
-	    update.setShiftName(shift.getShiftName());
-	    update.setShiftType(shift.getShiftType());
-	    update.setStartTime(shift.getStartTime());
-	    update.setEndTime(shift.getEndTime());
-	    update.setActive(shift.isActive());
+	    if (shift.getStartTime() != null) {
+	        update.setStartTime(shift.getStartTime());
+	    }
+
+	    if (shift.getEndTime() != null) {
+	        update.setEndTime(shift.getEndTime());
+	    }
+	    //update.setActive(shift.isActive());
+	    if (shift.getStartTime() != null && shift.getEndTime() != null) {
+	    	if (!shift.getStartTime().isBefore(shift.getEndTime())) {
+			    return ResponseEntity.badRequest()
+			            .body("Start time must be before end time");
+			}
+	    	
+	    	Duration duration = Duration.between(shift.getStartTime(), shift.getEndTime());
+	    	
+	    	
+			long hours = duration.toHours();
+			long minutes = duration.toMinutesPart();
+			long seconds = duration.toSecondsPart();
+
+			String workingHours = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+
+			update.setTotalHours(workingHours);
+	    	
+	    }
+	    
 
 	    EmployeeShift res = shiftRepository.save(update);
 
@@ -94,10 +128,8 @@ public class ShiftTimingService {
 	                .body("Shift not found");
 	    }
 
-	    EmployeeShift delete = shift.get();
-	    delete.setActive(false);
+	    shiftRepository.deleteById(id);
 
-	    shiftRepository.save(delete);
 
 	    return ResponseEntity.ok("Shift deleted successfully");
 	}

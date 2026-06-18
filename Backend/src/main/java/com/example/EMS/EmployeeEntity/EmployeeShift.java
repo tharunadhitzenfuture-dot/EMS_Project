@@ -19,6 +19,7 @@ public class EmployeeShift {
 	private LocalTime startTime;
 	private LocalTime endTime;
 	private boolean active=true;
+	private String totalHours;
 	
 	public String getShiftName() {
 		return shiftName;
@@ -62,6 +63,13 @@ public class EmployeeShift {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
+	public String getTotalHours() {
+		return totalHours;
+	}
+	public void setTotalHours(String totalHours) {
+		this.totalHours = totalHours;
+	}
+	
 	
 	
 	

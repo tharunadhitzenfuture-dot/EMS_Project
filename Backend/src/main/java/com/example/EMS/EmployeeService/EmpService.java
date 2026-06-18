@@ -117,22 +117,22 @@ public class EmpService {
 		long nextId = (maxId == null) ? 1 : maxId + 1;
 		emp.setEmployeeId(String.format("ZF%s-%03d", type, nextId));
 		
-		if(emp.getUser() != null) {
-			User user = emp.getUser();
-			
-			user.setName(emp.getFirst_name());
-			user.setRoles(Set.of(emp.getRole()));
-			user.setEmail(emp.getEmail());
-			user.setEmployee(emp);
-			
-			if(user.getPassword() != null) {
-				user.setPassword(passwordEncoder.encode(user.getPassword()));
-			}
-			
-			if(user.getConfirmPassword() != null) {
-				user.setConfirmPassword(passwordEncoder.encode(user.getConfirmPassword()));
-			}
-			
+		
+		User user = new User();
+		emp.setUser(user);		
+		emp.getUser().setName(emp.getFirst_name());
+		emp.getUser().setRoles(Set.of(emp.getRole()));
+		emp.getUser().setEmail(emp.getEmail());
+		emp.getUser().setEmployee(emp);
+		
+//		if(emp.getUser().getPassword() != null) {
+//			user.setPassword(passwordEncoder.encode(user.getPassword()));
+//		}
+//		
+//		if(user.getConfirmPassword() != null) {
+//			user.setConfirmPassword(passwordEncoder.encode(user.getConfirmPassword()));
+//		}
+		
 			
 //			if(user.getPassword() == null) {
 //				return  ResponseEntity.status(404).body("Please enter password");
@@ -152,7 +152,7 @@ public class EmpService {
 //			}
 //			
 			
-		}
+		
 		
 		
 		if(file != null && !file.isEmpty()) {
