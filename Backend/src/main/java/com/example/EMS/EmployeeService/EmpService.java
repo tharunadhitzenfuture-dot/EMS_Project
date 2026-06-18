@@ -1388,7 +1388,7 @@ public class EmpService {
 
                 if (newProfessional.getEmp_status() != null) {
                 	existingProfessional.setEmp_status(newProfessional.getEmp_status());
-                	boolean b = newProfessional.getEmp_status() ==  "Active" ? true : false;
+                	boolean b = emp.getProfessional_details().getEmp_status().equals("Active") ? true : false;
                 	existingUser.setActive(b);
                 	existing.setUser(existingUser);
                 }
