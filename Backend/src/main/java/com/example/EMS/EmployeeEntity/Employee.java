@@ -36,6 +36,7 @@ public class Employee {
 	private String employeeId;
 	private String first_name;
 	private String last_name;
+	@Column(unique = true)
 	private String email;
 	private Long phone_number;
 	private Date date_of_birth;

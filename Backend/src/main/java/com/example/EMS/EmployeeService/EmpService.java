@@ -1240,13 +1240,26 @@ public class EmpService {
         }
 
         Employee existing = existingOpt.get();
+        
+        if (existing.getUser() == null) {
+          User newUser = new User();
+          newUser.setEmployee(existing);
+          existing.setUser(newUser);
+      }
+        User existingUser = existing.getUser();
+
+        
 
         // ================= BASIC DETAILS =================
         if (emp != null) {
 
             if (emp.getFirst_name() != null) existing.setFirst_name(emp.getFirst_name());
             if (emp.getLast_name() != null) existing.setLast_name(emp.getLast_name());
-            if (emp.getEmail() != null) existing.setEmail(emp.getEmail());
+            if (emp.getEmail() != null) {
+            	existing.setEmail(emp.getEmail());
+            	existingUser.setEmail(emp.getEmail());
+            	existing.setUser(existingUser);
+            }
             if (emp.getPhone_number() != null) existing.setPhone_number(emp.getPhone_number());
             if (emp.getDate_of_birth() != null) existing.setDate_of_birth(emp.getDate_of_birth());
             if (emp.getMarital_status() != null) existing.setMarital_status(emp.getMarital_status());
@@ -1257,7 +1270,11 @@ public class EmpService {
             if (emp.getAadhar_number() != null) existing.setAadhar_number(emp.getAadhar_number());
             if (emp.getPan_number() != null) existing.setPan_number(emp.getPan_number());
             if (emp.getAddress() != null) existing.setAddress(emp.getAddress());
-            if (emp.getRole() != null) existing.setRole(emp.getRole());
+            if (emp.getRole() != null) {
+            	existing.setRole(emp.getRole());
+            	existingUser.setRoles(Set.of(emp.getRole()));
+            	existing.setUser(existingUser);
+            }
 
             // ================= BANK DETAILS =================
             if (emp.getBankDetails() != null) {
@@ -1292,41 +1309,41 @@ public class EmpService {
             }
             
             
-            if (emp.getUser() != null) {
-
-                User requestUser = emp.getUser();
-
-                if (existing.getUser() == null) {
-                    User newUser = new User();
-                    newUser.setEmployee(existing);
-                    existing.setUser(newUser);
-                }
-
-                User existingUser = existing.getUser();
-
-                if (requestUser.getName() != null) {
-                    existingUser.setName(requestUser.getName());
-                }
-
-                if (requestUser.getEmail() != null) {
-                    existingUser.setEmail(requestUser.getEmail());
-                }
-
-                if (requestUser.getRoles() != null && !requestUser.getRoles().isEmpty()) {
-                    existingUser.setRoles(requestUser.getRoles());
-                }
-
-                if (requestUser.getPassword() != null && !requestUser.getPassword().isBlank()) {
-                    existingUser.setPassword(passwordEncoder.encode(requestUser.getPassword()));
-                }
-
-                if (requestUser.getConfirmPassword() != null && !requestUser.getConfirmPassword().isBlank()) {
-                    existingUser.setConfirmPassword(passwordEncoder.encode(requestUser.getConfirmPassword()));
-                }
-
-                existingUser.setActive(requestUser.isActive());
-                existingUser.setEmployee(existing);
-            }
+//            if (emp.getUser() != null) {
+//
+//                User requestUser = emp.getUser();
+//
+//                if (existing.getUser() == null) {
+//                    User newUser = new User();
+//                    newUser.setEmployee(existing);
+//                    existing.setUser(newUser);
+//                }
+//
+//                User existingUser = existing.getUser();
+//
+//                if (requestUser.getName() != null) {
+//                    existingUser.setName(requestUser.getName());
+//                }
+//
+//                if (requestUser.getEmail() != null) {
+//                    existingUser.setEmail(requestUser.getEmail());
+//                }
+//
+//                if (requestUser.getRoles() != null && !requestUser.getRoles().isEmpty()) {
+//                    existingUser.setRoles(requestUser.getRoles());
+//                }
+//
+//                if (requestUser.getPassword() != null && !requestUser.getPassword().isBlank()) {
+//                    existingUser.setPassword(passwordEncoder.encode(requestUser.getPassword()));
+//                }
+//
+//                if (requestUser.getConfirmPassword() != null && !requestUser.getConfirmPassword().isBlank()) {
+//                    existingUser.setConfirmPassword(passwordEncoder.encode(requestUser.getConfirmPassword()));
+//                }
+//
+//                existingUser.setActive(requestUser.isActive());
+//                existingUser.setEmployee(existing);
+//            }
             
          // ================= Professional Details =================
             if (emp.getProfessional_details() != null) {
@@ -1367,9 +1384,13 @@ public class EmpService {
                     existingProfessional.setLocation(
                             newProfessional.getLocation());
 
-                if (newProfessional.getEmp_status() != null)
-                    existingProfessional.setEmp_status(
-                            newProfessional.getEmp_status());
+                if (newProfessional.getEmp_status() != null) {
+                	existingProfessional.setEmp_status(newProfessional.getEmp_status());
+                	boolean b = newProfessional.getEmp_status() ==  "Active" ? true : false;
+                	existingUser.setActive(b);
+                	existing.setUser(existingUser);
+                }
+                    
 
                 if (newProfessional.getDoj() != null)
                     existingProfessional.setDoj(
