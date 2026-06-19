@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.example.EMS.EmployeeDTO.ForgotPasswordDTO;
 import com.example.EMS.EmployeeDTO.LoginRequest;
 import com.example.EMS.EmployeeDTO.LoginResponse;
 import com.example.EMS.EmployeeDTO.MailResponseDTO;
@@ -164,8 +165,8 @@ public class UserService {
 		        
 		        
 
-		        String resetLink =
-		                "http://localhost:3000/Login?token=" + token;
+//		        String resetLink =
+//		                "http://localhost:3000/Login?token=" + token;
 
 		        MimeMessage message = mailSender.createMimeMessage();
 
@@ -240,37 +241,6 @@ public class UserService {
 
 		                                </div>
 
-		                                <div style="margin:30px 0;text-align:center;">
-		                                    <a href="%s"
-		                                       style="
-		                                       background:#2563eb;
-		                                       color:white;
-		                                       text-decoration:none;
-		                                       padding:14px 25px;
-		                                       border-radius:6px;
-		                                       font-weight:bold;
-		                                       display:inline-block;">
-		                                       Set Password
-		                                    </a>
-		                                </div>
-
-		                                <p style="font-size:13px;color:#6b7280;">
-		                                    If the button doesn't work, copy and paste this URL into your browser:
-		                                </p>
-
-		                                <p>
-		                                    <a href="%s">%s</a>
-		                                </p>
-
-		                                <div style="
-		                                    background:#fffbeb;
-		                                    border:1px solid #fde68a;
-		                                    padding:12px;
-		                                    border-radius:6px;
-		                                    color:#92400e;">
-		                                    This link is valid for 24 hours.
-		                                </div>
-
 		                                <p style="margin-top:25px;color:#6b7280;">
 		                                    If you did not request this email,
 		                                    please ignore it.
@@ -306,10 +276,7 @@ public class UserService {
 		        """.formatted(
 		                user.getName() != null ? user.getName() : "Employee",
 		                user.getEmail(),
-		                rawPassword,
-		                resetLink,
-		                resetLink,
-		                resetLink
+		                rawPassword
 		        );
 
 		        helper.setText(htmlContent, true);
@@ -331,8 +298,54 @@ public class UserService {
 		    }
 		}
 		
+		public ResponseEntity<?> verifyOTP(String email, User user, ForgotPasswordDTO passwordDTO){
+			
+			 if(!passwordEncoder.matches(passwordDTO.getOtp(), user.getPassword())) {
+				 return ResponseEntity.badRequest().body("One time password not matched");
+			 }
+			 
+			 return ResponseEntity.ok("OTP Verified");
 		
-		public ResponseEntity<?> resetPassword(String email, User user, ResetPassword passwordDTO){
+		}
+		
+		public ResponseEntity<?> resetForgetPassword(String email, User user, ForgotPasswordDTO password){
+		
+			
+			password.setPassword(password.getPassword());
+			user.setPassword(passwordEncoder.encode(password.getPassword()));
+			
+			userRepository.save(user);
+			 
+			 return ResponseEntity.ok("Your password has been reset");
+		
+			
+		}
+
+
+			
+			
+			
+			
+		
+		
+		
+		public ResponseEntity<?> resetPassword(String email, User user, ForgotPasswordDTO password){
+
+			
+			if(!password.getPassword().equals(password.getConfirmPassword())) {
+				return ResponseEntity.badRequest().body("Password and confirm password doesn't matched");
+			}
+			
+			user.setPassword(passwordEncoder.encode(password.getPassword()));
+			
+			userRepository.save(user);
+			 
+			return ResponseEntity.ok("Your password has been reset");
+		
+		}
+		
+		
+		public ResponseEntity<?> forgetPassword(String email, User user, ResetPassword passwordDTO){
 			
 //			 if(!passwordEncoder.matches(password.getOneTimePassword(), user.getPassword())) {
 //				 return ResponseEntity.badRequest().body("One time password not matched");
