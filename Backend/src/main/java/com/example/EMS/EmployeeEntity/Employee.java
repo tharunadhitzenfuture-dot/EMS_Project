@@ -57,7 +57,10 @@ public class Employee {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="user_id")
     private User user;
-   
+    
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="shift_id")
+    private ShiftEmployeeDetails shiftDetails;
     
     
 	@OneToOne(mappedBy="employee", cascade= CascadeType.ALL, orphanRemoval = true)
@@ -378,6 +381,13 @@ public class Employee {
 	public void setUser(User user) {
 		this.user = user;
 	}
+	public ShiftEmployeeDetails getShiftDetails() {
+		return shiftDetails;
+	}
+	public void setShiftDetails(ShiftEmployeeDetails shiftDetails) {
+		this.shiftDetails = shiftDetails;
+	}
+	
 	
 	
 	

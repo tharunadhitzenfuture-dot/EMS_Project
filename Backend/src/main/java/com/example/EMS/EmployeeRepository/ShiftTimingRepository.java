@@ -9,4 +9,5 @@ import com.example.EMS.EmployeeEntity.EmployeeShift;
 public interface ShiftTimingRepository extends JpaRepository<EmployeeShift,Long>{
 
 	Optional<EmployeeShift> findByShiftCode(String code);
+	Optional<EmployeeShift> findByShiftName(String name);
 }
