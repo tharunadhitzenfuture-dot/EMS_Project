@@ -18,7 +18,7 @@ public class ResetPassword {
 	private String email;
 	private String password;
 	private String confirmPassword;
-	private String token;
+	private String otp;
 	private LocalDateTime expiryTime; 	
 	private boolean used = false;
 	
@@ -31,13 +31,20 @@ public class ResetPassword {
 	public void setExpiryTime(LocalDateTime expiryTime) {
 		this.expiryTime = expiryTime;
 	}
-	public String getToken() {
-		return token;
-	}
-	public void setToken(String token) {
-		this.token = token;
-	}
 	
+	
+	public String getOtp() {
+		return otp;
+	}
+	public void setOtp(String otp) {
+		this.otp = otp;
+	}
+	public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
+	}
 	public String getEmail() {
 		return email;
 	}

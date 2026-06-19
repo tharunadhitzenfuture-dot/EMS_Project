@@ -1,5 +1,6 @@
 package com.example.EMS.EmployeeEntity;
 
+import java.time.LocalTime;
 import java.util.Set;
 
 import com.example.EMS.enums.Role;
@@ -28,6 +29,8 @@ public class User {
 	private String name;
 	private String email;
 	private String password;
+	private String otp;
+	private LocalTime expireTime;
 	private String confirmPassword;
 	private boolean active = true;
 	
@@ -83,12 +86,27 @@ public class User {
 	public void setConfirmPassword(String confirmPassword) {
 		this.confirmPassword = confirmPassword;
 	}
+	
 	public Employee getEmployee() {
 		return employee;
 	}
 	public void setEmployee(Employee employee) {
 		this.employee = employee;
 	}
+	
+	public LocalTime getExpireTime() {
+		return expireTime;
+	}
+	public void setExpireTime(LocalTime expireTime) {
+		this.expireTime = expireTime;
+	}
+	public String getOtp() {
+		return otp;
+	}
+	public void setOtp(String otp) {
+		this.otp = otp;
+	}
+	
 	
 	
 	

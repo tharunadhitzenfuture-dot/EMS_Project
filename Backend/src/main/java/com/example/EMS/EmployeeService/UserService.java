@@ -1,6 +1,7 @@
 package com.example.EMS.EmployeeService;
 
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +25,7 @@ import com.example.EMS.EmployeeRepository.UserRepository;
 import com.example.EMS.EmployeeSecurity.Jwtutil;
 
 import jakarta.mail.internet.MimeMessage;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -138,6 +141,7 @@ public class UserService {
 		    return ResponseEntity.ok(response);
 		}
 
+		@Transactional
 		public ResponseEntity<?> sendMail(String empId, User user) {
 
 		    try {
@@ -149,17 +153,24 @@ public class UserService {
 
 		        String token = UUID.randomUUID().toString();
 
-		        String rawPassword = "Temp@"+UUID.randomUUID().toString().substring(0,4);
+		        String rawPassword = UUID.randomUUID().toString().substring(0,6);
 		        
-		      
-		        user.setPassword(passwordEncoder.encode(rawPassword));
-		        user.setConfirmPassword(user.getPassword());
+		       
+//		        user.setPassword(passwordEncoder.encode(rawPassword));
+//		        user.setConfirmPassword(user.getPassword());
 
-		        userRepository.save(user);
+//		        userRepository.save(user);
+		        
+		        Optional<ResetPassword>  rst = resetRepository.findByEmail(user.getEmail());
+		        
+		        if(rst.isPresent()) {
+		        	resetRepository.deleteByEmail(user.getEmail());
+		        }
 		        
 		        ResetPassword reset = new ResetPassword();
 		        reset.setEmail(user.getEmail());
-		        reset.setToken(token);
+		        reset.setOtp(passwordEncoder.encode(rawPassword));
+		        reset.setExpiryTime(LocalDateTime.now().plusMinutes(10));
 		        resetRepository.save(reset);
 		        
 		        
@@ -300,20 +311,31 @@ public class UserService {
 		
 		public ResponseEntity<?> verifyOTP(String email, User user, ForgotPasswordDTO passwordDTO){
 			
-			 if(!passwordEncoder.matches(passwordDTO.getOtp(), user.getPassword())) {
+			Optional<ResetPassword> password =  resetRepository.findByEmail(email);
+			
+			if(password.isEmpty()) {
+				return ResponseEntity.badRequest().body("First send OTP");
+			}
+			System.out.println(password.get().getOtp());
+			System.out.println(passwordDTO.getOtp());
+			
+			 if(!passwordEncoder.matches(passwordDTO.getOtp(), password.get().getOtp())) {
 				 return ResponseEntity.badRequest().body("One time password not matched");
 			 }
-			 
 			 return ResponseEntity.ok("OTP Verified");
 		
 		}
 		
+		@Transactional
 		public ResponseEntity<?> resetForgetPassword(String email, User user, ForgotPasswordDTO password){
 		
+			if(resetRepository.findByEmail(email).isEmpty()) {
+				return ResponseEntity.badRequest().body("Please verify otp is sent");
+			}
 			
 			password.setPassword(password.getPassword());
 			user.setPassword(passwordEncoder.encode(password.getPassword()));
-			
+			resetRepository.deleteByEmail(email);
 			userRepository.save(user);
 			 
 			 return ResponseEntity.ok("Your password has been reset");
@@ -322,59 +344,53 @@ public class UserService {
 		}
 
 
-			
-			
-			
-			
+		
+//		public ResponseEntity<?> resetPassword(String email, User user, ForgotPasswordDTO password){
+//
+//			
+//			if(!password.getPassword().equals(password.getConfirmPassword())) {
+//				return ResponseEntity.badRequest().body("Password and confirm password doesn't matched");
+//			}
+//			
+//			user.setPassword(passwordEncoder.encode(password.getPassword()));
+//			
+//			userRepository.save(user);
+//			 
+//			return ResponseEntity.ok("Your password has been reset");
+//		
+//		}
 		
 		
-		
-		public ResponseEntity<?> resetPassword(String email, User user, ForgotPasswordDTO password){
-
-			
-			if(!password.getPassword().equals(password.getConfirmPassword())) {
-				return ResponseEntity.badRequest().body("Password and confirm password doesn't matched");
-			}
-			
-			user.setPassword(passwordEncoder.encode(password.getPassword()));
-			
-			userRepository.save(user);
-			 
-			return ResponseEntity.ok("Your password has been reset");
-		
-		}
-		
-		
-		public ResponseEntity<?> forgetPassword(String email, User user, ResetPassword passwordDTO){
-			
-//			 if(!passwordEncoder.matches(password.getOneTimePassword(), user.getPassword())) {
-//				 return ResponseEntity.badRequest().body("One time password not matched");
-//			 }
-			//Optional<ResetPassword> opt =  resetRepository.findByEmail(email);
-			Optional<ResetPassword> opt =  resetRepository.findByToken(passwordDTO.getToken());
-			
-			if(opt.isEmpty()) {
-				return ResponseEntity.badRequest().body("Mail not sent to user");
-			}
-			
-			ResetPassword password = opt.get();
-			
-			
-			if(password.isUsed()) {
-				return ResponseEntity.badRequest().body("Password reset already used");
-			}
-			System.out.println("Token : " + passwordDTO.getToken());
-			System.out.println("Password : " + passwordDTO.getPassword());
-			System.out.println("Confirm : " + passwordDTO.getConfirmPassword());
-			password.setUsed(true);
-			password.setPassword(passwordDTO.getPassword());
-			user.setPassword(passwordEncoder.encode(password.getPassword()));
-			
-			userRepository.save(user);
-			 
-			 return ResponseEntity.ok("Your password has been reset");
-		
-		}
+//		public ResponseEntity<?> forgetPassword(String email, User user, ResetPassword passwordDTO){
+//			
+////			 if(!passwordEncoder.matches(password.getOneTimePassword(), user.getPassword())) {
+////				 return ResponseEntity.badRequest().body("One time password not matched");
+////			 }
+//			//Optional<ResetPassword> opt =  resetRepository.findByEmail(email);
+//			Optional<ResetPassword> opt =  resetRepository.findByToken(passwordDTO.getOtp());
+//			
+//			if(opt.isEmpty()) {
+//				return ResponseEntity.badRequest().body("Mail not sent to user");
+//			}
+//			
+//			ResetPassword password = opt.get();
+//			
+//			
+//			if(password.isUsed()) {
+//				return ResponseEntity.badRequest().body("Password reset already used");
+//			}
+//			System.out.println("Token : " + passwordDTO.getToken());
+//			System.out.println("Password : " + passwordDTO.getPassword());
+//			System.out.println("Confirm : " + passwordDTO.getConfirmPassword());
+//			password.setUsed(true);
+//			password.setPassword(passwordDTO.getPassword());
+//			user.setPassword(passwordEncoder.encode(password.getPassword()));
+//			
+//			userRepository.save(user);
+//			 
+//			 return ResponseEntity.ok("Your password has been reset");
+//		
+//		}
 		
 		public ResponseEntity<?> updateUser(Long id, User updatedUser) {
 
@@ -417,6 +433,13 @@ public class UserService {
 		}
 	
 	
+		 @Scheduled(fixedRate = 60000) // Every 60 seconds
+		    public void deleteExpiredOtps() {
+
+		        resetRepository.deleteByExpiryTimeBefore(LocalDateTime.now());
+
+		        System.out.println("Expired OTPs deleted at " + LocalDateTime.now());
+		    }
 	 
 
 }
