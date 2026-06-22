@@ -35,8 +35,6 @@ public class AttendanceController {
 	private final AttendanceRepository attendanceRepo;
 	private final EmpRepository empRepo;
 	
-	
-
 
 
 	public AttendanceController(AttendanceService attendanceService, AttendanceRepository attendanceRepo,
@@ -97,7 +95,7 @@ public class AttendanceController {
 	    return ResponseEntity.ok(responseList);
 	}
 	
-	@PostMapping("/employeeRegister")
+	@PostMapping("/employee/register")
 	public ResponseEntity<?> empRegisterAttendance(
 	        @RequestBody AttendanceRequestDTO request){
 
@@ -148,6 +146,41 @@ public class AttendanceController {
 	        return attendanceService.deleteAttendanceById(empId);
 	    }
 	
+	    @PatchMapping("/employee/update")
+	    public ResponseEntity<?> empUpdateAttendance(
+	            @RequestBody AttendanceRequestDTO request){
+	    	
+	    	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			
+			User user = (User) authentication.getPrincipal();
+			
+			Optional<Employee> empUser = empRepo.findByUser(user);
+			
+			if(empUser.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User employee details not found");
+			}
+			
+			String empId = empUser.get().getEmployeeId();
+
+	    	
+
+	        Optional<Employee> emp =
+	                empRepo.findByEmployeeId(empId);
+
+	        if(emp.isEmpty()){
+	        	return ResponseEntity.badRequest().body("Employee not found with id: "+empId);
+	        }
+	        
+	     
+
+	        
+
+	        return attendanceService.updateAttendance(
+	        		emp.get(),
+	                empId,
+	                request);
+	    }
+	    
 	    @PatchMapping("/update/{empId}")
 	    public ResponseEntity<?> updateAttendance(
 	            @PathVariable String empId,
@@ -160,6 +193,8 @@ public class AttendanceController {
 	        if(emp.isEmpty()){
 	        	return ResponseEntity.badRequest().body("Employee not found with id: "+empId);
 	        }
+	        
+	     
 
 	        
 
