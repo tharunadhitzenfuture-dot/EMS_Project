@@ -7,6 +7,8 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.EMS.EmployeeDTO.AttendanceRequestDTO;
 import com.example.EMS.EmployeeDTO.WorkingHoursDTO;
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeService.AttendanceService;
@@ -92,6 +95,33 @@ public class AttendanceController {
 	    }
 
 	    return ResponseEntity.ok(responseList);
+	}
+	
+	@PostMapping("/employeeRegister")
+	public ResponseEntity<?> empRegisterAttendance(
+	        @RequestBody AttendanceRequestDTO request){
+
+//	        if(request.getCheckIn() == null) {
+//	        	return ResponseEntity.badRequest().body("Please enter check-in for employee id: "+ request.getEmpId());
+//	        }
+	        
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		User user = (User) authentication.getPrincipal();
+		
+		Optional<Employee> empUser = empRepo.findByUser(user);
+		
+		if(empUser.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User employee details not found");
+		}
+		
+		Employee employee = empUser.get();
+	        
+	      return   attendanceService.registerService(employee,request.getDate(),
+                    request.getCheckIn(),
+                    request.getCheckOut(),
+                    request.getStatus());
+	     
 	}
 	
 	 @GetMapping("/getAllAttendance")

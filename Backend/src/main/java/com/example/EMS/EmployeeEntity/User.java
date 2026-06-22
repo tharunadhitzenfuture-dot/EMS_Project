@@ -29,8 +29,6 @@ public class User {
 	private String name;
 	private String email;
 	private String password;
-	private String otp;
-	private LocalTime expireTime;
 	private String confirmPassword;
 	private boolean active = true;
 	
@@ -94,18 +92,6 @@ public class User {
 		this.employee = employee;
 	}
 	
-	public LocalTime getExpireTime() {
-		return expireTime;
-	}
-	public void setExpireTime(LocalTime expireTime) {
-		this.expireTime = expireTime;
-	}
-	public String getOtp() {
-		return otp;
-	}
-	public void setOtp(String otp) {
-		this.otp = otp;
-	}
 	
 	
 	

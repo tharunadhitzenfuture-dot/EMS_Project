@@ -81,7 +81,7 @@ public class AttendanceService {
         if (alreadyExists) {
 
             return ResponseEntity.badRequest()
-                    .body("Attendance already marked today");
+                    .body("Attendance already marked for date: "+date+" employee id: "+emp.getEmployeeId());
         }
 
         Attendance attendance = new Attendance();
