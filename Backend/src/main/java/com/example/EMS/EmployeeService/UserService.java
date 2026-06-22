@@ -12,6 +12,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.EMS.EmployeeDTO.ForgotPasswordDTO;
@@ -25,7 +26,6 @@ import com.example.EMS.EmployeeRepository.UserRepository;
 import com.example.EMS.EmployeeSecurity.Jwtutil;
 
 import jakarta.mail.internet.MimeMessage;
-import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -171,6 +171,7 @@ public class UserService {
 		        reset.setEmail(user.getEmail());
 		        reset.setOtp(passwordEncoder.encode(rawPassword));
 		        reset.setExpiryTime(LocalDateTime.now().plusMinutes(10));
+//		        reset.setExpiryTime(LocalDateTime.now());
 		        resetRepository.save(reset);
 		        
 		        
@@ -248,6 +249,10 @@ public class UserService {
 		        							   <p style="margin:0;">
 										        <strong>Temporary Password:</strong> %s
 										    </p>
+										    
+										  <p style="margin:10px 0 0 0; color:#d32f2f; font-weight:bold;">
+										    ⏰ Valid for only <strong>10 minutes</strong>.
+										</p>
 		                            
 
 		                                </div>
@@ -314,7 +319,7 @@ public class UserService {
 			Optional<ResetPassword> password =  resetRepository.findByEmail(email);
 			
 			if(password.isEmpty()) {
-				return ResponseEntity.badRequest().body("First send OTP");
+				return ResponseEntity.badRequest().body("OTP expired");
 			}
 			System.out.println(password.get().getOtp());
 			System.out.println(passwordDTO.getOtp());
@@ -433,12 +438,14 @@ public class UserService {
 		}
 	
 	
+		@Transactional
 		 @Scheduled(fixedRate = 60000) // Every 60 seconds
 		    public void deleteExpiredOtps() {
 
-		        resetRepository.deleteByExpiryTimeBefore(LocalDateTime.now());
+			  System.out.println("Current Time: " + LocalDateTime.now());
+		       int row = resetRepository.deleteByExpiryTimeBefore(LocalDateTime.now());
 
-		        System.out.println("Expired OTPs deleted at " + LocalDateTime.now());
+		        System.out.println("Expired OTPs deleted at " + LocalDateTime.now()+" "+row);
 		    }
 	 
 
