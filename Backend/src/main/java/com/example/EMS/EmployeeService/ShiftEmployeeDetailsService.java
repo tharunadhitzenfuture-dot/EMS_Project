@@ -11,6 +11,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +23,8 @@ import com.example.EMS.EmployeeEntity.ShiftEmployeeDetails;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.ShiftEmployeeDetailsRepository;
 import com.example.EMS.EmployeeRepository.ShiftTimingRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class ShiftEmployeeDetailsService {
@@ -69,6 +73,8 @@ public class ShiftEmployeeDetailsService {
 	            
 	            Optional<EmployeeShift> timing = shiftTimingRepository.findByShiftName(shift);
 	            
+	          
+	            
 	            if(timing.isEmpty()) {
 	            	  failed.add(
 		                        "Row " + (i + 1)
@@ -103,7 +109,15 @@ public class ShiftEmployeeDetailsService {
 
 	            Employee employee = emp.get();
 
-	            ShiftEmployeeDetails details = new ShiftEmployeeDetails();
+	            ShiftEmployeeDetails details = null;
+	            Optional<ShiftEmployeeDetails> existing = shiftRepository.findByEmpId(empId);
+	            if(existing.isEmpty()) {
+	            	details = new ShiftEmployeeDetails();
+	            }
+	            else {
+	            	details = existing.get();
+	            }
+	            
 
 	            details.setEmpId(empId);
 	            details.setEmail(email);
@@ -132,6 +146,69 @@ public class ShiftEmployeeDetailsService {
 	        return response;
 	        
 	  }
+	  
+	  public ResponseEntity<?> addShiftEmployee(ShiftEmployeeDetails request){
+		  
+		  Optional<Employee> emp  =empRepository.findByEmployeeId(request.getEmpId());
+		  
+		  if(emp.isEmpty()) {
+			  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee details not found with id: "+request.getEmpId());
+		  }
+		  
+		  
+		  Optional<EmployeeShift> timing = shiftTimingRepository.findByShiftName(request.getShift());
+		  if(timing.isEmpty()) {
+			  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Shift details not added with name: "+request.getShift());
+		  }
+		  Employee employee = emp.get();
+		  
+		  request.setEmail(employee.getEmail());
+		  request.setDept(employee.getProfessional_details().getProfessional_department());
+		  request.setName(employee.getFirst_name()+" "+ employee.getLast_name());
+		  
+		  
+		  
+		  ShiftEmployeeDetails details = shiftRepository.save(request);
+		  
+		  employee.setShiftDetails(details);
+
+		  return ResponseEntity.ok(details);
+		  
+	  }
+	  
+     public ResponseEntity<?> updateShiftEmployee(Long id, ShiftEmployeeDetails request){
+    	 
+    	  Optional<ShiftEmployeeDetails> exist =  shiftRepository.findById(id);
+		  
+		  Optional<Employee> emp  =empRepository.findByEmployeeId(exist.get().getEmpId());
+		  
+		  if(emp.isEmpty()) {
+			  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee details not found with id: "+request.getEmpId());
+		  }
+		  
+		  
+		  Optional<EmployeeShift> timing = shiftTimingRepository.findByShiftName(request.getShift());
+		  if(timing.isEmpty()) {
+			  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Shift details not added with name: "+request.getShift());
+		  }
+		  Employee employee = emp.get();
+
+		  
+		  ShiftEmployeeDetails existing = exist.get();
+		  existing.setShift(request.getShift());
+		  existing.setStartTime(request.getStartTime());
+		  existing.setEndTime(request.getEndTime());
+		  
+		  ShiftEmployeeDetails details = shiftRepository.save(existing);
+		  
+		  employee.setShiftDetails(details);
+
+		  return ResponseEntity.ok(details);
+		  
+	  }
+     
+	  
+	  
 
 	
 }
