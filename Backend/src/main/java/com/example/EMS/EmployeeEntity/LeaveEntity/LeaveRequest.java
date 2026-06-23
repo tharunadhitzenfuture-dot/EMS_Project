@@ -44,8 +44,11 @@ public class LeaveRequest {
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable=true)
-	private LeaveType leaveType = LeaveType.FULL_DAY;
+	private LeaveType leaveType = LeaveType.EARNED_LEAVE;
 	
+//	@Enumerated(EnumType.STRING)
+//	@Column(nullable=false)
+//	private LeaveType LeaveTime = LeaveType.FULL_DAY; 
 	
 	
 	@Enumerated(EnumType.STRING)
@@ -159,6 +162,8 @@ public class LeaveRequest {
 	 public void setLeaveType(LeaveType leaveType) {
 		 this.leaveType = leaveType;
 	 }
+
+	 
 	 
 	 
 	

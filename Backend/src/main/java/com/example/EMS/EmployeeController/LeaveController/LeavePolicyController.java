@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeavePolicy;
 import com.example.EMS.EmployeeService.LeaveService.LeavePolicyService;
+import com.example.EMS.enums.LeaveType;
 
 @RestController
 @RequestMapping("/api/leavePolicy")
@@ -36,10 +37,16 @@ public class LeavePolicyController {
 		                .body("Year cannot be null");
 		    }
 
-		    if (request.getMonth() == null) {
-		        return ResponseEntity.badRequest()
-		                .body("Month cannot be null");
+//		    if (request.getMonth() == null) {
+//		        return ResponseEntity.badRequest()
+//		                .body("Month cannot be null");
+//		    }
+		    
+		    if(request.getType() == null) {
+		    	return ResponseEntity.badRequest()
+		    			.body("Please select leave type");
 		    }
+		    
 		
 		    return leavePolicyService.createPolicy(request);
 	}

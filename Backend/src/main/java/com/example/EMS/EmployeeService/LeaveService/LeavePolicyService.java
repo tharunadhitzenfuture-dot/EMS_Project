@@ -33,10 +33,11 @@ public class LeavePolicyService {
 
 	public ResponseEntity<?> createPolicy(LeavePolicy request){
 		
-		Optional<LeavePolicy> res = leavePolicyRepo.findByMonthAndYear(request.getMonth(), request.getYear());
+		//Optional<LeavePolicy> res = leavePolicyRepo.findByMonthAndYear(request.getMonth(), request.getYear());
+		Optional<LeavePolicy> res = leavePolicyRepo.findByYearAndType(request.getYear(), request.getType());
 		
 		if(res.isPresent()) {
-			return ResponseEntity.badRequest().body("Total leave for month: "+request.getMonth()+" year: "+ request.getYear()+" already presented");
+			return ResponseEntity.badRequest().body("Total leave for year: "+ request.getYear()+" and type "+request.getYear()+" already presented");
 		}
 		
 		LeavePolicy save = leavePolicyRepo.save(request);
@@ -45,11 +46,12 @@ public class LeavePolicyService {
 		
 		for(Employee emp: employee) {
 			
-			Optional<LeaveBalance> existing = leaveBalRepository.findByEmployeeAndMonthAndYear(emp, request.getMonth(), request.getYear());
+			Optional<LeaveBalance> existing = leaveBalRepository.findByEmployeeAndYearAndType(emp,  request.getYear(), request.getType());
 			if(existing.isPresent()) {
 				LeaveBalance balance = existing.get();
 				balance.setTotalDays(request.getTotalDays());
 				balance.setRemainingDays(request.getTotalDays());
+				balance.setType(request.getType());
 				leaveBalRepository.save(balance);
 				
 			}
@@ -58,9 +60,9 @@ public class LeavePolicyService {
 
 		            balance.setEmployee(emp);
 
-		            balance.setMonth(
-		                    request.getMonth()
-		            );
+//		            balance.setMonth(
+//		                    request.getMonth()
+//		            );
 
 		            balance.setYear(
 		                    request.getYear()
@@ -70,6 +72,7 @@ public class LeavePolicyService {
 		                    request.getTotalDays()
 		            );
 		            
+		            balance.setType(request.getType());
 		            balance.setRemainingDays(request.getTotalDays());
 		            balance.setUsedDays(0);
 

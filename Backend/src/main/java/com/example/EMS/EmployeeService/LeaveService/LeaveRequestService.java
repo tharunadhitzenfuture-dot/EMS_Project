@@ -65,8 +65,15 @@ public class LeaveRequestService {
         int year = request.getStartDate().getYear();
         
 
-        LeaveBalance balance = leaveBalanceRepository
-                .findByEmployeeIdAndMonthAndYear(emp.getId(),month, year);
+//        LeaveBalance balance = leaveBalanceRepository
+//                .findByEmployeeIdAndMonthAndYear(emp.getId(),month, year);
+        
+        Optional<LeaveBalance> balance =leaveBalanceRepository.findByEmployeeAndYearAndType(emp, year, request.getLeaveType());
+        if(balance.isEmpty()) {
+        	return ResponseEntity.badRequest().body("Employee leave policy for type: "+request.getLeaveType()+" not found");
+        }
+        
+        
         
 //        if (balance.getRemainingDays() < workingDays)
 //            throw new BadRequestException("Insufficient balance. Available: "
@@ -74,6 +81,7 @@ public class LeaveRequestService {
 //        
         
         request.setEmployee(emp);
+        request.setTotalDays(workingDays);
         LeaveRequest req = leaveRequestRepository.save(request);
         return ResponseEntity.ok(req);
         
@@ -114,8 +122,14 @@ public class LeaveRequestService {
         int year = request.getStartDate().getYear();
         
 
-        LeaveBalance balance = leaveBalanceRepository
-                .findByEmployeeIdAndMonthAndYear(emp.getId(),month, year);
+//        LeaveBalance balance = leaveBalanceRepository
+//                .findByEmployeeIdAndMonthAndYear(emp.getId(),month, year);
+        
+        Optional<LeaveBalance> balance = leaveBalanceRepository.findByEmployeeAndYearAndType(emp, year, request.getLeaveType());
+        
+        if(balance.isEmpty()) {
+        	return ResponseEntity.badRequest().body("Employee leave policy for type: "+request.getLeaveType()+" not set");
+        }
         
 //        if (balance.getRemainingDays() < workingDays)
 //            throw new BadRequestException("Insufficient balance. Available: "
@@ -161,15 +175,16 @@ public class LeaveRequestService {
 	                int month = current.getMonthValue();
 	                int year = current.getYear();
 
-	                LeaveBalance balance =
-	                        leaveBalanceRepository
-	                        .findByEmployeeIdAndMonthAndYear(
-	                                req.getEmployee().getId(),
-	                                month,
-	                                year
-	                        );
+//	                LeaveBalance balance =
+//	                        leaveBalanceRepository
+//	                        .findByEmployeeIdAndMonthAndYear(
+//	                                req.getEmployee().getId(),
+//	                                month,
+//	                                year
+//	                        );
+	                Optional<LeaveBalance> bal = leaveBalanceRepository.findByEmployeeAndYearAndType(emp, year, req.getLeaveType());
 
-	                if (balance == null) {
+	                if (bal == null) {
 
 	                    throw new BadRequestException(
 	                            "Leave balance not found for "
@@ -178,7 +193,7 @@ public class LeaveRequestService {
 	                }
 
 
-
+	                LeaveBalance balance = bal.get();
 
 	                
 

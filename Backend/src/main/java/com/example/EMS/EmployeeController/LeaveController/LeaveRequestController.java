@@ -48,6 +48,7 @@ public class LeaveRequestController {
 		if(request.getStartDate() == null || request.getEndDate() == null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please provide start date and end date");
 		}
+
 		return requestService.applyLeave(empId, request);
 
 	}
@@ -82,14 +83,26 @@ public class LeaveRequestController {
 		
 		LeaveRequest req = getLeaveById(leaveId);
 		
-		if(req.getLeaveType() == LeaveType.FULL_DAY) {
-			return requestService.reviewLeave(empId, leaveId, dto);
-		}
-		else if(req.getLeaveType() == LeaveType.HALF_DAY) {
-			return requestService.reviewHalfDayLeave(empId, leaveId, dto);
-		}
+//		if(req.getLeaveTime() == LeaveType.FULL_DAY) {
+//			return requestService.reviewLeave(empId, leaveId, dto);
+//		}
+//		else if(req.getLeaveTime() == LeaveType.HALF_DAY) {
+//			return requestService.reviewHalfDayLeave(empId, leaveId, dto);
+//		}
+
+//		if(req.getLeaveType() == LeaveType.EARNED_LEAVE) {
+//			return requestService.reviewLeave(empId, leaveId, dto);
+//		}
+//		else if(req.getLeaveType() == LeaveType.CASUAL_LEAVE) {
+//			return requestService.reviewLeave(empId, leaveId, dto);
+//		}
+//		else if(req.getLeaveType() == LeaveType.SICK_LEAVE) {
+//			return requestService.reviewLeave(empId, leaveId, dto);
+//		}
 		
-		return ResponseEntity.badRequest().body("Please mention correct leave type FULL_DAY, HALF_DAY, PERMISSION");
+		return requestService.reviewLeave(empId, leaveId, dto);
+		
+//		return ResponseEntity.badRequest().body("Please mention correct leave type EARNED_LEAVE , CASUAL_LEAVE, SICK_LEAVE");
 	}
 	
 	@PostMapping("/review/{empId}/{leaveId}")
@@ -101,14 +114,26 @@ public class LeaveRequestController {
 		
 		LeaveRequest req = getLeaveById(leaveId);
 		
-		if(req.getLeaveType() == LeaveType.FULL_DAY) {
-			return requestService.reviewLeave(empId, leaveId, dto);
-		}
-		else if(req.getLeaveType() == LeaveType.HALF_DAY) {
-			return requestService.reviewHalfDayLeave(empId, leaveId, dto);
-		}
+//		if(req.getLeaveTime() == LeaveType.FULL_DAY) {
+//			return requestService.reviewLeave(empId, leaveId, dto);
+//		}
+//		else if(req.getLeaveTime()				
+//				== LeaveType.HALF_DAY) {
+//			return requestService.reviewHalfDayLeave(empId, leaveId, dto);
+//		}
+//		if(req.getLeaveType() == LeaveType.EARNED_LEAVE) {
+//			return requestService.reviewLeave(empId, leaveId, dto);
+//		}
+//		else if(req.getLeaveType() == LeaveType.CASUAL_LEAVE) {
+//			return requestService.reviewLeave(empId, leaveId, dto);
+//		}
+//		else if(req.getLeaveType() == LeaveType.SICK_LEAVE) {
+//			return requestService.reviewLeave(empId, leaveId, dto);
+//		}
 		
-		return ResponseEntity.badRequest().body("Please mention correct leave type FULL_DAY, HALF_DAY, PERMISSION");
+		return requestService.reviewLeave(empId, leaveId, dto);
+		
+	//	return ResponseEntity.badRequest().body("Please mention correct leave type EARNED_LEAVE , CASUAL_LEAVE, SICK_LEAVE");
 	}
 	
 	@GetMapping("/getAll")

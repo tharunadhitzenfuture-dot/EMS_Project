@@ -3,6 +3,7 @@ package com.example.EMS.EmployeeEntity.LeaveEntity;
 
 
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.enums.LeaveType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.*;
@@ -36,8 +37,13 @@ public class LeaveBalance {
     @Column(nullable = false)
     private Integer year;
     
-    @Column(nullable = false)
+ 
     private Integer month;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LeaveType type;
+    
 
     public double getRemainingDays() {
         return totalDays - usedDays;
@@ -101,6 +107,14 @@ public class LeaveBalance {
 
 	public void setRemainingDays(double remainingDays) {
 		this.remainingDays = remainingDays;
+	}
+
+	public LeaveType getType() {
+		return type;
+	}
+
+	public void setType(LeaveType type) {
+		this.type = type;
 	}
 	
 	
