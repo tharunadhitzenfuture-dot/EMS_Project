@@ -10,6 +10,7 @@ import com.example.EMS.enums.LeaveStatus;
 import com.example.EMS.enums.LeaveType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -73,6 +74,11 @@ public class LeaveRequest {
 
 	 public void setId(Long id) {
 		 this.id = id;
+	 }
+	 
+	 @JsonProperty
+	 public String getEmployee_Id() {
+		 return employee != null ? employee.getEmployeeId() : null;
 	 }
 
 	 public Employee getEmployee() {

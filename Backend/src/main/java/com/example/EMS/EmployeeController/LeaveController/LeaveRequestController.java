@@ -25,7 +25,6 @@ import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
 import com.example.EMS.EmployeeService.LeaveService.LeaveRequestService;
-import com.example.EMS.enums.LeaveType;
 
 @RestController
 @RequestMapping("/api/leave")
