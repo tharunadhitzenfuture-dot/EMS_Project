@@ -24,7 +24,6 @@ import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.ShiftEmployeeDetailsRepository;
 import com.example.EMS.EmployeeRepository.ShiftTimingRepository;
 
-import jakarta.transaction.Transactional;
 
 @Service
 public class ShiftEmployeeDetailsService {

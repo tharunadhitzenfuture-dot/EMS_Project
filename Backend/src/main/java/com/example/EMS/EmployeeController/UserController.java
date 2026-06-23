@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.ForgotPasswordDTO;
 import com.example.EMS.EmployeeDTO.LoginRequest;
+import com.example.EMS.EmployeeDTO.ResetPasswordDTO;
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.ResetPassword;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.UserRepository;
@@ -81,22 +83,34 @@ public class UserController {
 //		
 //	}
 	
-//	@PostMapping("/resetPassword")
-//	public ResponseEntity<?> resetPassword(@RequestBody ResetPassword passwordReq){
-//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//		
-//		User user = (User) authentication.getPrincipal();
-//		
-//		Optional<Employee> empUser = empRepository.findByUser(user);
-//		
-//		if(empUser.isEmpty()) {
-//			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User employee details not found");
-//		}
-//		
-//		String email = empUser.get().getEmail();
-//
+	@PostMapping("/resetPassword")
+	public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO passwordReq){
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		User user = (User) authentication.getPrincipal();
+		
+		Optional<Employee> empUser = empRepository.findByUser(user);
+		
+		if(empUser.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User employee details not found");
+		}
+		
+		String email = empUser.get().getEmail();
+		
+		if(passwordReq.getOldPassword() == null || passwordReq.getOldPassword().isBlank()) {
+			return ResponseEntity.badRequest().body("Please enter old password");
+		}
+		
+		if(passwordReq.getPassword() == null || passwordReq.getPassword().isBlank()) {
+			return ResponseEntity.badRequest().body("Please enter password");
+		}
+		
+		if(passwordReq.getConfirmPassword() == null || passwordReq.getConfirmPassword().isBlank()) {
+			return ResponseEntity.badRequest().body("Please enter confirm password");
+		}
+
 //		Optional<Employee>  emp =empRepository.findByEmail(email);
-//		
+		
 //		if(emp.isEmpty()) {
 //			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee not found with email: "+passwordReq.getEmail());
 //		}
@@ -105,10 +119,10 @@ public class UserController {
 //		if(user == null) {
 //			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not created with id: "+passwordReq.getEmail());
 //		}
-//		
-//		return userService.resetPassword(email, user, passwordReq);
-//		
-//	}
+		
+		return userService.resetPassword(email, user, passwordReq);
+		
+	}
 	
 	@PostMapping("/sendForgetPasswordMail")
 	public ResponseEntity<?> sendPasswordMail(@RequestBody ForgotPasswordDTO req){		
@@ -203,9 +217,6 @@ public class UserController {
 		
 		
 		return userService.resetForgetPassword(passwordReq.getEmail(), user, passwordReq);
-		
-		
-		
 		
 	}
 	

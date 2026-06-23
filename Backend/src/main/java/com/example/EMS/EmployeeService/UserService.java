@@ -19,6 +19,7 @@ import com.example.EMS.EmployeeDTO.ForgotPasswordDTO;
 import com.example.EMS.EmployeeDTO.LoginRequest;
 import com.example.EMS.EmployeeDTO.LoginResponse;
 import com.example.EMS.EmployeeDTO.MailResponseDTO;
+import com.example.EMS.EmployeeDTO.ResetPasswordDTO;
 import com.example.EMS.EmployeeEntity.ResetPassword;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeRepository.ResetPasswordRepository;
@@ -350,27 +351,35 @@ public class UserService {
 
 
 		
-//		public ResponseEntity<?> resetPassword(String email, User user, ForgotPasswordDTO password){
-//
-//			
-//			if(!password.getPassword().equals(password.getConfirmPassword())) {
-//				return ResponseEntity.badRequest().body("Password and confirm password doesn't matched");
-//			}
-//			
-//			user.setPassword(passwordEncoder.encode(password.getPassword()));
-//			
-//			userRepository.save(user);
-//			 
-//			return ResponseEntity.ok("Your password has been reset");
-//		
-//		}
+		public ResponseEntity<?> resetPassword(String email, User user, ResetPasswordDTO password){
+			
+			if(!passwordEncoder.matches(password.getOldPassword(), user.getPassword())) {
+				return ResponseEntity.badRequest().body("Old password didn't match");
+			}
+			
+			if(!password.getPassword().equals(password.getConfirmPassword())) {
+				return ResponseEntity.badRequest().body("Password and confirm password doesn't matched");
+			}
+			
+			if(password.getOldPassword().equals(password.getOldPassword())) {
+				return ResponseEntity.badRequest().body("New password cannot be the same as your current password");
+			}
+			
+			
+			user.setPassword(passwordEncoder.encode(password.getPassword()));
+			
+			userRepository.save(user);
+			 
+			return ResponseEntity.ok("Your password has been reset");
+		
+		}
 		
 		
 //		public ResponseEntity<?> forgetPassword(String email, User user, ResetPassword passwordDTO){
 //			
-////			 if(!passwordEncoder.matches(password.getOneTimePassword(), user.getPassword())) {
-////				 return ResponseEntity.badRequest().body("One time password not matched");
-////			 }
+//			 if(!passwordEncoder.matches(password.getOneTimePassword(), user.getPassword())) {
+//				 return ResponseEntity.badRequest().body("One time password not matched");
+//			 }
 //			//Optional<ResetPassword> opt =  resetRepository.findByEmail(email);
 //			Optional<ResetPassword> opt =  resetRepository.findByToken(passwordDTO.getOtp());
 //			
