@@ -40,13 +40,12 @@ public class LeavePolicyService {
 			return ResponseEntity.badRequest().body("Total leave for year: "+ request.getYear()+" and type "+request.getYear()+" department "+ request.getDepartment()+" already presented");
 		}
 		
-		System.out.println(request.getDepartment().toString());
 		List<Employee> employee = empRepo.findByProfessional_detailsProfessional_department(request.getDepartment().toString());
 		
 		if(employee.isEmpty()) {
 			return ResponseEntity.badRequest().body("Employee list for department "+request.getDepartment()+" is empty");
 		}
-		System.out.println("IT "+request.getDepartment().toString());
+
 		for(Employee emp: employee) {
 			
 			Optional<LeaveBalance> existing = leaveBalRepository.findByEmployeeAndYearAndTypeAndDepartment(emp,  request.getYear(), request.getType(), request.getDepartment());

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeavePolicy;
 import com.example.EMS.EmployeeService.LeaveService.LeavePolicyService;
-import com.example.EMS.enums.LeaveType;
 
 @RestController
 @RequestMapping("/api/leavePolicy")

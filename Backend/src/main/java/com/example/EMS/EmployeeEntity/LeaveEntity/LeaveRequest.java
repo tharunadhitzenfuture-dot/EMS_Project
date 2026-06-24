@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.enums.Department;
 import com.example.EMS.enums.LeaveStatus;
 import com.example.EMS.enums.LeaveType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -50,6 +51,9 @@ public class LeaveRequest {
 //	@Enumerated(EnumType.STRING)
 //	@Column(nullable=false)
 //	private LeaveType LeaveTime = LeaveType.FULL_DAY; 
+	
+
+	private Department department;
 	
 	
 	@Enumerated(EnumType.STRING)
@@ -169,6 +173,15 @@ public class LeaveRequest {
 		 this.leaveType = leaveType;
 	 }
 
+	 public Department getDepartment() {
+		 return department;
+	 }
+
+	 public void setDepartment(Department department) {
+		 this.department = department;
+	 }
+     
+	 
 	 
 	 
 	 

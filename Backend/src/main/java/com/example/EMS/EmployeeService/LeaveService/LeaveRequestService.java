@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,6 +24,7 @@ import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveBalanceRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
+import com.example.EMS.enums.Department;
 import com.example.EMS.enums.LeaveStatus;
 import com.example.EMS.enums.Role;
 
@@ -67,10 +69,15 @@ public class LeaveRequestService {
 
 //        LeaveBalance balance = leaveBalanceRepository
 //                .findByEmployeeIdAndMonthAndYear(emp.getId(),month, year);
+        String dept = emp.getProfessional_details().getProfessional_department();
+        Department department = Department.valueOf(dept);
+        if(department == null) {
+        	return ResponseEntity.badRequest().body("Employee department should be either IT/ FINANCE/ HR");
+        }
         
-        Optional<LeaveBalance> balance =leaveBalanceRepository.findByEmployeeAndYearAndType(emp, year, request.getLeaveType());
+        Optional<LeaveBalance> balance =leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment(emp, year, request.getLeaveType(), department );
         if(balance.isEmpty()) {
-        	return ResponseEntity.badRequest().body("Employee leave policy for type: "+request.getLeaveType()+" not found");
+        	return ResponseEntity.badRequest().body("Employee leave policy for type: "+request.getLeaveType()+" department: "+dept+" not found");
         }
         
         
@@ -82,6 +89,7 @@ public class LeaveRequestService {
         
         request.setEmployee(emp);
         request.setTotalDays(workingDays);
+        request.setDepartment(department);
         LeaveRequest req = leaveRequestRepository.save(request);
         return ResponseEntity.ok(req);
         
@@ -125,7 +133,13 @@ public class LeaveRequestService {
 //        LeaveBalance balance = leaveBalanceRepository
 //                .findByEmployeeIdAndMonthAndYear(emp.getId(),month, year);
         
-        Optional<LeaveBalance> balance = leaveBalanceRepository.findByEmployeeAndYearAndType(emp, year, request.getLeaveType());
+        String dept = emp.getProfessional_details().getProfessional_department();
+        Department department = Department.valueOf(dept);
+        if(department == null) {
+        	return ResponseEntity.badRequest().body("Employee department should be either IT/ FINANCE/ HR");
+        }
+        
+        Optional<LeaveBalance> balance = leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment(emp, year, request.getLeaveType(), department);
         
         if(balance.isEmpty()) {
         	return ResponseEntity.badRequest().body("Employee leave policy for type: "+request.getLeaveType()+" not set");
@@ -182,13 +196,15 @@ public class LeaveRequestService {
 //	                                month,
 //	                                year
 //	                        );
-	                Optional<LeaveBalance> bal = leaveBalanceRepository.findByEmployeeAndYearAndType(emp, year, req.getLeaveType());
-
-	                if (bal == null) {
+	               
+	                
+	                Optional<LeaveBalance> bal = leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment(req.getEmployee(), year, req.getLeaveType(), req.getDepartment());
+               
+	                if (bal.isEmpty()) {
 
 	                    throw new BadRequestException(
-	                            "Leave balance not found for "
-	                            + month + "/" + year
+	                            "Leave balance not found for employee: "+req.getEmployee_Id()+"/"
+	                            + req.getLeaveType() + "/" + year + "/" +  req.getDepartment()
 	                    );
 	                }
 
