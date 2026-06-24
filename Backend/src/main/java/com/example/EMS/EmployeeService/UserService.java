@@ -361,7 +361,7 @@ public class UserService {
 				return ResponseEntity.badRequest().body("Password and confirm password doesn't matched");
 			}
 			
-			if(password.getOldPassword().equals(password.getOldPassword())) {
+			if(password.getPassword().equals(password.getOldPassword())) {
 				return ResponseEntity.badRequest().body("New password cannot be the same as your current password");
 			}
 			
