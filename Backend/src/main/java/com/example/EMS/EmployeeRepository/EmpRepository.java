@@ -1,5 +1,6 @@
 package com.example.EMS.EmployeeRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.User;
+import com.example.EMS.enums.Department;
 
 public interface EmpRepository extends JpaRepository<Employee, Long>{
 	Optional<Employee> findByEmail(String email);
@@ -27,6 +29,12 @@ public interface EmpRepository extends JpaRepository<Employee, Long>{
 		        @Param("employeeId")
 		        String employeeId);
 	
-	
+
+	@Query("""
+		    SELECT e
+		    FROM Employee e
+		    WHERE e.professional_details.professional_department = :department
+		    """)
+	List<Employee> findByProfessional_detailsProfessional_department(String department);
 
 }

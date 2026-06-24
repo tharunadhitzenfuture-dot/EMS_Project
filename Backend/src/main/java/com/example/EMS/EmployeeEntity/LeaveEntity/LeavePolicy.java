@@ -1,5 +1,6 @@
 package com.example.EMS.EmployeeEntity.LeaveEntity;
 
+import com.example.EMS.enums.Department;
 import com.example.EMS.enums.LeaveType;
 
 import jakarta.persistence.Column;
@@ -23,6 +24,9 @@ public class LeavePolicy {
 	private Integer totalDays;
 	private Integer year;
 	private Integer month;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable=false)
+	private Department department;
 	@Enumerated(EnumType.STRING)
     @Column(nullable=false)
 	private LeaveType type;
@@ -58,6 +62,13 @@ public class LeavePolicy {
 	public void setType(LeaveType type) {
 		this.type = type;
 	}
+	public Department getDepartment() {
+		return department;
+	}
+	public void setDepartment(Department department) {
+		this.department = department;
+	}
+	
 	
 	
 	

@@ -47,6 +47,11 @@ public class LeavePolicyController {
 		    			.body("Please select leave type");
 		    }
 		    
+		    if(request.getDepartment() == null) {
+		    	return ResponseEntity.badRequest()
+		    			.body("Please select leave department");
+		    }
+		    
 		
 		    return leavePolicyService.createPolicy(request);
 	}

@@ -3,6 +3,7 @@ package com.example.EMS.EmployeeEntity.LeaveEntity;
 
 
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.enums.Department;
 import com.example.EMS.enums.LeaveType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -43,6 +44,10 @@ public class LeaveBalance {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LeaveType type;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Department department;
     
 
     public double getRemainingDays() {
@@ -115,6 +120,14 @@ public class LeaveBalance {
 
 	public void setType(LeaveType type) {
 		this.type = type;
+	}
+
+	public Department getDepartment() {
+		return department;
+	}
+
+	public void setDepartment(Department department) {
+		this.department = department;
 	}
 	
 	

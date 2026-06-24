@@ -34,24 +34,28 @@ public class LeavePolicyService {
 	public ResponseEntity<?> createPolicy(LeavePolicy request){
 		
 		//Optional<LeavePolicy> res = leavePolicyRepo.findByMonthAndYear(request.getMonth(), request.getYear());
-		Optional<LeavePolicy> res = leavePolicyRepo.findByYearAndType(request.getYear(), request.getType());
+		Optional<LeavePolicy> res = leavePolicyRepo.findByYearAndTypeAndDepartment(request.getYear(), request.getType(), request.getDepartment());
 		
 		if(res.isPresent()) {
-			return ResponseEntity.badRequest().body("Total leave for year: "+ request.getYear()+" and type "+request.getYear()+" already presented");
+			return ResponseEntity.badRequest().body("Total leave for year: "+ request.getYear()+" and type "+request.getYear()+" department "+ request.getDepartment()+" already presented");
 		}
 		
-		LeavePolicy save = leavePolicyRepo.save(request);
+		System.out.println(request.getDepartment().toString());
+		List<Employee> employee = empRepo.findByProfessional_detailsProfessional_department(request.getDepartment().toString());
 		
-		List<Employee> employee = empRepo.findAll();
-		
+		if(employee.isEmpty()) {
+			return ResponseEntity.badRequest().body("Employee list for department "+request.getDepartment()+" is empty");
+		}
+		System.out.println("IT "+request.getDepartment().toString());
 		for(Employee emp: employee) {
 			
-			Optional<LeaveBalance> existing = leaveBalRepository.findByEmployeeAndYearAndType(emp,  request.getYear(), request.getType());
+			Optional<LeaveBalance> existing = leaveBalRepository.findByEmployeeAndYearAndTypeAndDepartment(emp,  request.getYear(), request.getType(), request.getDepartment());
 			if(existing.isPresent()) {
 				LeaveBalance balance = existing.get();
 				balance.setTotalDays(request.getTotalDays());
 				balance.setRemainingDays(request.getTotalDays());
 				balance.setType(request.getType());
+				balance.setDepartment(request.getDepartment());
 				leaveBalRepository.save(balance);
 				
 			}
@@ -75,11 +79,13 @@ public class LeavePolicyService {
 		            balance.setType(request.getType());
 		            balance.setRemainingDays(request.getTotalDays());
 		            balance.setUsedDays(0);
+		            balance.setDepartment(request.getDepartment());
 
 		            leaveBalRepository.save(balance);
 			}
 			
 		}
+		LeavePolicy save = leavePolicyRepo.save(request);
 		
 		
 		
