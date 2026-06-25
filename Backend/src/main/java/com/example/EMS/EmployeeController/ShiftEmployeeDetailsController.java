@@ -104,7 +104,7 @@ public class ShiftEmployeeDetailsController {
 			return ResponseEntity.badRequest().body("Please enter shift end time");
 		}
 		
-		Optional<ShiftEmployeeDetails> details =  shiftRepo.findByEmpId(request.getEmpId());
+		Optional<ShiftEmployeeDetails> details =  shiftRepo.findByEmpIdAndStartTimeAndEndTime(request.getEmpId(), request.getStartTime(), request.getEndTime());
 		if(details.isPresent()) {
 			return ResponseEntity.badRequest().body("Employee shift details already presented with id: "+request.getEmpId());
 		}
@@ -133,6 +133,13 @@ public class ShiftEmployeeDetailsController {
 		if(details.isEmpty()) {
 			return ResponseEntity.badRequest().body("Employee shift details not presented");
 		}
+		
+		String empId = shiftRepo.findEmpIdById(id);
+		Optional<ShiftEmployeeDetails> detail =  shiftRepo.findByEmpIdAndStartTimeAndEndTime(empId, request.getStartTime(), request.getEndTime());
+		if(detail.isPresent()) {
+			return ResponseEntity.badRequest().body("Employee shift details already presented with id: "+request.getEmpId());
+		}
+		
 		
 		return shiftService.updateShiftEmployee(id, request);
 		
