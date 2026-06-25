@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.EMS.EmployeeEntity.ApprovalSystem;
 import com.example.EMS.EmployeeEntity.Attendance;
 import com.example.EMS.EmployeeEntity.BankDetails;
 import com.example.EMS.EmployeeEntity.Education;
@@ -44,6 +45,7 @@ import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.ProfessionalDetailRepository;
+import com.example.EMS.enums.JobLevel;
 import com.example.EMS.enums.Role;
 
 @Service
@@ -81,6 +83,14 @@ public class EmpService {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(employee);
     }
 
+    public int getJobLevel(String email) {
+       Employee employee = empRepo.findByEmail(email).orElseThrow(()-> new RuntimeException("Employee not found with email :"+email));
+       JobLevel jl = employee.getProfessional_details().getJobLevel();
+       int n = Integer.parseInt(jl.name().substring(2));
+       return n;
+       
+    	
+    }
     // ══════════════════════════════════════════════════════════════════
     // CREATE — single employee with multipart files
     // ══════════════════════════════════════════════════════════════════
@@ -124,6 +134,22 @@ public class EmpService {
 		emp.getUser().setRoles(Set.of(emp.getRole()));
 		emp.getUser().setEmail(emp.getEmail());
 		emp.getUser().setEmployee(emp);
+		
+		if(emp.getApproval() != null) {
+			if(emp.getApproval().getApproverEmail1() != null 
+					&& emp.getApproval().getApproverEmail2() != null ) {
+				String email1 = emp.getApproval().getApproverEmail1();
+				String email2 = emp.getApproval().getApproverEmail2();
+				int n1 = getJobLevel(email1);
+				int n2 = getJobLevel(email2);
+				
+				if(n2 <= n1) {
+					return ResponseEntity.badRequest().body("Approver 2 should be higher than approver 1");
+				}
+				
+			}
+		}
+		
 		
 //		if(emp.getUser().getPassword() != null) {
 //			user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -1310,6 +1336,61 @@ public class EmpService {
                 existing.setBankDetails(existingBank);
             }
             
+         // ================= Approvers =================
+            if (emp.getApproval() != null) {
+
+                ApprovalSystem exist = existing.getApproval();
+
+                if (exist == null) {
+                    exist = new ApprovalSystem();
+                    exist.setEmployee(existing);
+                    existing.setApproval(exist);
+                }
+
+                String email1 = emp.getApproval().getApproverEmail1() != null
+                        ? emp.getApproval().getApproverEmail1()
+                        : exist.getApproverEmail1();
+
+                String email2 = emp.getApproval().getApproverEmail2() != null
+                        ? emp.getApproval().getApproverEmail2()
+                        : exist.getApproverEmail2();
+
+                // Validate hierarchy only when both approvers are available
+                if (email1 != null && email2 != null) {
+
+                    if (email1.equalsIgnoreCase(email2)) {
+                        return ResponseEntity.badRequest()
+                                .body("Approver 1 and Approver 2 cannot be the same employee.");
+                    }
+
+                    if (email1.equalsIgnoreCase(existing.getEmail())
+                            || email2.equalsIgnoreCase(existing.getEmail())) {
+
+                        return ResponseEntity.badRequest()
+                                .body("Employee cannot be their own approver.");
+                    }
+
+                    int n1 = getJobLevel(email1);
+                    int n2 = getJobLevel(email2);
+
+                    if (n2 <= n1) {
+                        return ResponseEntity.badRequest()
+                                .body("Approver 2 should be higher than Approver 1.");
+                    }
+                }
+
+                if (emp.getApproval().getProjectName() != null) {
+                    exist.setProjectName(emp.getApproval().getProjectName());
+                }
+
+                if (emp.getApproval().getApproverEmail1() != null) {
+                    exist.setApproverEmail1(emp.getApproval().getApproverEmail1());
+                }
+
+                if (emp.getApproval().getApproverEmail2() != null) {
+                    exist.setApproverEmail2(emp.getApproval().getApproverEmail2());
+                }
+            }
             
 //            if (emp.getUser() != null) {
 //
@@ -1363,6 +1444,14 @@ public class EmpService {
                 if (newProfessional.getProfessional_designation() != null)
                     existingProfessional.setProfessional_designation(
                             newProfessional.getProfessional_designation());
+                
+                if (newProfessional.getJobLevel() != null) {
+                	existingProfessional.setJobLevel(
+                    		newProfessional.getJobLevel());
+                }
+                
+                
+                    
 
                 if (newProfessional.getProfessional_department() != null) {
                 	existingProfessional.setProfessional_department(

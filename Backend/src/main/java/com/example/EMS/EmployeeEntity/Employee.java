@@ -19,6 +19,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
@@ -118,6 +119,12 @@ public class Employee {
 			orphanRemoval = true)
 			@JsonManagedReference("employee-weeklyReport")
 			private List<WeeklyReportDTO> weeklyReport;
+			
+			@OneToOne(mappedBy="employee",
+			cascade= CascadeType.ALL,
+			orphanRemoval = true)
+			@JsonManagedReference("employee-Report")
+			private ApprovalSystem approval;
 	
 	
 	
@@ -386,6 +393,12 @@ public class Employee {
 	}
 	public void setShiftDetails(ShiftEmployeeDetails shiftDetails) {
 		this.shiftDetails = shiftDetails;
+	}
+	public ApprovalSystem getApproval() {
+		return approval;
+	}
+	public void setApproval(ApprovalSystem approval) {
+		this.approval = approval;
 	}
 	
 	

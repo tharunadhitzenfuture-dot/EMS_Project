@@ -2,9 +2,13 @@ package com.example.EMS.EmployeeEntity;
 
 import java.util.Date;
 
+import com.example.EMS.enums.JobLevel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,8 +23,10 @@ public class ProfessionalDetails {
 	private Long id;
 	private String professional_designation;
 	
-	private String approverEmail1;
-	private String approverEmail2;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable= false)
+	private JobLevel jobLevel;
+	
 		
 	private String professional_department;
 	private String emp_type;
@@ -137,18 +143,14 @@ public class ProfessionalDetails {
 	public void setEmployeeInvite(EmployeeInvite employeeInvite) {
 		this.employeeInvite = employeeInvite;
 	}
-	public String getApproverEmail1() {
-		return approverEmail1;
+	public JobLevel getJobLevel() {
+		return jobLevel;
 	}
-	public void setApproverEmail1(String approverEmail1) {
-		this.approverEmail1 = approverEmail1;
+	public void setJobLevel(JobLevel jobLevel) {
+		this.jobLevel = jobLevel;
 	}
-	public String getApproverEmail2() {
-		return approverEmail2;
-	}
-	public void setApproverEmail2(String approverEmail2) {
-		this.approverEmail2 = approverEmail2;
-	}
+	
+	
 	
 		
 
