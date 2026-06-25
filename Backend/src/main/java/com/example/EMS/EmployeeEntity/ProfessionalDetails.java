@@ -2,6 +2,7 @@ package com.example.EMS.EmployeeEntity;
 
 import java.util.Date;
 
+
 import com.example.EMS.enums.JobLevel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -26,6 +27,10 @@ public class ProfessionalDetails {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable= false)
 	private JobLevel jobLevel;
+	
+//	@ManyToOne
+//    @JoinColumn(name = "department_id", nullable = false)
+//    private Departments professional_department;
 	
 		
 	private String professional_department;
@@ -64,12 +69,7 @@ public class ProfessionalDetails {
 	public void setEmployee(Employee employee) {
 		this.employee = employee;
 	}
-	public String getProfessional_department() {
-		return professional_department;
-	}
-	public void setProfessional_department(String professional_department) {
-		this.professional_department = professional_department;
-	}
+	
 	public String getResume() {
 		return resume;
 	}
@@ -83,6 +83,12 @@ public class ProfessionalDetails {
 		this.offer_letter = offer_letter;
 	}
 	
+	public String getProfessional_department() {
+		return professional_department;
+	}
+	public void setProfessional_department(String professional_department) {
+		this.professional_department = professional_department;
+	}
 	public String getProfessional_designation() {
 		return professional_designation;
 	}

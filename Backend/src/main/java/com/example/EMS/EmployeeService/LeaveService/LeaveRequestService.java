@@ -26,7 +26,6 @@ import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveBalanceRepository
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
 import com.example.EMS.enums.Department;
 import com.example.EMS.enums.LeaveStatus;
-import com.example.EMS.enums.Role;
 
 import jakarta.transaction.Transactional;
 
@@ -51,6 +50,18 @@ public class LeaveRequestService {
 		Long id = empRepository.findIdByEmployeeId(empId);
 		Employee emp = getUserByEmployeeId(id);
 		
+		String email1 = emp.getApproval().getApproverEmail1();
+		String email2 = emp.getApproval().getApproverEmail2();
+		
+		if(email1 == null || email1.isBlank()) {
+			return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Approver 1 not set");
+		}
+		
+		request.setApproverEmail1(email1);
+		request.setApproverEmail2(email2);
+
+		
+		
 		List<LeaveRequest> res = leaveRequestRepository.findOverlappingLeaves(id, request.getStartDate(), request.getEndDate());
 		if(!res.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Leave request dates overlapping with dates: "+request.getStartDate()+" and "+request.getEndDate());
@@ -74,6 +85,9 @@ public class LeaveRequestService {
         if(department == null) {
         	return ResponseEntity.badRequest().body("Employee department should be either IT/ FINANCE/ HR");
         }
+        else {
+        	request.setDepartment(department);
+        }
         
         Optional<LeaveBalance> balance =leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment(emp, year, request.getLeaveType(), department );
         if(balance.isEmpty()) {
@@ -85,7 +99,8 @@ public class LeaveRequestService {
 //        if (balance.getRemainingDays() < workingDays)
 //            throw new BadRequestException("Insufficient balance. Available: "
 //                    + balance.getRemainingDays() + ", Requested: " + workingDays);
-//        
+//       
+        
         
         request.setEmployee(emp);
         request.setTotalDays(workingDays);
@@ -114,6 +129,17 @@ public class LeaveRequestService {
 		Long id = empRepository.findIdByEmployeeId(empId);
 		Employee emp = getUserByEmployeeId(id);
 		
+		String email1 = emp.getApproval().getApproverEmail1();
+		String email2 = emp.getApproval().getApproverEmail2();
+		
+		if(email1 == null || email1.isBlank()) {
+			return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Approver 1 not set");
+		}
+		
+		request.setApproverEmail1(email1);
+		request.setApproverEmail2(email2);
+
+		
 		List<LeaveRequest> res = leaveRequestRepository.findOverlappingLeaves(id, request.getStartDate(), request.getEndDate());
 		if(!res.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Leave request dates overlapping with dates: "+request.getStartDate()+" and "+request.getEndDate());
@@ -138,6 +164,9 @@ public class LeaveRequestService {
         if(department == null) {
         	return ResponseEntity.badRequest().body("Employee department should be either IT/ FINANCE/ HR");
         }
+        else {
+        	request.setDepartment(department);
+        }
         
         Optional<LeaveBalance> balance = leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment(emp, year, request.getLeaveType(), department);
         
@@ -161,17 +190,24 @@ public class LeaveRequestService {
 	 
 	    @Transactional
 	    public ResponseEntity<?> reviewLeave(String empId, Long leaveId, ReviewLeaveDto dto) {   
+	    	
 	    	Long id = empRepository.findIdByEmployeeId(empId);
 	        Employee emp = getUserByEmployeeId(id);
 	        LeaveRequest req = getLeaveById(leaveId);
 	        
 	        
-	        if(emp.getRole() != Role.MANAGER && emp.getRole() != Role.HR && emp.getRole() != Role.ADMIN) {
-	        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not authorized to review leave requests");
+	  
+//	        if(emp.getRole() != Role.MANAGER && emp.getRole() != Role.HR && emp.getRole() != Role.ADMIN) {
+//	        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not authorized to review leave requests");
+//	        }
+	        
+	        if(!emp.getEmail().equals(req.getApproverEmail1()) && !emp.getEmail().equals(req.getApproverEmail2())) {
+	        	return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body("You are not authorized to approve this leave request. Only the designated approver (" 
+	                    + req.getApproverEmail1() +" or "+req.getApproverEmail1()+") can perform this action.");
 	        }
 	        
 	        
-
+	        
 	        if (req.getStatus() == LeaveStatus.CANCELLED)
 	            throw new BadRequestException("Cannot review a cancelled request");
 	        if (req.getStatus() == LeaveStatus.APPROVED || req.getStatus() == LeaveStatus.REJECTED)
@@ -197,7 +233,7 @@ public class LeaveRequestService {
 //	                                year
 //	                        );
 	               
-	                
+	                System.out.println("Hiii"+id);
 	                Optional<LeaveBalance> bal = leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment(req.getEmployee(), year, req.getLeaveType(), req.getDepartment());
                
 	                if (bal.isEmpty()) {
@@ -293,8 +329,13 @@ public class LeaveRequestService {
 	        LeaveRequest req = getLeaveById(leaveId);
 	        
 	        
-	        if(emp.getRole() != Role.MANAGER && emp.getRole() != Role.HR) {
-	        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not authorized to review leave requests");
+//	        if(emp.getRole() != Role.MANAGER && emp.getRole() != Role.HR) {
+//	        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not authorized to review leave requests");
+//	        }
+	        
+	        if(!emp.getEmail().equals(req.getApproverEmail1()) && !emp.getEmail().equals(req.getApproverEmail2())) {
+	        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You are not authorized to approve this leave request. Only the designated approver (" 
+	                    + req.getApproverEmail1() +" or "+req.getApproverEmail1()+") can perform this action.");
 	        }
 	        
 	        

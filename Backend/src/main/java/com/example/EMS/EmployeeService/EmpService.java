@@ -43,8 +43,12 @@ import com.example.EMS.EmployeeEntity.ProfessionalDetails;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
+import com.example.EMS.EmployeeException.BadRequestException;
+import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.ProfessionalDetailRepository;
+import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveBalanceRepository;
+import com.example.EMS.enums.Department;
 import com.example.EMS.enums.JobLevel;
 import com.example.EMS.enums.Role;
 
@@ -54,6 +58,7 @@ public class EmpService {
     public EmpRepository empRepo;
     public PasswordEncoder passwordEncoder;
     public ProfessionalDetailRepository professionalRepo;
+    public LeaveBalanceRepository leaveBalanceRepo;
 
     public EmpService(EmpRepository empRepo, PasswordEncoder passwordEncoder,
             ProfessionalDetailRepository professionalRepo) {
@@ -84,7 +89,7 @@ public class EmpService {
     }
 
     public int getJobLevel(String email) {
-       Employee employee = empRepo.findByEmail(email).orElseThrow(()-> new RuntimeException("Employee not found with email :"+email));
+       Employee employee = empRepo.findByEmail(email).orElseThrow(()-> new ResourceNotFoundException("Employee not found with email :"+email));
        JobLevel jl = employee.getProfessional_details().getJobLevel();
        int n = Integer.parseInt(jl.name().substring(2));
        return n;
@@ -150,37 +155,28 @@ public class EmpService {
 			}
 		}
 		
-		
-//		if(emp.getUser().getPassword() != null) {
-//			user.setPassword(passwordEncoder.encode(user.getPassword()));
-//		}
-//		
-//		if(user.getConfirmPassword() != null) {
-//			user.setConfirmPassword(passwordEncoder.encode(user.getConfirmPassword()));
-//		}
-		
+		if(emp.getProfessional_details().getProfessional_department() != null) {
+			String departmentName = emp.getProfessional_details().getProfessional_department();
+
+			Department department;
+			try {
+			    department = Department.valueOf(departmentName.toUpperCase());
+			} catch (IllegalArgumentException e) {
+			    throw new BadRequestException("Invalid department: " + departmentName);
+			}
 			
-//			if(user.getPassword() == null) {
-//				return  ResponseEntity.status(404).body("Please enter password");
-//			}
-//			
-//			if(user.getConfirmPassword() == null) {
-//				return  ResponseEntity.status(404).body("Please enter confirm password");
-//			}
-//			
-//			if(!user.getPassword().equals(user.getConfirmPassword())) {
-//				return  ResponseEntity.status(404).body("Password and confirm is not matching");
-//			}			
-//			Optional<User> emailuser = userRepository.findByEmail(user.getEmail());
-//			
-//			if(emailuser.isPresent()) {
-//				return  ResponseEntity.status(409).body("User Already exists please login");
-//			}
-//			
+			Optional<List<LeaveBalance>> balances =
+			        leaveBalanceRepo.findByDepartment(department);
 			
+			if(balances.isPresent()) {			
+				List<LeaveBalance> lst = balances.get();
+				emp.setLeaveBalance(lst);				
+			}
+			
+			
+		}
 		
-		
-		
+
 		if(file != null && !file.isEmpty()) {
 			try {
 				String fileName = saveFile(file, "uploads");
@@ -1115,18 +1111,18 @@ public class EmpService {
     public ResponseEntity<?> getEmployeeById(String id) {
         Optional<Employee> emp = empRepo.findByEmployeeId(id);
         if (emp.isPresent()) return ResponseEntity.ok(emp);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
                 .body("Employee with id: " + id + " not found");
     }
 
     public ResponseEntity<?> getPayrollById(String empId) {
         Optional<Employee> empOptional = empRepo.findByEmployeeId(empId);
         if (empOptional.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
                     .body("Employee not found with ID: " + empId);
         Employee emp = empOptional.get();
         if (emp.getEmpPayroll() == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
                     .body("Payroll details not found for Employee ID: " + empId);
         return ResponseEntity.ok(emp.getEmpPayroll());
     }
@@ -1151,7 +1147,7 @@ public class EmpService {
     public ResponseEntity<?> updateEmployee(String empId, Employee emp) {
         Optional<Employee> existingEmp = empRepo.findByEmployeeId(empId);
         if (!existingEmp.isPresent())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
                     .body("Employee not found with id: " + empId);
 
         Employee existing = existingEmp.get();
@@ -1261,7 +1257,7 @@ public class EmpService {
         Optional<Employee> existingOpt = empRepo.findByEmployeeId(empId);
 
         if (existingOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
                     .body("Employee not found");
         }
 

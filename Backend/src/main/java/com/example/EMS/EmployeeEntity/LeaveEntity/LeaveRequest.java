@@ -55,6 +55,9 @@ public class LeaveRequest {
 
 	private Department department;
 	
+	private String approverEmail1;
+	private String approverEmail2;
+	
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable=true)
@@ -180,6 +183,23 @@ public class LeaveRequest {
 	 public void setDepartment(Department department) {
 		 this.department = department;
 	 }
+
+	 public String getApproverEmail1() {
+		 return approverEmail1;
+	 }
+
+	 public void setApproverEmail1(String approverEmail1) {
+		 this.approverEmail1 = approverEmail1;
+	 }
+
+	 public String getApproverEmail2() {
+		 return approverEmail2;
+	 }
+
+	 public void setApproverEmail2(String approverEmail2) {
+		 this.approverEmail2 = approverEmail2;
+	 }
+	 
      
 	 
 	 

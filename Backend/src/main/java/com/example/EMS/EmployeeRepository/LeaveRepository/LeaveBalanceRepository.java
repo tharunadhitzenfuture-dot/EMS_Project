@@ -9,7 +9,7 @@ import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.enums.Department;
 import com.example.EMS.enums.LeaveType;
 
-
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -34,5 +34,7 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, Long
     		int year,
     		LeaveType type,
     		Department department);
+    
+    Optional<List<LeaveBalance>> findByDepartment(Department department);
     
 }

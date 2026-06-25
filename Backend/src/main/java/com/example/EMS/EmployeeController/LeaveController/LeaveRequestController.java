@@ -106,7 +106,6 @@ public class LeaveRequestController {
 	
 	@PostMapping("/review/{empId}/{leaveId}")
 	 public ResponseEntity<?> reviewLeave(@PathVariable String empId,@PathVariable Long leaveId,@RequestBody ReviewLeaveDto dto) {
-		
 		if(empId == null || leaveId == null) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please provide employee id and leave id");
 		}
