@@ -2,7 +2,6 @@ package com.example.EMS.EmployeeEntity;
 
 import java.util.Date;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
@@ -20,7 +19,9 @@ public class ProfessionalDetails {
 	private Long id;
 	private String professional_designation;
 	
-	
+	private String approverEmail1;
+	private String approverEmail2;
+		
 	private String professional_department;
 	private String emp_type;
 	private String location;
@@ -136,12 +137,19 @@ public class ProfessionalDetails {
 	public void setEmployeeInvite(EmployeeInvite employeeInvite) {
 		this.employeeInvite = employeeInvite;
 	}
+	public String getApproverEmail1() {
+		return approverEmail1;
+	}
+	public void setApproverEmail1(String approverEmail1) {
+		this.approverEmail1 = approverEmail1;
+	}
+	public String getApproverEmail2() {
+		return approverEmail2;
+	}
+	public void setApproverEmail2(String approverEmail2) {
+		this.approverEmail2 = approverEmail2;
+	}
 	
-	
-	
-	
-	
-	
-	
+		
 
 }
