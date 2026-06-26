@@ -6,5 +6,6 @@ public enum Department {
 	FINANCE,
 	HR,
 	SALES,
-	MARKETING
+	MARKETING,
+	INSURANCE
 }

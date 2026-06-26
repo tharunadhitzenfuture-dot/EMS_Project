@@ -1531,7 +1531,6 @@ public class EmpService {
             			        leavePolicyRepo.findByDepartment(department);
             			if(balances.isPresent()) {			
             				List<LeavePolicy> lst = balances.get();
-            				System.out.println(lst);
             				List<LeaveBalance> employeeBalances = new ArrayList<>();
             				for (LeavePolicy balance : lst) {
             				    LeaveBalance newBalance = new LeaveBalance();

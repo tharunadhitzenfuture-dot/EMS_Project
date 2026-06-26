@@ -1,5 +1,7 @@
 package com.example.EMS.EmployeeService.DepartmentService;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +18,9 @@ public class DepartmentService {
 	}
 	
 	
-	public ResponseEntity<?> create(Departments request){
+	public ResponseEntity<?> create(List<Departments> request){
 		
-		Departments res = deptRepository.save(request);
+		List<Departments> res = deptRepository.saveAll(request);
 		return ResponseEntity.ok(res);
 	}
 	

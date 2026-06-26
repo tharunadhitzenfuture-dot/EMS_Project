@@ -1,7 +1,13 @@
 package com.example.EMS.EmployeeController.DepartmentController;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,21 +36,37 @@ public class DepartmentController {
 		this.deptRepository = deptRepository;
 	}
 	
+	
 	@PostMapping("/create")
-	public ResponseEntity<?> create(@RequestBody Departments dept){
-		
-		if(dept.getName() == null || dept.getName().isBlank()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter department name");
-		}
-		Optional<Departments> depts = deptRepository.findByName(dept.getName());
-		
-		if(depts.isPresent()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Department already presented");
-		}
-		
-		return deptService.create(dept);
-		
-	}
+	public ResponseEntity<?> create(@RequestBody List<Departments> departments) {
+
+    Map<String, String> result = new LinkedHashMap<>();
+    List<Departments> departmentsToSave = new ArrayList<>();
+
+    for (Departments dept : departments) {
+
+        if (dept.getName() == null || dept.getName().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body("Please enter department name");
+        }
+
+        String name = dept.getName().trim().toUpperCase();
+        dept.setName(name);
+
+        if (deptRepository.findByName(name).isPresent()) {
+            result.put(name, "Already exists");
+        } else {
+            departmentsToSave.add(dept);
+            result.put(name, "Added");
+        }
+    }
+
+    if (!departmentsToSave.isEmpty()) {
+        deptService.create(departmentsToSave);
+    }
+
+    return ResponseEntity.ok(result);
+}
 	
 	@GetMapping("/getAll")
 	public ResponseEntity<?> getAllDepartment(){
