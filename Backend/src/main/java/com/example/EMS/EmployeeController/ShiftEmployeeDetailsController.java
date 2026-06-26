@@ -116,7 +116,6 @@ public class ShiftEmployeeDetailsController {
 	
 	@PatchMapping("/updateShift/{id}")
 	public ResponseEntity<?> updateShift(@PathVariable Long id, @RequestBody ShiftEmployeeDetails request){
-		
 		if(request.getShift() == null) {
 			return ResponseEntity.badRequest().body("Please enter shift name");
 		}
@@ -134,11 +133,12 @@ public class ShiftEmployeeDetailsController {
 			return ResponseEntity.badRequest().body("Employee shift details not presented");
 		}
 		
-		String empId = shiftRepo.findEmpIdById(id);
-		Optional<ShiftEmployeeDetails> detail =  shiftRepo.findByEmpIdAndStartTimeAndEndTime(empId, request.getStartTime(), request.getEndTime());
-		if(detail.isPresent()) {
-			return ResponseEntity.badRequest().body("Employee shift details already presented with id: "+request.getEmpId());
-		}
+		
+//		String empId = shiftRepo.findEmpIdById(id);
+//		Optional<ShiftEmployeeDetails> detail =  shiftRepo.findByEmpIdAndStartTimeAndEndTime(empId, request.getStartTime(), request.getEndTime());
+//		if(detail.isPresent()) {
+//			return ResponseEntity.badRequest().body("Employee shift details already presented with id: "+request.getEmpId());
+//		}
 		
 		
 		return shiftService.updateShiftEmployee(id, request);
