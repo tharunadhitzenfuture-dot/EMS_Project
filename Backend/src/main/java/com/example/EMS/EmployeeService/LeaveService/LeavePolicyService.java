@@ -39,7 +39,7 @@ public class LeavePolicyService {
 		Optional<LeavePolicy> res = leavePolicyRepo.findByYearAndTypeAndDepartment(request.getYear(), request.getType(), request.getDepartment());
 		
 		if(res.isPresent()) {
-			return ResponseEntity.badRequest().body("Total leave for year: "+ request.getYear()+" and type "+request.getYear()+" department "+ request.getDepartment()+" already presented");
+			return ResponseEntity.badRequest().body("Total leave for year: "+ request.getYear()+" and type "+request.getType()+" department "+ request.getDepartment()+" already presented");
 		}
 		
 		List<Employee> employee = empRepo.findByProfessional_detailsProfessional_department(request.getDepartment().toString());

@@ -42,12 +42,14 @@ import com.example.EMS.EmployeeEntity.HigherEducation;
 import com.example.EMS.EmployeeEntity.ProfessionalDetails;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
+import com.example.EMS.EmployeeEntity.LeaveEntity.LeavePolicy;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeException.BadRequestException;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.ProfessionalDetailRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveBalanceRepository;
+import com.example.EMS.EmployeeRepository.LeaveRepository.LeavePolicyRepository;
 import com.example.EMS.enums.Department;
 import com.example.EMS.enums.JobLevel;
 import com.example.EMS.enums.Role;
@@ -58,16 +60,19 @@ public class EmpService {
     public EmpRepository empRepo;
     public PasswordEncoder passwordEncoder;
     public ProfessionalDetailRepository professionalRepo;
-    public LeaveBalanceRepository leaveBalanceRepo;
+    public LeavePolicyRepository leavePolicyRepo;
 
-    public EmpService(EmpRepository empRepo, PasswordEncoder passwordEncoder,
-            ProfessionalDetailRepository professionalRepo) {
-        this.empRepo = empRepo;
-        this.passwordEncoder = passwordEncoder;
-        this.professionalRepo = professionalRepo;
-    }
-    
-    public Long getIdByEmployeeId(String empId) {
+
+	public EmpService(EmpRepository empRepo, PasswordEncoder passwordEncoder,
+			ProfessionalDetailRepository professionalRepo, LeavePolicyRepository leavePolicyRepo) {
+	
+		this.empRepo = empRepo;
+		this.passwordEncoder = passwordEncoder;
+		this.professionalRepo = professionalRepo;
+		this.leavePolicyRepo = leavePolicyRepo;
+	}
+
+	public Long getIdByEmployeeId(String empId) {
     	return empRepo.findIdByEmployeeId(empId);
     }
 
@@ -165,12 +170,28 @@ public class EmpService {
 			    throw new BadRequestException("Invalid department: " + departmentName);
 			}
 			
-			Optional<List<LeaveBalance>> balances =
-			        leaveBalanceRepo.findByDepartment(department);
-			
+			Optional<List<LeavePolicy>> balances =
+			        leavePolicyRepo.findByDepartment(department);
+			System.out.println();
 			if(balances.isPresent()) {			
-				List<LeaveBalance> lst = balances.get();
-				emp.setLeaveBalance(lst);				
+				List<LeavePolicy> lst = balances.get();
+				System.out.println(lst);
+				List<LeaveBalance> employeeBalances = new ArrayList<>();
+				for (LeavePolicy balance : lst) {
+				    LeaveBalance newBalance = new LeaveBalance();
+				    newBalance.setType(balance.getType());
+				    newBalance.setTotalDays(balance.getTotalDays());
+				    newBalance.setRemainingDays(balance.getTotalDays());
+				    newBalance.setYear(balance.getYear());
+				    newBalance.setDepartment(department);
+				    newBalance.setMonth(balance.getMonth());
+				    newBalance.setUsedDays(0);
+				    // if LeaveBalance has Employee mapping
+				    newBalance.setEmployee(emp);
+
+				    employeeBalances.add(newBalance);
+				}	
+			    emp.setLeaveBalance(employeeBalances);	
 			}
 			
 			

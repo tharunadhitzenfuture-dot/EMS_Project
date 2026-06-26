@@ -27,11 +27,6 @@ public class ProfessionalDetails {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable= false)
 	private JobLevel jobLevel;
-	
-//	@ManyToOne
-//    @JoinColumn(name = "department_id", nullable = false)
-//    private Departments professional_department;
-	
 		
 	private String professional_department;
 	private String emp_type;

@@ -1,5 +1,6 @@
 package com.example.EMS.EmployeeRepository.LeaveRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,6 +19,6 @@ public interface LeavePolicyRepository extends JpaRepository<LeavePolicy,Long>{
 	Optional<LeavePolicy> findByYear(Integer year);
 	Optional<LeavePolicy> findByYearAndType(Integer year, LeaveType type);
 	Optional<LeavePolicy> findByYearAndTypeAndDepartment(Integer year, LeaveType type, Department department);
-	
+	Optional<List<LeavePolicy>> findByDepartment(Department department);
 
 }
