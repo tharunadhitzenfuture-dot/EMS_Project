@@ -1,6 +1,6 @@
 package com.example.EMS.EmployeeService;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
-import com.example.EMS.EmployeeEntity.Attendance;
+
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
 import com.example.EMS.EmployeeException.BadRequestException;
@@ -19,8 +19,7 @@ import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.PermissionRepository;
 import com.example.EMS.enums.LeaveStatus;
-import com.example.EMS.enums.LeaveType;
-import com.example.EMS.enums.Role;
+
 
 @Service
 public class PermissionService {
@@ -29,12 +28,6 @@ public class PermissionService {
 	private final PermissionRepository permissionRepo;
 	private final AttendanceRepository attendanceRepo;
 	private final AttendanceService attendanceService;
-	
-	
-	
-
-	
-
 
 	public PermissionService(EmpRepository empRepository, PermissionRepository permissionRepo,
 			AttendanceRepository attendanceRepo, AttendanceService attendanceService) {
@@ -53,14 +46,19 @@ public class PermissionService {
 		 
 //        if (permission.getEndDate().isBefore(permission.getStartDate()))
 //            throw new BadRequestException("End date must be on or after start date");
+        String email1 = emp.getApproval().getApproverEmail1();
+        String email2 = emp.getApproval().getApproverEmail2();
         
+        if(email1 == null || email1.isBlank()) {
+			return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Approver 1 not set");
+		}
         
         permission.setEmployee(emp);
+        permission.setApproverEmail1(email1);
+        permission.setApproverEmail2(email2);
         Permission res = permissionRepo.save(permission);
         return ResponseEntity.ok(res);
-		
-        
-		
+
 	}
 	
 	
@@ -70,10 +68,14 @@ public class PermissionService {
         Permission req = getPermissionById(permissionId);
         
         
-        if(emp.getRole() != Role.MANAGER && emp.getRole() != Role.HR && emp.getRole() != Role.ADMIN) {
-        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not authorized to review leave requests");
+//        if(emp.getRole() != Role.MANAGER && emp.getRole() != Role.HR && emp.getRole() != Role.ADMIN) {
+//        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not authorized to review leave requests");
+//        }
+//        
+        if(!emp.getEmail().equals(req.getApproverEmail1()) && !emp.getEmail().equals(req.getApproverEmail2())) {
+        	return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body("You are not authorized to approve this leave request. Only the designated approver (" 
+                    + req.getApproverEmail1() +" or "+req.getApproverEmail1()+") can perform this action.");
         }
-        
         
 
         if (req.getStatus() == LeaveStatus.CANCELLED)

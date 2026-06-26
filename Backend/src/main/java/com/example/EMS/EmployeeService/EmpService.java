@@ -150,10 +150,23 @@ public class EmpService {
 					&& emp.getApproval().getApproverEmail2() != null ) {
 				String email1 = emp.getApproval().getApproverEmail1();
 				String email2 = emp.getApproval().getApproverEmail2();
-				int n1 = getJobLevel(email1);
-				int n2 = getJobLevel(email2);
+				
+
+                 if (email1.equalsIgnoreCase(emp.getEmail())
+                         || email2.equalsIgnoreCase(emp.getEmail())) {
+
+                     return ResponseEntity.badRequest()
+                             .body("Employee cannot be their own approver.");
+                 }
+                int n1 = getJobLevel(emp.getEmail());
+				int n2 = getJobLevel(email1);
+				int n3 = getJobLevel(email2);
 				
 				if(n2 <= n1) {
+					return ResponseEntity.badRequest().body("Approver 1 should be higher than your job level");
+				}
+				
+				if(n3 <= n2) {
 					return ResponseEntity.badRequest().body("Approver 2 should be higher than approver 1");
 				}
 				
@@ -172,10 +185,8 @@ public class EmpService {
 			
 			Optional<List<LeavePolicy>> balances =
 			        leavePolicyRepo.findByDepartment(department);
-			System.out.println();
 			if(balances.isPresent()) {			
 				List<LeavePolicy> lst = balances.get();
-				System.out.println(lst);
 				List<LeaveBalance> employeeBalances = new ArrayList<>();
 				for (LeavePolicy balance : lst) {
 				    LeaveBalance newBalance = new LeaveBalance();
@@ -1364,13 +1375,9 @@ public class EmpService {
                     existing.setApproval(exist);
                 }
 
-                String email1 = emp.getApproval().getApproverEmail1() != null
-                        ? emp.getApproval().getApproverEmail1()
-                        : exist.getApproverEmail1();
+                String email1 = emp.getApproval().getApproverEmail1(); 
 
-                String email2 = emp.getApproval().getApproverEmail2() != null
-                        ? emp.getApproval().getApproverEmail2()
-                        : exist.getApproverEmail2();
+                String email2 = emp.getApproval().getApproverEmail2(); 
 
                 // Validate hierarchy only when both approvers are available
                 if (email1 != null && email2 != null) {
@@ -1386,28 +1393,66 @@ public class EmpService {
                         return ResponseEntity.badRequest()
                                 .body("Employee cannot be their own approver.");
                     }
+                    
+                    int n1 = getJobLevel(emp.getEmail());
+                    int n2 = getJobLevel(email1);
+                    int n3 = getJobLevel(email2);
 
-                    int n1 = getJobLevel(email1);
-                    int n2 = getJobLevel(email2);
-
-                    if (n2 <= n1) {
-                        return ResponseEntity.badRequest()
-                                .body("Approver 2 should be higher than Approver 1.");
-                    }
+    				if(n2 <= n1) {
+    					return ResponseEntity.badRequest().body("Approver 1 should be higher than your job level");
+    				}
+    				
+    				if(n3 <= n2) {
+    					return ResponseEntity.badRequest().body("Approver 2 should be higher than approver 1");
+    				}
                 }
 
-                if (emp.getApproval().getProjectName() != null) {
                     exist.setProjectName(emp.getApproval().getProjectName());
-                }
-
-                if (emp.getApproval().getApproverEmail1() != null) {
                     exist.setApproverEmail1(emp.getApproval().getApproverEmail1());
-                }
-
-                if (emp.getApproval().getApproverEmail2() != null) {
                     exist.setApproverEmail2(emp.getApproval().getApproverEmail2());
-                }
+                
             }
+            
+            
+         // ================= leave balance =================
+//    		if(emp.getProfessional_details().getProfessional_department() != null) {
+//    			String departmentName = emp.getProfessional_details().getProfessional_department();
+//
+//    			Department department;
+//    			try {
+//    			    department = Department.valueOf(departmentName.toUpperCase());
+//    			} catch (IllegalArgumentException e) {
+//    			    throw new BadRequestException("Invalid department: " + departmentName);
+//    			}
+//    			
+//    			Optional<List<LeavePolicy>> balances =
+//    			        leavePolicyRepo.findByDepartment(department);
+//    			if(balances.isPresent()) {			
+//    				List<LeavePolicy> lst = balances.get();
+//    				System.out.println(lst);
+//    				List<LeaveBalance> employeeBalances = new ArrayList<>();
+//    				for (LeavePolicy balance : lst) {
+//    				    LeaveBalance newBalance = new LeaveBalance();
+//    				    newBalance.setType(balance.getType());
+//    				    newBalance.setTotalDays(balance.getTotalDays());
+//    				    newBalance.setRemainingDays(balance.getTotalDays());
+//    				    newBalance.setYear(balance.getYear());
+//    				    newBalance.setDepartment(department);
+//    				    newBalance.setMonth(balance.getMonth());
+//    				    newBalance.setUsedDays(0);
+//    				    // if LeaveBalance has Employee mapping
+//    				    newBalance.setEmployee(emp);
+//
+//    				    employeeBalances.add(newBalance);
+//    				}	
+//    			    emp.setLeaveBalance(employeeBalances);	
+//    			    existing.setLeaveBalance(employeeBalances);
+//    			}
+//    			
+//    			
+//    			
+//    			
+//    		}
             
 //            if (emp.getUser() != null) {
 //
@@ -1471,6 +1516,46 @@ public class EmpService {
                     
 
                 if (newProfessional.getProfessional_department() != null) {
+                	
+                	if(emp.getProfessional_details().getProfessional_department() != null) {
+            			String departmentName = emp.getProfessional_details().getProfessional_department();
+
+            			Department department;
+            			try {
+            			    department = Department.valueOf(departmentName.toUpperCase());
+            			} catch (IllegalArgumentException e) {
+            			    throw new BadRequestException("Invalid department: " + departmentName);
+            			}
+            			
+            			Optional<List<LeavePolicy>> balances =
+            			        leavePolicyRepo.findByDepartment(department);
+            			if(balances.isPresent()) {			
+            				List<LeavePolicy> lst = balances.get();
+            				System.out.println(lst);
+            				List<LeaveBalance> employeeBalances = new ArrayList<>();
+            				for (LeavePolicy balance : lst) {
+            				    LeaveBalance newBalance = new LeaveBalance();
+            				    newBalance.setType(balance.getType());
+            				    newBalance.setTotalDays(balance.getTotalDays());
+            				    newBalance.setRemainingDays(balance.getTotalDays());
+            				    newBalance.setYear(balance.getYear());
+            				    newBalance.setDepartment(department);
+            				    newBalance.setMonth(balance.getMonth());
+            				    newBalance.setUsedDays(0);
+            				    // if LeaveBalance has Employee mapping
+            				    newBalance.setEmployee(emp);
+
+            				    employeeBalances.add(newBalance);
+            				}	
+            			    emp.setLeaveBalance(employeeBalances);	
+            			
+            			}
+            			
+            			
+            			
+            			
+            		}
+                	
                 	existingProfessional.setProfessional_department(
                             newProfessional.getProfessional_department());
                 	

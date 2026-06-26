@@ -46,6 +46,8 @@ public class Permission {
 	@Column(nullable=true)
 	private LeaveType leaveType = LeaveType.PERMISSION;
 	
+	private String approverEmail1;
+	private String approverEmail2;
 	
 	
 	@Enumerated(EnumType.STRING)
@@ -178,6 +180,30 @@ public class Permission {
 
 	 public LocalDate getPermissionDate() {
 		 return permissionDate;
+	 }
+
+	 
+
+	 public String getApproverEmail1() {
+		return approverEmail1;
+	}
+
+
+
+	 public void setApproverEmail1(String approverEmail1) {
+		 this.approverEmail1 = approverEmail1;
+	 }
+
+
+
+	 public String getApproverEmail2() {
+		 return approverEmail2;
+	 }
+
+
+
+	 public void setApproverEmail2(String approverEmail2) {
+		 this.approverEmail2 = approverEmail2;
 	 }
 
 
