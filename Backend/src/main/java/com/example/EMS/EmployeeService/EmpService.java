@@ -41,16 +41,15 @@ import com.example.EMS.EmployeeEntity.Experience;
 import com.example.EMS.EmployeeEntity.HigherEducation;
 import com.example.EMS.EmployeeEntity.ProfessionalDetails;
 import com.example.EMS.EmployeeEntity.User;
+import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeavePolicy;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
-import com.example.EMS.EmployeeException.BadRequestException;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.ProfessionalDetailRepository;
-import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveBalanceRepository;
+import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeavePolicyRepository;
-import com.example.EMS.enums.Department;
 import com.example.EMS.enums.JobLevel;
 import com.example.EMS.enums.Role;
 
@@ -61,15 +60,18 @@ public class EmpService {
     public PasswordEncoder passwordEncoder;
     public ProfessionalDetailRepository professionalRepo;
     public LeavePolicyRepository leavePolicyRepo;
+    public DepartmentRepository departmentRepository;
 
-
+	
 	public EmpService(EmpRepository empRepo, PasswordEncoder passwordEncoder,
-			ProfessionalDetailRepository professionalRepo, LeavePolicyRepository leavePolicyRepo) {
+			ProfessionalDetailRepository professionalRepo, LeavePolicyRepository leavePolicyRepo,
+			DepartmentRepository departmentRepository) {
 	
 		this.empRepo = empRepo;
 		this.passwordEncoder = passwordEncoder;
 		this.professionalRepo = professionalRepo;
 		this.leavePolicyRepo = leavePolicyRepo;
+		this.departmentRepository = departmentRepository;
 	}
 
 	public Long getIdByEmployeeId(String empId) {
@@ -94,12 +96,15 @@ public class EmpService {
     }
 
     public int getJobLevel(String email) {
-       Employee employee = empRepo.findByEmail(email).orElseThrow(()-> new ResourceNotFoundException("Employee not found with email :"+email));
-       JobLevel jl = employee.getProfessional_details().getJobLevel();
-       int n = Integer.parseInt(jl.name().substring(2));
-       return n;
-       
-    	
+    		Employee employee = empRepo.findByEmail(email).orElseThrow(()-> new ResourceNotFoundException("Employee not found with email :"+email));
+    		ProfessionalDetails prof = employee.getProfessional_details();
+    		if(prof == null) {
+    			throw new ResourceNotFoundException("Employee professional details not found with email: "+email);
+    		}
+    	    JobLevel jl = employee.getProfessional_details().getJobLevel();
+    	    int n = Integer.parseInt(jl.name().substring(2));
+    	    return n;
+        	
     }
     // ══════════════════════════════════════════════════════════════════
     // CREATE — single employee with multipart files
@@ -170,21 +175,43 @@ public class EmpService {
 					return ResponseEntity.badRequest().body("Approver 2 should be higher than approver 1");
 				}
 				
+				
 			}
+			 else if(emp.getApproval().getApproverEmail1() != null) {
+             	if (emp.getApproval().getApproverEmail1().equalsIgnoreCase(emp.getEmail())) {
+
+                     return ResponseEntity.badRequest()
+                             .body("Employee cannot be their own approver.");
+                 }
+             	
+             	  JobLevel jl = emp.getProfessional_details().getJobLevel();
+             	  int n1=Integer.parseInt(jl.toString().substring(2));
+                  int n2 = getJobLevel(emp.getApproval().getApproverEmail1());
+             
+
+  				if(n2 <= n1) {
+  					return ResponseEntity.badRequest().body("Approver 1 should be higher than your job level");
+  				}
+             }
 		}
 		
 		if(emp.getProfessional_details().getProfessional_department() != null) {
-			String departmentName = emp.getProfessional_details().getProfessional_department();
+			Departments department = departmentRepository
+    		        .findByName(emp.getProfessional_details()
+    		                       .getProfessional_department()
+    		                       .getName())
+    		        .orElseThrow(() -> new RuntimeException("Department not found"));
+			String departmentName = department.getName();
 
-			Department department;
-			try {
-			    department = Department.valueOf(departmentName.toUpperCase());
-			} catch (IllegalArgumentException e) {
-			    throw new BadRequestException("Invalid department: " + departmentName);
-			}
+//			Department department;
+//			try {
+//			    department = Department.valueOf(departmentName.toUpperCase());
+//			} catch (IllegalArgumentException e) {
+//			    throw new BadRequestException("Invalid department: " + departmentName);
+//			}
 			
 			Optional<List<LeavePolicy>> balances =
-			        leavePolicyRepo.findByDepartment(department);
+			        leavePolicyRepo.findByDepartment_Name(departmentName);
 			if(balances.isPresent()) {			
 				List<LeavePolicy> lst = balances.get();
 				List<LeaveBalance> employeeBalances = new ArrayList<>();
@@ -194,7 +221,7 @@ public class EmpService {
 				    newBalance.setTotalDays(balance.getTotalDays());
 				    newBalance.setRemainingDays(balance.getTotalDays());
 				    newBalance.setYear(balance.getYear());
-				    newBalance.setDepartment(department);
+				    newBalance.setDepartment(balance.getDepartment());
 				    newBalance.setMonth(balance.getMonth());
 				    newBalance.setUsedDays(0);
 				    // if LeaveBalance has Employee mapping
@@ -202,7 +229,8 @@ public class EmpService {
 
 				    employeeBalances.add(newBalance);
 				}	
-			    emp.setLeaveBalance(employeeBalances);	
+			    emp.setLeaveBalance(employeeBalances);
+			    emp.getProfessional_details().setProfessional_department(department);
 			}
 			
 			
@@ -705,8 +733,9 @@ public class EmpService {
 	                        new ProfessionalDetails();
 
 	                pd.setProfessional_designation(designation);
-	                pd.setProfessional_department(
-	                        getCellValue(row.getCell(20)));
+//	                pd.setProfessional_department(
+//	                        getCellValue(row.getCell(20)));
+	                pd.getProfessional_department().setName(getCellValue(row.getCell(20)));
 
 	                pd.setEmp_type(
 	                        getCellValue(row.getCell(21)));
@@ -1364,6 +1393,133 @@ public class EmpService {
                 existing.setBankDetails(existingBank);
             }
             
+            // ================= Professional Details =================
+            if (emp.getProfessional_details() != null) {
+
+                ProfessionalDetails newProfessional =
+                        emp.getProfessional_details();
+
+                ProfessionalDetails existingProfessional =
+                        existing.getProfessional_details();
+
+                if (existingProfessional == null) {
+                    existingProfessional = new ProfessionalDetails();
+                }
+
+                if (newProfessional.getProfessional_designation() != null)
+                    existingProfessional.setProfessional_designation(
+                            newProfessional.getProfessional_designation());
+                
+                if (newProfessional.getJobLevel() != null) {
+                	existingProfessional.setJobLevel(
+                    		newProfessional.getJobLevel());
+                }
+                
+                
+                    
+
+                if (newProfessional.getProfessional_department() != null) {
+                	
+                	if(emp.getProfessional_details().getProfessional_department() != null) {
+                		
+                		Departments department = departmentRepository
+                		        .findByName(emp.getProfessional_details()
+                		                       .getProfessional_department()
+                		                       .getName())
+                		        .orElseThrow(() -> new RuntimeException("Department not found"));
+                		
+            			String departmentName = department.getName();
+            			existingProfessional.setProfessional_department(department);
+            			
+            			Optional<List<LeavePolicy>> balances =
+            			        leavePolicyRepo.findByDepartment_Name(departmentName);
+            			if(balances.isPresent()) {			
+            				List<LeavePolicy> lst = balances.get();
+            				List<LeaveBalance> employeeBalances = new ArrayList<>();
+            				for (LeavePolicy balance : lst) {
+            				    LeaveBalance newBalance = new LeaveBalance();
+            				    newBalance.setType(balance.getType());
+            				    newBalance.setTotalDays(balance.getTotalDays());
+            				    newBalance.setRemainingDays(balance.getTotalDays());
+            				    newBalance.setYear(balance.getYear());
+            				    newBalance.setDepartment(department);
+            				    newBalance.setMonth(balance.getMonth());
+            				    newBalance.setUsedDays(0);
+            				    // if LeaveBalance has Employee mapping
+            				    newBalance.setEmployee(emp);
+
+            				    employeeBalances.add(newBalance);
+            				}	
+            			    emp.setLeaveBalance(employeeBalances);	
+            			
+            			}
+            			
+            			
+            			
+            			
+            		}
+                	
+                
+                	
+                	
+            		String detail =  emp.getProfessional_details().getEmp_type();
+            		String id = existing.getEmployeeId();
+            		String updatedId = id.substring(0, 2) + detail.charAt(0) + id.substring(3);
+            		existing.setEmployeeId(updatedId);
+            		
+                }
+                    
+                
+
+                if (newProfessional.getEmp_type() != null)
+                    existingProfessional.setEmp_type(
+                            newProfessional.getEmp_type());
+
+                if (newProfessional.getLocation() != null)
+                    existingProfessional.setLocation(
+                            newProfessional.getLocation());
+
+                if (newProfessional.getEmp_status() != null) {
+                	existingProfessional.setEmp_status(newProfessional.getEmp_status());
+                	boolean b = emp.getProfessional_details().getEmp_status().equals("Active") ? true : false;
+                	existingUser.setActive(b);
+                	existing.setUser(existingUser);
+                }
+                    
+
+                if (newProfessional.getDoj() != null)
+                    existingProfessional.setDoj(
+                            newProfessional.getDoj());
+
+                if (newProfessional.getProbation_period() != null)
+                    existingProfessional.setProbation_period(
+                            newProfessional.getProbation_period());
+
+                if (newProfessional.getConfirmation_date() != null)
+                    existingProfessional.setConfirmation_date(
+                            newProfessional.getConfirmation_date());
+
+                if (newProfessional.getSkills() != null)
+                    existingProfessional.setSkills(
+                            newProfessional.getSkills());
+
+                if (newProfessional.getExp_level() != null)
+                    existingProfessional.setExp_level(
+                            newProfessional.getExp_level());
+
+                if (newProfessional.getResume() != null)
+                    existingProfessional.setResume(
+                            newProfessional.getResume());
+
+                if (newProfessional.getOffer_letter() != null)
+                    existingProfessional.setOffer_letter(
+                            newProfessional.getOffer_letter());
+
+                existingProfessional.setEmployee(existing);
+
+                existing.setProfessional_details(existingProfessional);
+            }
+            
          // ================= Approvers =================
             if (emp.getApproval() != null) {
 
@@ -1406,6 +1562,23 @@ public class EmpService {
     					return ResponseEntity.badRequest().body("Approver 2 should be higher than approver 1");
     				}
                 }
+                else if(email1 != null) {
+
+                    if (email1.equalsIgnoreCase(existing.getEmail())) {
+
+                        return ResponseEntity.badRequest()
+                                .body("Employee cannot be their own approver.");
+                    }
+                    
+                    int n1 = getJobLevel(emp.getEmail());
+                    int n2 = getJobLevel(email1);
+                    
+                    if(n2 <= n1) {
+    					return ResponseEntity.badRequest().body("Approver 1 should be higher than your job level");
+    				}
+                    
+                }
+  
 
                     exist.setProjectName(emp.getApproval().getProjectName());
                     exist.setApproverEmail1(emp.getApproval().getApproverEmail1());
@@ -1490,132 +1663,7 @@ public class EmpService {
 //                existingUser.setEmployee(existing);
 //            }
             
-         // ================= Professional Details =================
-            if (emp.getProfessional_details() != null) {
-
-                ProfessionalDetails newProfessional =
-                        emp.getProfessional_details();
-
-                ProfessionalDetails existingProfessional =
-                        existing.getProfessional_details();
-
-                if (existingProfessional == null) {
-                    existingProfessional = new ProfessionalDetails();
-                }
-
-                if (newProfessional.getProfessional_designation() != null)
-                    existingProfessional.setProfessional_designation(
-                            newProfessional.getProfessional_designation());
-                
-                if (newProfessional.getJobLevel() != null) {
-                	existingProfessional.setJobLevel(
-                    		newProfessional.getJobLevel());
-                }
-                
-                
-                    
-
-                if (newProfessional.getProfessional_department() != null) {
-                	
-                	if(emp.getProfessional_details().getProfessional_department() != null) {
-            			String departmentName = emp.getProfessional_details().getProfessional_department();
-
-            			Department department;
-            			try {
-            			    department = Department.valueOf(departmentName.toUpperCase());
-            			} catch (IllegalArgumentException e) {
-            			    throw new BadRequestException("Invalid department: " + departmentName);
-            			}
-            			
-            			Optional<List<LeavePolicy>> balances =
-            			        leavePolicyRepo.findByDepartment(department);
-            			if(balances.isPresent()) {			
-            				List<LeavePolicy> lst = balances.get();
-            				List<LeaveBalance> employeeBalances = new ArrayList<>();
-            				for (LeavePolicy balance : lst) {
-            				    LeaveBalance newBalance = new LeaveBalance();
-            				    newBalance.setType(balance.getType());
-            				    newBalance.setTotalDays(balance.getTotalDays());
-            				    newBalance.setRemainingDays(balance.getTotalDays());
-            				    newBalance.setYear(balance.getYear());
-            				    newBalance.setDepartment(department);
-            				    newBalance.setMonth(balance.getMonth());
-            				    newBalance.setUsedDays(0);
-            				    // if LeaveBalance has Employee mapping
-            				    newBalance.setEmployee(emp);
-
-            				    employeeBalances.add(newBalance);
-            				}	
-            			    emp.setLeaveBalance(employeeBalances);	
-            			
-            			}
-            			
-            			
-            			
-            			
-            		}
-                	
-                	existingProfessional.setProfessional_department(
-                            newProfessional.getProfessional_department());
-                	
-                	
-            		String detail =  emp.getProfessional_details().getEmp_type();
-            		String id = existing.getEmployeeId();
-            		String updatedId = id.substring(0, 2) + detail.charAt(0) + id.substring(3);
-            		existing.setEmployeeId(updatedId);
-            		
-                }
-                    
-                
-
-                if (newProfessional.getEmp_type() != null)
-                    existingProfessional.setEmp_type(
-                            newProfessional.getEmp_type());
-
-                if (newProfessional.getLocation() != null)
-                    existingProfessional.setLocation(
-                            newProfessional.getLocation());
-
-                if (newProfessional.getEmp_status() != null) {
-                	existingProfessional.setEmp_status(newProfessional.getEmp_status());
-                	boolean b = emp.getProfessional_details().getEmp_status().equals("Active") ? true : false;
-                	existingUser.setActive(b);
-                	existing.setUser(existingUser);
-                }
-                    
-
-                if (newProfessional.getDoj() != null)
-                    existingProfessional.setDoj(
-                            newProfessional.getDoj());
-
-                if (newProfessional.getProbation_period() != null)
-                    existingProfessional.setProbation_period(
-                            newProfessional.getProbation_period());
-
-                if (newProfessional.getConfirmation_date() != null)
-                    existingProfessional.setConfirmation_date(
-                            newProfessional.getConfirmation_date());
-
-                if (newProfessional.getSkills() != null)
-                    existingProfessional.setSkills(
-                            newProfessional.getSkills());
-
-                if (newProfessional.getExp_level() != null)
-                    existingProfessional.setExp_level(
-                            newProfessional.getExp_level());
-
-                if (newProfessional.getResume() != null)
-                    existingProfessional.setResume(
-                            newProfessional.getResume());
-
-                if (newProfessional.getOffer_letter() != null)
-                    existingProfessional.setOffer_letter(
-                            newProfessional.getOffer_letter());
-
-                existingProfessional.setEmployee(existing);
-
-                existing.setProfessional_details(existingProfessional);
-            }
+ 
 
             // ================= PAYROLL =================
             if (emp.getEmpPayroll() != null) {
@@ -1841,6 +1889,8 @@ public class EmpService {
         }
 
         Employee saved = empRepo.save(existing);
+        System.out.println(saved.getProfessional_details()
+                .getProfessional_department().getClass());
         return ResponseEntity.ok(saved);
     }
 
@@ -2330,7 +2380,7 @@ public class EmpService {
                         getCellValue(row.getCell(20));
 
                 if (hasValue(dept)) {
-                    pd.setProfessional_department(dept);
+                	  pd.getProfessional_department().setName(dept);
                 }
 
                 String empType =

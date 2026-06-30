@@ -2,7 +2,7 @@ package com.example.EMS.EmployeeEntity;
 
 import java.util.Date;
 
-
+import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.enums.JobLevel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -10,10 +10,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 
 @Entity
@@ -27,8 +29,12 @@ public class ProfessionalDetails {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable= false)
 	private JobLevel jobLevel;
-		
-	private String professional_department;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="department_id")
+	private Departments professional_department;
+	
+//	private String professional_department;
 	private String emp_type;
 	private String location;
 	private String emp_status;
@@ -78,10 +84,11 @@ public class ProfessionalDetails {
 		this.offer_letter = offer_letter;
 	}
 	
-	public String getProfessional_department() {
+    
+	public Departments getProfessional_department() {
 		return professional_department;
 	}
-	public void setProfessional_department(String professional_department) {
+	public void setProfessional_department(Departments professional_department) {
 		this.professional_department = professional_department;
 	}
 	public String getProfessional_designation() {

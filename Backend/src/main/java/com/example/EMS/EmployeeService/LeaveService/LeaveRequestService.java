@@ -17,11 +17,13 @@ import org.springframework.stereotype.Service;
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.User;
+import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeException.BadRequestException;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
+import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveBalanceRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
 import com.example.EMS.enums.Department;
@@ -35,14 +37,15 @@ public class LeaveRequestService {
 	private final EmpRepository empRepository;
 	private final LeaveBalanceRepository leaveBalanceRepository;
 	private final LeaveRequestRepository leaveRequestRepository;
-	
+	private final DepartmentRepository departmentRepository;
+
 
 	public LeaveRequestService(EmpRepository empRepository, LeaveBalanceRepository leaveBalanceRepository,
-			LeaveRequestRepository leaveRequestRepository) {
+			LeaveRequestRepository leaveRequestRepository, DepartmentRepository departmentRepository) {
 		this.empRepository = empRepository;
 		this.leaveBalanceRepository = leaveBalanceRepository;
 		this.leaveRequestRepository = leaveRequestRepository;
-		
+		this.departmentRepository = departmentRepository;
 	}
 
 
@@ -50,17 +53,26 @@ public class LeaveRequestService {
 		Long id = empRepository.findIdByEmployeeId(empId);
 		Employee emp = getUserByEmployeeId(id);
 		
-		String email1 = emp.getApproval().getApproverEmail1();
-		String email2 = emp.getApproval().getApproverEmail2();
+		String email1 = null;
+		String email2 = null;
+		if(emp.getApproval() != null) {
+			email1 = emp.getApproval().getApproverEmail1();
+			email2 = emp.getApproval().getApproverEmail2();
+		}
+		
+		
 		
 		if(email1 == null || email1.isBlank()) {
 			return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Approver 1 not set");
 		}
+		else {
+			request.setApproverEmail1(email1);
+		}
 		
-		request.setApproverEmail1(email1);
-		request.setApproverEmail2(email2);
-
-		
+		if(email2 != null && !email2.isBlank()) {
+			request.setApproverEmail2(email2);
+		}
+	
 		
 		List<LeaveRequest> res = leaveRequestRepository.findOverlappingLeaves(id, request.getStartDate(), request.getEndDate());
 		if(!res.isEmpty()) {
@@ -80,16 +92,25 @@ public class LeaveRequestService {
 
 //        LeaveBalance balance = leaveBalanceRepository
 //                .findByEmployeeIdAndMonthAndYear(emp.getId(),month, year);
-        String dept = emp.getProfessional_details().getProfessional_department();
-        Department department = Department.valueOf(dept);
-        if(department == null) {
+        if(emp.getProfessional_details() == null) {
+        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee : "+emp.getEmployeeId()+" department not set");
+        }
+        Departments department1 = departmentRepository
+		        .findByName(emp.getProfessional_details()
+		                       .getProfessional_department()
+		                       .getName())
+		        .orElseThrow(() -> new RuntimeException("Department not found"));
+        String dept = department1.getName();
+        Optional<Departments> department = departmentRepository.findByName(dept);
+        if(department.isEmpty()) {
         	return ResponseEntity.badRequest().body("Employee department should be either IT/ FINANCE/ HR");
         }
         else {
-        	request.setDepartment(department);
+        	
+        	request.setDepartment(department.get());
         }
         
-        Optional<LeaveBalance> balance =leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment(emp, year, request.getLeaveType(), department );
+        Optional<LeaveBalance> balance =leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment_Name(emp, year, request.getLeaveType(), dept );
         if(balance.isEmpty()) {
         	return ResponseEntity.badRequest().body("Employee leave policy for type: "+request.getLeaveType()+" department: "+dept+" not found");
         }
@@ -104,7 +125,7 @@ public class LeaveRequestService {
         
         request.setEmployee(emp);
         request.setTotalDays(workingDays);
-        request.setDepartment(department);
+        request.setDepartment(department.get());
         LeaveRequest req = leaveRequestRepository.save(request);
         return ResponseEntity.ok(req);
         
@@ -129,15 +150,25 @@ public class LeaveRequestService {
 		Long id = empRepository.findIdByEmployeeId(empId);
 		Employee emp = getUserByEmployeeId(id);
 		
-		String email1 = emp.getApproval().getApproverEmail1();
-		String email2 = emp.getApproval().getApproverEmail2();
+		String email1 = null;
+		String email2 = null;
+		if(emp.getApproval() != null) {
+			email1 = emp.getApproval().getApproverEmail1();
+			email2 = emp.getApproval().getApproverEmail2();
+		}
+		
+		
 		
 		if(email1 == null || email1.isBlank()) {
 			return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Approver 1 not set");
 		}
+		else {
+			request.setApproverEmail1(email1);
+		}
 		
-		request.setApproverEmail1(email1);
-		request.setApproverEmail2(email2);
+		if(email2 != null && !email2.isBlank()) {
+			request.setApproverEmail2(email2);
+		}
 
 		
 		List<LeaveRequest> res = leaveRequestRepository.findOverlappingLeaves(id, request.getStartDate(), request.getEndDate());
@@ -159,16 +190,20 @@ public class LeaveRequestService {
 //        LeaveBalance balance = leaveBalanceRepository
 //                .findByEmployeeIdAndMonthAndYear(emp.getId(),month, year);
         
-        String dept = emp.getProfessional_details().getProfessional_department();
-        Department department = Department.valueOf(dept);
-        if(department == null) {
+        String dept = emp.getProfessional_details().getProfessional_department().getName();
+        Optional<Departments> department = departmentRepository.findByName(dept);
+        if(department.isEmpty()) {
         	return ResponseEntity.badRequest().body("Employee department should be either IT/ FINANCE/ HR");
         }
         else {
-        	request.setDepartment(department);
+        	Departments deptEntity = department.get();
+
+        	deptEntity.getName();   // Force Hibernate to initialize the proxy
+
+        	request.setDepartment(deptEntity);
         }
         
-        Optional<LeaveBalance> balance = leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment(emp, year, request.getLeaveType(), department);
+        Optional<LeaveBalance> balance = leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment_Name(emp, year, request.getLeaveType(), dept);
         
         if(balance.isEmpty()) {
         	return ResponseEntity.badRequest().body("Employee leave policy for type: "+request.getLeaveType()+" not set");
@@ -178,9 +213,11 @@ public class LeaveRequestService {
 //            throw new BadRequestException("Insufficient balance. Available: "
 //                    + balance.getRemainingDays() + ", Requested: " + workingDays);
 //        
-        
+      
         request.setEmployee(emp);
         LeaveRequest req = leaveRequestRepository.save(request);
+       
+
         return ResponseEntity.ok(req);
         
 	      	
@@ -233,8 +270,7 @@ public class LeaveRequestService {
 //	                                year
 //	                        );
 	               
-	                System.out.println("Hiii"+id);
-	                Optional<LeaveBalance> bal = leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment(req.getEmployee(), year, req.getLeaveType(), req.getDepartment());
+	                Optional<LeaveBalance> bal = leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment_Name(req.getEmployee(), year, req.getLeaveType(), req.getDepartment().getName());
                
 	                if (bal.isEmpty()) {
 
@@ -306,11 +342,7 @@ public class LeaveRequestService {
 //	       for(Attendance obj: attendanceList) {
 //	    	   obj.setStatus(LeaveType.ABSENT);
 //	       }
-	        
-	     
-	        
-	       
-	         
+
 	        req.setStatus(dto.getStatus());
 	        req.setHrRemarks(dto.getHrRemarks());
 	        req.setReviewedBy(emp);

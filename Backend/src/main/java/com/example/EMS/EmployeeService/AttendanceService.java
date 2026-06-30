@@ -94,7 +94,7 @@ public class AttendanceService {
 
         attendance.setDepartment(
                 emp.getProfessional_details()
-                   .getProfessional_department());
+                   .getProfessional_department().getName());
 
         attendance.setDesignation(
                 emp.getProfessional_details().getProfessional_designation());

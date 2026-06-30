@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.enums.Department;
 import com.example.EMS.enums.LeaveStatus;
 import com.example.EMS.enums.LeaveType;
@@ -53,7 +54,10 @@ public class LeaveRequest {
 //	private LeaveType LeaveTime = LeaveType.FULL_DAY; 
 	
 
-	private Department department;
+	@ManyToOne
+	@JoinColumn(name="department_id")
+	@JsonIgnore
+	private Departments department;
 	
 	private String approverEmail1;
 	private String approverEmail2;
@@ -176,13 +180,7 @@ public class LeaveRequest {
 		 this.leaveType = leaveType;
 	 }
 
-	 public Department getDepartment() {
-		 return department;
-	 }
-
-	 public void setDepartment(Department department) {
-		 this.department = department;
-	 }
+     
 
 	 public String getApproverEmail1() {
 		 return approverEmail1;
@@ -198,6 +196,14 @@ public class LeaveRequest {
 
 	 public void setApproverEmail2(String approverEmail2) {
 		 this.approverEmail2 = approverEmail2;
+	 }
+
+	 public Departments getDepartment() {
+		 return department;
+	 }
+
+	 public void setDepartment(Departments department) {
+		 this.department = department;
 	 }
 	 
      

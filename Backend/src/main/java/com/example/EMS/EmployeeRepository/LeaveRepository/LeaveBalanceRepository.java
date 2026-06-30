@@ -29,12 +29,12 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, Long
     		int year,
     		LeaveType type);
     
-    Optional<LeaveBalance> findByEmployeeAndYearAndTypeAndDepartment(
+    Optional<LeaveBalance> findByEmployeeAndYearAndTypeAndDepartment_Name(
     		Employee emp,
     		int year,
     		LeaveType type,
-    		Department department);
+    		String department);
     
-    Optional<List<LeaveBalance>> findByDepartment(Department department);
+    Optional<List<LeaveBalance>> findByDepartment_Name(String department);
     
 }

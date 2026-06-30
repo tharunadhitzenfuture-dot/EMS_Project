@@ -1,7 +1,10 @@
 package com.example.EMS.EmployeeEntity.LeaveEntity;
 
-import com.example.EMS.enums.Department;
+
+
+import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.enums.LeaveType;
+
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +13,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,11 +30,12 @@ public class LeavePolicy {
 	private Integer year;
 	private Integer month;
 	@Enumerated(EnumType.STRING)
-	@Column(nullable=false)
-	private Department department;
-	@Enumerated(EnumType.STRING)
     @Column(nullable=false)
 	private LeaveType type;
+	
+	@ManyToOne
+	@JoinColumn(name="department_id")
+	private Departments department;
 	
 	public Long getId() {
 		return id;
@@ -62,12 +68,13 @@ public class LeavePolicy {
 	public void setType(LeaveType type) {
 		this.type = type;
 	}
-	public Department getDepartment() {
+	public Departments getDepartment() {
 		return department;
 	}
-	public void setDepartment(Department department) {
+	public void setDepartment(Departments department) {
 		this.department = department;
 	}
+	
 	
 	
 	

@@ -162,7 +162,7 @@ public class ShiftEmployeeDetailsService {
 		  Employee employee = emp.get();
 		  
 		  request.setEmail(employee.getEmail());
-		  request.setDept(employee.getProfessional_details().getProfessional_department());
+		  request.setDept(employee.getProfessional_details().getProfessional_department().getName());
 		  request.setName(employee.getFirst_name()+" "+ employee.getLast_name());
 		  
 		  

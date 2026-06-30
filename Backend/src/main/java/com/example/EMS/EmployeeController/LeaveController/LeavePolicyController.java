@@ -53,7 +53,7 @@ public class LeavePolicyController {
 		    			.body("Please select leave type");
 		    }
 		    
-		    if(request.getDepartment() == null) {
+		    if(request.getDepartment().getName() == null || request.getDepartment().getName().isBlank()) {
 		    	return ResponseEntity.badRequest()
 		    			.body("Please select leave department");
 		    }
@@ -107,7 +107,12 @@ public class LeavePolicyController {
 		if(request.getYear() != null) {
 			exist.setYear(request.getYear());
 		}
-
+		
+		if(request.getDepartment() != null) {
+			exist.setDepartment(request.getDepartment());
+		}
+		
+		
 		return leavePolicyService.updateById(id, exist);
 	}
 }

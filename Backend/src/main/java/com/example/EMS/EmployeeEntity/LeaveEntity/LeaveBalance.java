@@ -3,9 +3,11 @@ package com.example.EMS.EmployeeEntity.LeaveEntity;
 
 
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.enums.Department;
 import com.example.EMS.enums.LeaveType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -45,9 +47,15 @@ public class LeaveBalance {
     @Column(nullable = false)
     private LeaveType type;
     
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Department department;
+//    @Enumerated(EnumType.STRING)
+//    @Column(nullable = false)
+//    private Department department;
+    
+    @ManyToOne
+    @JoinColumn(name="department_id")
+    @JsonIgnore
+    private Departments department;
+    
     
 
     public double getRemainingDays() {
@@ -122,14 +130,15 @@ public class LeaveBalance {
 		this.type = type;
 	}
 
-	public Department getDepartment() {
+	public Departments getDepartment() {
 		return department;
 	}
 
-	public void setDepartment(Department department) {
+	public void setDepartment(Departments department) {
 		this.department = department;
 	}
-	
+
+    
 	
     
     

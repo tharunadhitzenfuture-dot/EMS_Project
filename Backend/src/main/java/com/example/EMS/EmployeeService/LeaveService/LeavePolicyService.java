@@ -7,9 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeavePolicy;
 import com.example.EMS.EmployeeRepository.EmpRepository;
+import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveBalanceRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeavePolicyRepository;
 
@@ -21,42 +23,42 @@ public class LeavePolicyService {
 	private LeavePolicyRepository leavePolicyRepo;
 	private LeaveBalanceRepository leaveBalRepository;
 	private EmpRepository empRepo;
-	
-	
-	
-	public LeavePolicyService(LeavePolicyRepository leavePolicyRepo, EmpRepository empRepo, LeaveBalanceRepository leaveBalRepository) {
-	
+	private DepartmentRepository departmentRepository;
+
+	public LeavePolicyService(LeavePolicyRepository leavePolicyRepo, LeaveBalanceRepository leaveBalRepository,
+			EmpRepository empRepo, DepartmentRepository departmentRepository) {
 		this.leavePolicyRepo = leavePolicyRepo;
-		this.empRepo = empRepo;
 		this.leaveBalRepository = leaveBalRepository;
+		this.empRepo = empRepo;
+		this.departmentRepository = departmentRepository;
 	}
-
-
 
 	public ResponseEntity<?> createPolicy(LeavePolicy request){
 		
+		Departments department = departmentRepository.findByName(request.getDepartment().getName()).orElseThrow(()-> new RuntimeException("Department not found"));
+		request.setDepartment(department);
 		//Optional<LeavePolicy> res = leavePolicyRepo.findByMonthAndYear(request.getMonth(), request.getYear());
-		Optional<LeavePolicy> res = leavePolicyRepo.findByYearAndTypeAndDepartment(request.getYear(), request.getType(), request.getDepartment());
+		Optional<LeavePolicy> res = leavePolicyRepo.findByYearAndTypeAndDepartment_Name(request.getYear(), request.getType(), department.getName());
 		
 		if(res.isPresent()) {
-			return ResponseEntity.badRequest().body("Total leave for year: "+ request.getYear()+" and type "+request.getType()+" department "+ request.getDepartment()+" already presented");
+			return ResponseEntity.badRequest().body("Total leave for year: "+ request.getYear()+" and type "+request.getType()+" department "+ department.getName()+" already presented");
 		}
 		
-		List<Employee> employee = empRepo.findByProfessional_detailsProfessional_department(request.getDepartment().toString());
+		List<Employee> employee = empRepo.findByProfessional_detailsProfessional_department(department.getName());
 		
 		if(employee.isEmpty()) {
-			return ResponseEntity.badRequest().body("Employee list for department "+request.getDepartment()+" is empty");
+			return ResponseEntity.badRequest().body("Employee list for department "+department.getName()+" is empty");
 		}
 
 		for(Employee emp: employee) {
 			
-			Optional<LeaveBalance> existing = leaveBalRepository.findByEmployeeAndYearAndTypeAndDepartment(emp,  request.getYear(), request.getType(), request.getDepartment());
+			Optional<LeaveBalance> existing = leaveBalRepository.findByEmployeeAndYearAndTypeAndDepartment_Name(emp,  request.getYear(), request.getType(), department.getName());
 			if(existing.isPresent()) {
 				LeaveBalance balance = existing.get();
 				balance.setTotalDays(request.getTotalDays());
 				balance.setRemainingDays(request.getTotalDays());
 				balance.setType(request.getType());
-				balance.setDepartment(request.getDepartment());
+				balance.setDepartment(department);
 				leaveBalRepository.save(balance);
 				
 			}
@@ -80,17 +82,14 @@ public class LeavePolicyService {
 		            balance.setType(request.getType());
 		            balance.setRemainingDays(request.getTotalDays());
 		            balance.setUsedDays(0);
-		            balance.setDepartment(request.getDepartment());
+		            balance.setDepartment(department);
 
 		            leaveBalRepository.save(balance);
 			}
 			
 		}
 		LeavePolicy save = leavePolicyRepo.save(request);
-		
-		
-		
-		
+
 		return ResponseEntity.ok(save);
 		
 		
@@ -106,21 +105,23 @@ public class LeavePolicyService {
 		public ResponseEntity<?> updateById(Long id, LeavePolicy request){
 		
 		//Optional<LeavePolicy> res = leavePolicyRepo.findByMonthAndYear(request.getMonth(), request.getYear());
-		List<Employee> employee = empRepo.findByProfessional_detailsProfessional_department(request.getDepartment().toString());
+		Departments department = departmentRepository.findByName(request.getDepartment().getName()).orElseThrow(()-> new RuntimeException("Department not found"));
+		request.setDepartment(department);
+		List<Employee> employee = empRepo.findByProfessional_detailsProfessional_department(request.getDepartment().getName());
 		
 		if(employee.isEmpty()) {
-			return ResponseEntity.badRequest().body("Employee list for department "+request.getDepartment()+" is empty");
+			return ResponseEntity.badRequest().body("Employee list for department "+department.getName()+" is empty");
 		}
 
 		for(Employee emp: employee) {
 			
-			Optional<LeaveBalance> existing = leaveBalRepository.findByEmployeeAndYearAndTypeAndDepartment(emp,  request.getYear(), request.getType(), request.getDepartment());
+			Optional<LeaveBalance> existing = leaveBalRepository.findByEmployeeAndYearAndTypeAndDepartment_Name(emp,  request.getYear(), request.getType(), department.getName());
 			if(existing.isPresent()) {
 				LeaveBalance balance = existing.get();
 				balance.setTotalDays(request.getTotalDays());
 				balance.setRemainingDays(request.getTotalDays());
 				balance.setType(request.getType());
-				balance.setDepartment(request.getDepartment());
+				balance.setDepartment(department);
 				leaveBalRepository.save(balance);
 				
 			}
@@ -144,7 +145,7 @@ public class LeavePolicyService {
 		            balance.setType(request.getType());
 		            balance.setRemainingDays(request.getTotalDays());
 		            balance.setUsedDays(0);
-		            balance.setDepartment(request.getDepartment());
+		            balance.setDepartment(department);
 
 		            leaveBalRepository.save(balance);
 			}

@@ -156,13 +156,13 @@ public class WeeklyReportService {
 	            req.setPermission(permission);
 	            
 	            
-	            String dept = emp.get().getProfessional_details().getProfessional_department();
+	            String dept = emp.get().getProfessional_details().getProfessional_department().getName();
 	            
 	            if(!dept.equalsIgnoreCase("IT") && !dept.equalsIgnoreCase("Finance")) {
 	            	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee id: "+emp.get().getEmployeeId()+" department mismatched with: "+dept);
 	            }
 	       
-	            String total = getByDepartment(emp.get().getProfessional_details().getProfessional_department());
+	            String total = getByDepartment(emp.get().getProfessional_details().getProfessional_department().getName());
 	            
 	            req.setDepartment_workHours(total);
 	                                
