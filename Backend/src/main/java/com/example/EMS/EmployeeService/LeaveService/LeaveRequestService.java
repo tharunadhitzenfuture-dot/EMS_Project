@@ -26,7 +26,6 @@ import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveBalanceRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
-import com.example.EMS.enums.Department;
 import com.example.EMS.enums.LeaveStatus;
 
 import jakarta.transaction.Transactional;
