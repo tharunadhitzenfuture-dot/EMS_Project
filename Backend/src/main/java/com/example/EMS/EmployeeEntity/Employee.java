@@ -8,6 +8,7 @@ import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
 import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyReportDTO;
 import com.example.EMS.enums.Role;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -19,6 +20,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
@@ -51,8 +53,8 @@ public class Employee {
     private String imgFile;
     private String aadhar_number;
     private String pan_number;
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(nullable=false)
+    private String role;
     
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="user_id")
@@ -61,6 +63,11 @@ public class Employee {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="shift_id")
     private ShiftEmployeeDetails shiftDetails;
+    
+    @ManyToOne(cascade= CascadeType.ALL)
+    @JoinColumn(name="role_id")
+    @JsonBackReference("role-employee")
+    private RolesAssign rolesAssign;
     
     
 	@OneToOne(mappedBy="employee", cascade= CascadeType.ALL, orphanRemoval = true)
@@ -327,12 +334,7 @@ public class Employee {
 	public void setAttendance(List<Attendance> attendance) {
 		this.attendance = attendance;
 	}
-	public Role getRole() {
-		return role;
-	}
-	public void setRole(Role role) {
-		this.role = role;
-	}
+	
 	public List<LeaveRequest> getLeaveRequest() {
 		return leaveRequest;
 	}
@@ -399,6 +401,19 @@ public class Employee {
 	public void setApproval(ApprovalSystem approval) {
 		this.approval = approval;
 	}
+	public RolesAssign getRolesAssign() {
+		return rolesAssign;
+	}
+	public void setRolesAssign(RolesAssign rolesAssign) {
+		this.rolesAssign = rolesAssign;
+	}
+	public String getRole() {
+		return role;
+	}
+	public void setRole(String role) {
+		this.role = role;
+	}
+	
 	
 	
 	

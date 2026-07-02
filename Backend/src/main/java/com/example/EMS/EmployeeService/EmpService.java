@@ -40,6 +40,7 @@ import com.example.EMS.EmployeeEntity.EmployeePayroll;
 import com.example.EMS.EmployeeEntity.Experience;
 import com.example.EMS.EmployeeEntity.HigherEducation;
 import com.example.EMS.EmployeeEntity.ProfessionalDetails;
+import com.example.EMS.EmployeeEntity.RolesAssign;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
@@ -48,6 +49,7 @@ import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.ProfessionalDetailRepository;
+import com.example.EMS.EmployeeRepository.RoleAssignRepository;
 import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeavePolicyRepository;
 import com.example.EMS.enums.JobLevel;
@@ -61,17 +63,20 @@ public class EmpService {
     public ProfessionalDetailRepository professionalRepo;
     public LeavePolicyRepository leavePolicyRepo;
     public DepartmentRepository departmentRepository;
+    public RoleAssignRepository rolesRepository;
+    
 
+	
 	
 	public EmpService(EmpRepository empRepo, PasswordEncoder passwordEncoder,
 			ProfessionalDetailRepository professionalRepo, LeavePolicyRepository leavePolicyRepo,
-			DepartmentRepository departmentRepository) {
-	
+			DepartmentRepository departmentRepository, RoleAssignRepository rolesRepository) {
 		this.empRepo = empRepo;
 		this.passwordEncoder = passwordEncoder;
 		this.professionalRepo = professionalRepo;
 		this.leavePolicyRepo = leavePolicyRepo;
 		this.departmentRepository = departmentRepository;
+		this.rolesRepository = rolesRepository;
 	}
 
 	public Long getIdByEmployeeId(String empId) {
@@ -143,11 +148,30 @@ public class EmpService {
 		long nextId = (maxId == null) ? 1 : maxId + 1;
 		emp.setEmployeeId(String.format("ZF%s-%03d", type, nextId));
 		
-		
+				
 		User user = new User();
 		emp.setUser(user);		
-		emp.getUser().setName(emp.getFirst_name());
 		emp.getUser().setRoles(Set.of(emp.getRole()));
+		emp.getUser().setName(emp.getFirst_name());
+		
+//		Role Assign
+		if(emp.getRole() != null) {			
+			Optional<RolesAssign> role = rolesRepository.findByRole(emp.getRole().toString());
+			if(role.isEmpty()) {
+				return ResponseEntity.badRequest().body("Role name not assigned: "+emp.getRole().toString());
+			}
+			
+			List<Employee> lstRole = role.get().getEmployee();
+			if(role.get().getEmployee() == null) {
+			 lstRole = new ArrayList<>();
+			}
+						
+			lstRole.add(emp);
+			role.get().setEmployee(lstRole);
+			emp.setRolesAssign(role.get());
+		}
+		
+		
 		emp.getUser().setEmail(emp.getEmail());
 		emp.getUser().setEmployee(emp);
 		
@@ -237,7 +261,6 @@ public class EmpService {
 			
 		}
 		
-
 		if(file != null && !file.isEmpty()) {
 			try {
 				String fileName = saveFile(file, "uploads");
@@ -600,30 +623,30 @@ public class EmpService {
 	            emp.setPan_number(getCellValue(row.getCell(11)));
 	            emp.setAddress(getCellValue(row.getCell(12)));
 
-	            String roleValue =
-	                    getCellValue(row.getCell(13));
+	            
+	            emp.setRole(getCellValue(row.getCell(13)));
 
-	            if (roleValue != null) {
-
-	                switch (roleValue.trim().toUpperCase()) {
-
-	                    case "ADMIN":
-	                        emp.setRole(Role.ADMIN);
-	                        break;
-
-	                    case "HR":
-	                        emp.setRole(Role.HR);
-	                        break;
-
-	                    case "MANAGER":
-	                        emp.setRole(Role.MANAGER);
-	                        break;
-
-	                    default:
-	                        emp.setRole(Role.EMPLOYEE);
-	                        break;
-	                }
-	            }
+//	            if (roleValue != null) {
+//
+//	                switch (roleValue.trim().toUpperCase()) {
+//
+//	                    case "ADMIN":
+//	                        
+//	                        break;
+//
+//	                    case "HR":
+//	                        emp.setRole(Role.HR);
+//	                        break;
+//
+//	                    case "MANAGER":
+//	                        emp.setRole(Role.MANAGER);
+//	                        break;
+//
+//	                    default:
+//	                        emp.setRole(Role.EMPLOYEE);
+//	                        break;
+//	                }
+//	            }
 
 	            // =====================================================
 	            // PROFILE IMAGE
@@ -1356,7 +1379,7 @@ public class EmpService {
             if (emp.getAddress() != null) existing.setAddress(emp.getAddress());
             if (emp.getRole() != null) {
             	existing.setRole(emp.getRole());
-            	Set<Role> roles = new HashSet<>();
+            	Set<String> roles = new HashSet<>();
             	roles.add(emp.getRole());
             	existingUser.setRoles(roles);
             	existing.setUser(existingUser);
@@ -1417,7 +1440,7 @@ public class EmpService {
                 }
                 
                 
-                    
+                
 
                 if (newProfessional.getProfessional_department() != null) {
                 	
@@ -1523,7 +1546,6 @@ public class EmpService {
             
          // ================= Approvers =================
             if (emp.getApproval() != null) {
-
                 ApprovalSystem exist = existing.getApproval();
 
                 if (exist == null) {
@@ -2220,30 +2242,30 @@ public class EmpService {
                 // ROLE
                 // =====================================================
 
-                String roleValue =
-                        getCellValue(row.getCell(13));
+                
+                		emp.setRole(getCellValue(row.getCell(13)));
 
-                if (roleValue != null) {
-
-                    switch (roleValue.trim().toUpperCase()) {
-
-                        case "ADMIN":
-                            emp.setRole(Role.ADMIN);
-                            break;
-
-                        case "HR":
-                            emp.setRole(Role.HR);
-                            break;
-
-                        case "MANAGER":
-                            emp.setRole(Role.MANAGER);
-                            break;
-
-                        default:
-                            emp.setRole(Role.EMPLOYEE);
-                            break;
-                    }
-                }
+//                if (roleValue != null) {
+//
+//                    switch (roleValue.trim().toUpperCase()) {
+//
+//                        case "ADMIN":
+//                            emp.setRole(Role.ADMIN);
+//                            break;
+//
+//                        case "HR":
+//                            emp.setRole(Role.HR);
+//                            break;
+//
+//                        case "MANAGER":
+//                            emp.setRole(Role.MANAGER);
+//                            break;
+//
+//                        default:
+//                            emp.setRole(Role.EMPLOYEE);
+//                            break;
+//                    }
+//                }
 
                 // =====================================================
                 // PROFILE IMAGE

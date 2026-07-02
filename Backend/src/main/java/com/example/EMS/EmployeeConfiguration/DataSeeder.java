@@ -38,8 +38,8 @@ public class DataSeeder {
                 user.setName("Admin");
                 user.setEmail("admin@gmail.com");
                 user.setPassword(passwordEncoder.encode("admin123")); 
-                HashSet<Role> roles = new HashSet<>();
-                roles.add(Role.ADMIN);
+                HashSet<String> roles = new HashSet<>();
+                roles.add("ADMIN");
                 user.setRoles(roles);
 
                 userRepository.save(user);

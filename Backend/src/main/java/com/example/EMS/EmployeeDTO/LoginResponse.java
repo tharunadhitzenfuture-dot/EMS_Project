@@ -12,14 +12,14 @@ public class LoginResponse {
     private String email;
     private String name;
     private String token;
-    private Set<Role> role;
+    private Set<String> role;
     
     
     
-    public Set<Role> getRole() {
+    public Set<String> getRole() {
 		return role;
 	}
-	public void setRole(Set<Role> role) {
+	public void setRole(Set<String> role) {
 		this.role = role;
 	}
 	public String getToken() {

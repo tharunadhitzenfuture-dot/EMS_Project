@@ -1,9 +1,8 @@
 package com.example.EMS.EmployeeEntity;
 
-import java.time.LocalTime;
+
 import java.util.Set;
 
-import com.example.EMS.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.ElementCollection;
@@ -34,7 +33,7 @@ public class User {
 	
 	@Enumerated(EnumType.STRING)
 	@ElementCollection(fetch= FetchType.EAGER)
-	private Set<Role> roles;
+	private Set<String> roles;
 	
 	@OneToOne(mappedBy="user")
 	@JsonIgnore 
@@ -66,12 +65,7 @@ public class User {
 		this.password = password;
 	}
 	
-	public Set<Role> getRoles() {
-		return roles;
-	}
-	public void setRoles(Set<Role> roles) {
-		this.roles = roles;
-	}
+    
 	public boolean isActive() {
 		return active;
 	}
@@ -91,7 +85,13 @@ public class User {
 	public void setEmployee(Employee employee) {
 		this.employee = employee;
 	}
-	
+	public Set<String> getRoles() {
+		return roles;
+	}
+	public void setRoles(Set<String> roles) {
+		this.roles = roles;
+	}
+    
 	
 	
 	
