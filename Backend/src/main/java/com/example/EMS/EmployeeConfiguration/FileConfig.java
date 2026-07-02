@@ -21,6 +21,9 @@ public class FileConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/onBoardingProfiles/**")
         .addResourceLocations("file:onBoardingProfiles/");
         
+        registry.addResourceHandler("/companylogo/**")
+        .addResourceLocations("file:companyLogo/");
+        
         registry.addResourceHandler("/onBoardingProfilesPdf/**")
         .addResourceLocations("file:onBoardingProfilesPdf/");
     }

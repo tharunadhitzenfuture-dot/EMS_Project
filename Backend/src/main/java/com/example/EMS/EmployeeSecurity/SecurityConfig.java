@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/weekly/**").hasAnyRole("ADMIN","HR","MANAGER")
                 .requestMatchers("/api/employeeInvite/**").hasAnyRole("ADMIN","HR")
                 .requestMatchers("/api/invite/**").hasAnyRole("ADMIN","HR")
-                .requestMatchers("/uploads/**", "/uploadsPdf/**", "/onBoardingProfiles/**", "/onBoardingProfilesPdf/**").permitAll()
+                .requestMatchers("/uploads/**", "/uploadsPdf/**", "/onBoardingProfiles/**", "/onBoardingProfilesPdf/**", "/companylogo/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
