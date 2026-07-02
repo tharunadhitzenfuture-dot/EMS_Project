@@ -1,5 +1,7 @@
 package com.example.EMS.EmployeeEntity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,8 +11,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
 public class CompanySettings {
 
 	@Id
@@ -31,6 +31,8 @@ public class CompanySettings {
 	private String state;
 	private String pincode;
 	private String address;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 	public Long getId() {
 		return id;
 	}
@@ -109,6 +111,19 @@ public class CompanySettings {
 	public void setAddress(String address) {
 		this.address = address;
 	}
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+	
 	
 	
 	

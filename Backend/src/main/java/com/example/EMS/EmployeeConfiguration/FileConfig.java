@@ -22,7 +22,7 @@ public class FileConfig implements WebMvcConfigurer {
         .addResourceLocations("file:onBoardingProfiles/");
         
         registry.addResourceHandler("/companylogo/**")
-        .addResourceLocations("file:companyLogo/");
+        .addResourceLocations("file:companylogo/");
         
         registry.addResourceHandler("/onBoardingProfilesPdf/**")
         .addResourceLocations("file:onBoardingProfilesPdf/");
