@@ -1,7 +1,7 @@
 package com.example.EMS.EmployeeEntity;
 
 import java.util.List;
-
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -22,6 +22,8 @@ public class RolesAssign {
 	private String role;
 	private String parent_Role;
 	private String description;
+	
+	private Set<String> sub_designation;
 	
 	@OneToMany(mappedBy = "rolesAssign")
 	@JsonManagedReference("role-employee")
@@ -65,6 +67,14 @@ public class RolesAssign {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Set<String> getSub_designation() {
+		return sub_designation;
+	}
+
+	public void setSub_designation(Set<String> sub_designation) {
+		this.sub_designation = sub_designation;
 	}
 	
 	

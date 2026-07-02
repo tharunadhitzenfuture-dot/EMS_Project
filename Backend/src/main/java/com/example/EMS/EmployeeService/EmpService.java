@@ -53,7 +53,6 @@ import com.example.EMS.EmployeeRepository.RoleAssignRepository;
 import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeavePolicyRepository;
 import com.example.EMS.enums.JobLevel;
-import com.example.EMS.enums.Role;
 
 @Service
 public class EmpService {
@@ -164,6 +163,10 @@ public class EmpService {
 			List<Employee> lstRole = role.get().getEmployee();
 			if(role.get().getEmployee() == null) {
 			 lstRole = new ArrayList<>();
+			}
+			
+			if(emp.getProfessional_details().getProfessional_designation() != null || !emp.getProfessional_details().getProfessional_designation().isBlank()) {
+				role.get().setSub_designation(Set.of(emp.getProfessional_details().getProfessional_designation()));
 			}
 						
 			lstRole.add(emp);
@@ -1686,6 +1689,31 @@ public class EmpService {
 //                existingUser.setEmployee(existing);
 //            }
             
+         // ================= RoleAssign =================
+    		if(emp.getRole() != null) {			
+    			if(existing.getRole() != emp.getRole()) {
+    				
+    			}
+    			Optional<RolesAssign> role = rolesRepository.findByRole(emp.getRole().toString());
+    			if(role.isEmpty()) {
+    				return ResponseEntity.badRequest().body("Role name not assigned: "+emp.getRole().toString());
+    			}
+    			
+    			List<Employee> lstRole = role.get().getEmployee();
+    			if(role.get().getEmployee() == null) {
+    			 lstRole = new ArrayList<>();
+    			}
+    			
+    			if(emp.getProfessional_details().getProfessional_designation() != null || !emp.getProfessional_details().getProfessional_designation().isBlank()) {
+    				role.get().setSub_designation(Set.of(emp.getProfessional_details().getProfessional_designation()));
+    			}
+    						
+    			lstRole.add(emp);
+    			role.get().setEmployee(lstRole);
+    			existing.setRolesAssign(role.get());
+    			rolesRepository.save(role.get());
+    			
+    		}
  
 
             // ================= PAYROLL =================
