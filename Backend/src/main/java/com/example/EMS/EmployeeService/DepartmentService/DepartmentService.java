@@ -29,6 +29,7 @@ public class DepartmentService {
         Departments existing = deptRepository.findById(id).get();
 
         existing.setName(request.getName());
+        existing.setDescription(request.getDescription());
 
         Departments updated = deptRepository.save(existing);
 

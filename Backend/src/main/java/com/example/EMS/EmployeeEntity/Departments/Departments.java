@@ -16,7 +16,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 
 
 @Entity
@@ -29,6 +28,8 @@ public class Departments {
 
     @Column(unique = true)
     private String name;
+    
+    private String description;
     
     @OneToMany(mappedBy="department")
     @JsonIgnore
@@ -61,6 +62,31 @@ public class Departments {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public List<LeaveRequest> getLeaveRequest() {
+		return leaveRequest;
+	}
+
+	public void setLeaveRequest(List<LeaveRequest> leaveRequest) {
+		this.leaveRequest = leaveRequest;
+	}
+
+	public List<ProfessionalDetails> getProfessionalDetails() {
+		return professionalDetails;
+	}
+
+	public void setProfessionalDetails(List<ProfessionalDetails> professionalDetails) {
+		this.professionalDetails = professionalDetails;
 	}
 
 	public List<LeavePolicy> getLeavePolicy() {
