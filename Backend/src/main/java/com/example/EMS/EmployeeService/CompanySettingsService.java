@@ -68,7 +68,6 @@ public class CompanySettingsService {
 		}
 		
 		existing.setCompanyName(request.getCompanyName());
-		existing.setCompanyLogo(request.getCompanyLogo());
 		existing.setRegisterNumber(request.getRegisterNumber());
 		existing.setDepartment(request.getDepartment());
 		existing.setGstNumber(request.getGstNumber());
