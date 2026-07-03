@@ -30,10 +30,10 @@ public class DesignationController {
 	@PostMapping("/create")
 	public ResponseEntity<?> create(@RequestBody Designation request){
 		
-		if(request.getRole() == null || request.getRole().isBlank()) {
+		if(request.getDepartment() == null || request.getDepartment().isBlank()) {
 			return ResponseEntity.badRequest().body("Please enter designation");
 		}		
-		Optional<Designation> designation =  repository.findByRole(request.getRole());		
+		Optional<Designation> designation =  repository.findByDepartment(request.getDepartment());		
 		if(designation.isPresent()) {
 			return ResponseEntity.badRequest().body("Designation already presented");
 		}		

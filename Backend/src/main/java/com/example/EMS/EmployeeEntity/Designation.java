@@ -12,34 +12,42 @@ import lombok.Setter;
 
 
 @Entity
-@Setter
-@Getter
 public class Designation {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 	@Column(nullable=false)
-	private String role;
-	private Set<String> subRoles;
+	private String department;
+	private Set<String> designation;
+	private String description;
+	
 	public Long getId() {
 		return id;
 	}
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public String getRole() {
-		return role;
+	
+	public String getDepartment() {
+		return department;
 	}
-	public void setRole(String role) {
-		this.role = role;
+	public void setDepartment(String department) {
+		this.department = department;
 	}
-	public Set<String> getSubRoles() {
-		return subRoles;
+	public Set<String> getDesignation() {
+		return designation;
 	}
-	public void setSubRoles(Set<String> subRoles) {
-		this.subRoles = subRoles;
+	public void setDesignation(Set<String> designation) {
+		this.designation = designation;
 	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
 	
 }
 

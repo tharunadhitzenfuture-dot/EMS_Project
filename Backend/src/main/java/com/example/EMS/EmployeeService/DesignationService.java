@@ -27,8 +27,9 @@ public class DesignationService {
 	    Designation existing = repository.findById(id)
 	            .orElseThrow(() -> new RuntimeException("Designation not found"));
 
-	    existing.setRole(request.getRole());
-	    existing.setSubRoles(request.getSubRoles());
+	    existing.setDepartment(request.getDepartment());
+	    existing.setDesignation(request.getDesignation());
+	    existing.setDescription(request.getDescription());
 
 	    Designation updated = repository.save(existing);
 

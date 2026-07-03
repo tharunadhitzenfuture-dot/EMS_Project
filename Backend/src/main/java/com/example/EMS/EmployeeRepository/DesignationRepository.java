@@ -8,5 +8,5 @@ import com.example.EMS.EmployeeEntity.Designation;
 
 public interface DesignationRepository extends JpaRepository<Designation, Long> {
 
-	Optional<Designation> findByRole(String name);
+	Optional<Designation> findByDepartment(String name);
 }
