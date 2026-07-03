@@ -78,6 +78,8 @@ public class CompanySettingsService {
 		existing.setState(request.getState());
 		existing.setPincode(request.getPincode());
 		existing.setAddress(request.getAddress());
+		existing.setCreatedAt(request.getCreatedAt());
+		existing.setUpdatedAt(request.getUpdatedAt());
 		
 		CompanySettings res = repository.save(existing);
 		return ResponseEntity.ok(res);
