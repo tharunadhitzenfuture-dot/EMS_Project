@@ -36,5 +36,12 @@ public interface EmpRepository extends JpaRepository<Employee, Long>{
 		    WHERE e.professional_details.professional_department = :department
 		    """)
 	List<Employee> findByProfessional_detailsProfessional_department(String department);
+	
+	@Query("""
+		    SELECT e
+		    FROM Employee e
+		    WHERE LOWER(e.first_name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+		""")
+	List<Employee> searchByFirstName(@Param("keyword") String keyword);
 
 }

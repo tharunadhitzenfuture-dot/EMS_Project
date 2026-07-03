@@ -1,5 +1,6 @@
 package com.example.EMS.EmployeeController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -13,11 +14,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.EMS.EmployeeDTO.ApproverResponseDTO;
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeService.EmpService;
 
 @RestController
@@ -26,10 +30,16 @@ import com.example.EMS.EmployeeService.EmpService;
 public class EmpController {
 	
 	public EmpService empService;
+	public EmpRepository empRepository;
 	
-	public EmpController(EmpService empService) {
+	
+	
+	public EmpController(EmpService empService, EmpRepository empRepository) {
 		this.empService = empService;
+		this.empRepository = empRepository;
 	}
+
+
 
 	@PostMapping("/register")
 	public ResponseEntity<?> createUserControll(@RequestBody Employee emp){
@@ -602,6 +612,21 @@ public class EmpController {
 	            higherCertification,
 	            salarySlip
 	    );
+	}
+	
+	@GetMapping("/search")
+	public List<ApproverResponseDTO> searchEmployee(@RequestParam String keyword){
+		List<Employee> lst =  empRepository.searchByFirstName(keyword);
+		List<ApproverResponseDTO> res = new ArrayList<>();
+		for(Employee emp: lst) {
+			ApproverResponseDTO dto = new ApproverResponseDTO();
+			dto.setEmpId(emp.getEmployeeId());
+			dto.setEmail(emp.getEmail());
+			dto.setName(emp.getFirst_name()+" "+emp.getLast_name());		
+			res.add(dto);
+		}
+		return res;
+		
 	}
 	
 	
