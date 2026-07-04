@@ -1,5 +1,6 @@
 package com.example.EMS.EmployeeController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.EMS.EmployeeDTO.ApproverResponseDTO;
+import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.RolesAssign;
 import com.example.EMS.EmployeeRepository.RoleAssignRepository;
 import com.example.EMS.EmployeeService.RoleAssignService;
@@ -96,6 +99,27 @@ public class RoleAssignController {
 		return service.update(exist.get(), request);
 		
 		
+	}
+	
+	
+	@GetMapping("/search")
+	public List<ApproverResponseDTO> searchEmployee(
+	        @RequestParam String department,
+	        @RequestParam String name) {
+
+	    List<Employee> employees = service.searchEmployee(department, name);
+
+	    List<ApproverResponseDTO> res = new ArrayList<>();
+
+	    for (Employee emp : employees) {
+	        ApproverResponseDTO dto = new ApproverResponseDTO();
+	        dto.setEmpId(emp.getEmployeeId());
+	        dto.setEmail(emp.getEmail());
+	        dto.setName(emp.getFirst_name() + " " + emp.getLast_name());
+	        res.add(dto);
+	    }
+
+	    return res;
 	}
 
 }

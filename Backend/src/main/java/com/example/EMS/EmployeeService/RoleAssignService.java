@@ -1,8 +1,11 @@
 package com.example.EMS.EmployeeService;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.RolesAssign;
 import com.example.EMS.EmployeeRepository.RoleAssignRepository;
 
@@ -33,6 +36,10 @@ public class RoleAssignService {
 		RolesAssign res =  repository.save(exist);
 		return ResponseEntity.ok(res);
 		
+	}
+	
+	public List<Employee> searchEmployee(String department, String name) {
+	    return repository.searchEmployee(department, name);
 	}
 	
 }
