@@ -165,12 +165,13 @@ public class EmpService {
 			
 			Optional<Role> rolePresent =  roleRepo.findByRole(emp.getRole().toString());			
 			if(rolePresent.isEmpty()) {
-				return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Role not presented with name: "+emp.getRole().toString());
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role not presented with name: "+emp.getRole().toString());
 			}			
 			Optional<RolesAssign> roles = rolesRepository.findByRole(emp.getRole().toString());
 			RolesAssign role= roles.get(); 
 			if(roles.isEmpty()) {
 				role = new RolesAssign();
+				role.setRole(emp.getRole().toString());
 			}
 			
 			List<Employee> lstRole = role.getEmployee();
@@ -1704,27 +1705,31 @@ public class EmpService {
             
          // ================= RoleAssign =================
     		if(emp.getRole() != null) {			
-    			if(existing.getRole() != emp.getRole()) {
-    				
-    			}
-    			Optional<RolesAssign> role = rolesRepository.findByRole(emp.getRole().toString());
-    			if(role.isEmpty()) {
-    				return ResponseEntity.badRequest().body("Role name not assigned: "+emp.getRole().toString());
+    			
+    			Optional<Role> rolePresent =  roleRepo.findByRole(emp.getRole().toString());			
+    			if(rolePresent.isEmpty()) {
+    				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role not presented with name: "+emp.getRole().toString());
+    			}			
+    			Optional<RolesAssign> roles = rolesRepository.findByRole(emp.getRole().toString());
+    			RolesAssign role = roles.get();
+    			if(roles.isEmpty()) {
+    				role = new RolesAssign();
+    				role.setRole(emp.getRole().toString());
     			}
     			
-    			List<Employee> lstRole = role.get().getEmployee();
-    			if(role.get().getEmployee() == null) {
+    			List<Employee> lstRole = role.getEmployee();
+    			if(role.getEmployee() == null) {
     			 lstRole = new ArrayList<>();
     			}
     			
     			if(emp.getProfessional_details().getProfessional_designation() != null || !emp.getProfessional_details().getProfessional_designation().isBlank()) {
-    				role.get().setSub_designation(Set.of(emp.getProfessional_details().getProfessional_designation()));
+    				role.setSub_designation(Set.of(emp.getProfessional_details().getProfessional_designation()));
     			}
     						
     			lstRole.add(emp);
-    			role.get().setEmployee(lstRole);
-    			existing.setRolesAssign(role.get());
-    			rolesRepository.save(role.get());
+    			role.setEmployee(lstRole);
+    			existing.setRolesAssign(role);
+    			rolesRepository.save(role);
     			
     		}
  
