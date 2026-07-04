@@ -46,12 +46,14 @@ import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeavePolicy;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
+import com.example.EMS.EmployeeEntity.Role.Role;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.ProfessionalDetailRepository;
 import com.example.EMS.EmployeeRepository.RoleAssignRepository;
 import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeavePolicyRepository;
+import com.example.EMS.EmployeeRepository.RoleRepository.RoleRepository;
 import com.example.EMS.enums.JobLevel;
 
 @Service
@@ -63,19 +65,24 @@ public class EmpService {
     public LeavePolicyRepository leavePolicyRepo;
     public DepartmentRepository departmentRepository;
     public RoleAssignRepository rolesRepository;
+    public RoleRepository roleRepo;
     
 
 	
 	
+	
+
 	public EmpService(EmpRepository empRepo, PasswordEncoder passwordEncoder,
 			ProfessionalDetailRepository professionalRepo, LeavePolicyRepository leavePolicyRepo,
-			DepartmentRepository departmentRepository, RoleAssignRepository rolesRepository) {
+			DepartmentRepository departmentRepository, RoleAssignRepository rolesRepository, RoleRepository roleRepo) {
+
 		this.empRepo = empRepo;
 		this.passwordEncoder = passwordEncoder;
 		this.professionalRepo = professionalRepo;
 		this.leavePolicyRepo = leavePolicyRepo;
 		this.departmentRepository = departmentRepository;
 		this.rolesRepository = rolesRepository;
+		this.roleRepo = roleRepo;
 	}
 
 	public Long getIdByEmployeeId(String empId) {
@@ -155,23 +162,29 @@ public class EmpService {
 		
 //		Role Assign
 		if(emp.getRole() != null) {			
-			Optional<RolesAssign> role = rolesRepository.findByRole(emp.getRole().toString());
-			if(role.isEmpty()) {
-				return ResponseEntity.badRequest().body("Role name not assigned: "+emp.getRole().toString());
+			
+			Optional<Role> rolePresent =  roleRepo.findByRole(emp.getRole().toString());			
+			if(rolePresent.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Role not presented with name: "+emp.getRole().toString());
+			}			
+			Optional<RolesAssign> roles = rolesRepository.findByRole(emp.getRole().toString());
+			RolesAssign role= roles.get(); 
+			if(roles.isEmpty()) {
+				role = new RolesAssign();
 			}
 			
-			List<Employee> lstRole = role.get().getEmployee();
-			if(role.get().getEmployee() == null) {
+			List<Employee> lstRole = role.getEmployee();
+			if(role.getEmployee() == null) {
 			 lstRole = new ArrayList<>();
 			}
 			
 			if(emp.getProfessional_details().getProfessional_designation() != null || !emp.getProfessional_details().getProfessional_designation().isBlank()) {
-				role.get().setSub_designation(Set.of(emp.getProfessional_details().getProfessional_designation()));
+				role.setSub_designation(Set.of(emp.getProfessional_details().getProfessional_designation()));
 			}
 						
 			lstRole.add(emp);
-			role.get().setEmployee(lstRole);
-			emp.setRolesAssign(role.get());
+			role.setEmployee(lstRole);
+			emp.setRolesAssign(role);
 		}
 		
 		

@@ -1,4 +1,4 @@
-package com.example.EMS.EmployeeController;
+package com.example.EMS.EmployeeController.RoleController;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,32 +15,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.EMS.EmployeeEntity.RolesAssign;
-import com.example.EMS.EmployeeRepository.RoleAssignRepository;
-import com.example.EMS.EmployeeService.RoleAssignService;
+
+import com.example.EMS.EmployeeEntity.Role.Role;
+import com.example.EMS.EmployeeRepository.RoleRepository.RoleRepository;
+import com.example.EMS.EmployeeService.RoleService;
 
 @RestController
-@RequestMapping("/api/roleAssign")
-public class RoleAssignController {
+@RequestMapping("/api/role")
+public class RoleController {
 	
-	private RoleAssignRepository repository;
-	private RoleAssignService service;
-	
-	public RoleAssignController(RoleAssignRepository repository, RoleAssignService service) {
+	private RoleRepository repository;
+	private RoleService service;
+	public RoleController(RoleRepository repository, RoleService service) {
 		this.repository = repository;
 		this.service = service;
 	}
 	
 	
-	
 	@PostMapping("/create")
-	public ResponseEntity<?> createRole(@RequestBody RolesAssign request){
+	public ResponseEntity<?> createRole(@RequestBody Role request){
 		
 		if(request.getRole() == null || request.getRole().isBlank()) {
 			return ResponseEntity.badRequest().body("Please enter role name");
 		}
 		
-		Optional<RolesAssign>  res =repository.findByRole(request.getRole());
+		Optional<Role>  res =repository.findByRole(request.getRole());
 		
 		if(res.isPresent()) {
 			return ResponseEntity.badRequest().body("Role already created with name: "+request.getRole());
@@ -52,7 +51,7 @@ public class RoleAssignController {
 	@GetMapping("/getAll")
 	public ResponseEntity<?> getAll(){
 		
-		List<RolesAssign> lst = repository.findAll();
+		List<Role> lst = repository.findAll();
 		return ResponseEntity.ok(lst);
 		
 	
@@ -60,7 +59,7 @@ public class RoleAssignController {
 
 	@GetMapping("/getByRole")
 	public ResponseEntity<?> getByRole(@RequestParam String role){
-		Optional<RolesAssign>  res = repository.findByRole(role);
+		Optional<Role>  res = repository.findByRole(role);
 		
 		if(res.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Role is not found.");
@@ -70,8 +69,8 @@ public class RoleAssignController {
 	}
 	
 	@DeleteMapping("/deleteById/{id}")
-	public ResponseEntity<?> getByRole(@PathVariable Long id){
-		Optional<RolesAssign>  res = repository.findById(id);
+	public ResponseEntity<?> deleteByRole(@PathVariable Long id){
+		Optional<Role>  res = repository.findById(id);
 		
 		if(res.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Role is not found.");
@@ -83,11 +82,11 @@ public class RoleAssignController {
 	}
 	
 	@PutMapping("/updateById/{id}")
-	public ResponseEntity<?> updateById(@PathVariable Long id,@RequestBody RolesAssign request){
+	public ResponseEntity<?> updateById(@PathVariable Long id,@RequestBody Role request){
 		if(request.getRole() == null || request.getRole().isBlank()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter role name");
 		}
-		Optional<RolesAssign> exist = repository.findById(id);
+		Optional<Role> exist = repository.findById(id);
 		
 		if(exist.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Role is not found with id: "+id);
@@ -97,5 +96,7 @@ public class RoleAssignController {
 		
 		
 	}
+	
+	
 
 }
