@@ -52,6 +52,7 @@ public class RoleAssignController {
 	
 	}
 	
+	
 	@GetMapping("/getAll")
 	public ResponseEntity<?> getAll(){
 		
@@ -66,7 +67,7 @@ public class RoleAssignController {
 		Optional<RolesAssign>  res = repository.findByRole(role);
 		
 		if(res.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Role is not found.");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role is not found.");
 		}
 		
 		return ResponseEntity.ok(res.get());
@@ -77,7 +78,7 @@ public class RoleAssignController {
 		Optional<RolesAssign>  res = repository.findById(id);
 		
 		if(res.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Role is not found.");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role is not found.");
 		}
 		
 		repository.deleteById(id);
@@ -93,7 +94,7 @@ public class RoleAssignController {
 		Optional<RolesAssign> exist = repository.findById(id);
 		
 		if(exist.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Role is not found with id: "+id);
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role is not found with id: "+id);
 		}
 		
 		return service.update(exist.get(), request);

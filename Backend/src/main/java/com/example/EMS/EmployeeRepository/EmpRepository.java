@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.User;
-import com.example.EMS.enums.Department;
+
 
 public interface EmpRepository extends JpaRepository<Employee, Long>{
 	Optional<Employee> findByEmail(String email);

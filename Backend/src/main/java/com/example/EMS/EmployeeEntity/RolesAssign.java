@@ -3,6 +3,7 @@ package com.example.EMS.EmployeeEntity;
 import java.util.List;
 import java.util.Set;
 
+import com.example.EMS.EmployeeEntity.Module.ModuleList;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
@@ -28,6 +29,9 @@ public class RolesAssign {
 	@OneToMany(mappedBy = "rolesAssign")
 	@JsonManagedReference("role-employee")
 	private List<Employee> employee;
+	
+	@OneToMany(mappedBy="rolesAssign")
+	private List<ModuleList> moduleList;
 
 	public Long getId() {
 		return id;
@@ -76,6 +80,16 @@ public class RolesAssign {
 	public void setSub_designation(Set<String> sub_designation) {
 		this.sub_designation = sub_designation;
 	}
+
+	public List<ModuleList> getModuleList() {
+		return moduleList;
+	}
+
+	public void setModuleList(List<ModuleList> moduleList) {
+		this.moduleList = moduleList;
+	}
+    
+	
 	
 	
 	

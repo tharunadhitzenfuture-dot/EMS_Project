@@ -67,11 +67,6 @@ public class EmpService {
     public RoleAssignRepository rolesRepository;
     public RoleRepository roleRepo;
     
-
-	
-	
-	
-
 	public EmpService(EmpRepository empRepo, PasswordEncoder passwordEncoder,
 			ProfessionalDetailRepository professionalRepo, LeavePolicyRepository leavePolicyRepo,
 			DepartmentRepository departmentRepository, RoleAssignRepository rolesRepository, RoleRepository roleRepo) {
@@ -121,6 +116,7 @@ public class EmpService {
     // ══════════════════════════════════════════════════════════════════
     // CREATE — single employee with multipart files
     // ══════════════════════════════════════════════════════════════════
+    @Transactional
 	public ResponseEntity<?> createEmpIMG(@RequestPart("employee") Employee emp, 
 			@RequestPart(value= "file", required=false) MultipartFile file,			
 			
@@ -168,10 +164,13 @@ public class EmpService {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role not presented with name: "+emp.getRole().toString());
 			}			
 			Optional<RolesAssign> roles = rolesRepository.findByRole(emp.getRole().toString());
-			RolesAssign role= roles.get(); 
+			RolesAssign role = null;
 			if(roles.isEmpty()) {
 				role = new RolesAssign();
 				role.setRole(emp.getRole().toString());
+			}
+			else {
+				role = roles.get();
 			}
 			
 			List<Employee> lstRole = role.getEmployee();
@@ -545,6 +544,8 @@ public class EmpService {
 		
 
 		Employee employee = empRepo.save(emp);
+		
+		
 		return ResponseEntity.ok(employee);
 		
 	}
@@ -1334,6 +1335,7 @@ public class EmpService {
     // ══════════════════════════════════════════════════════════════════
     // UPDATE — all fields + files together
     // ══════════════════════════════════════════════════════════════════
+    @Transactional
     public ResponseEntity<?> updateEmployeeAll(
 
             String empId,
@@ -1711,10 +1713,13 @@ public class EmpService {
     				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role not presented with name: "+emp.getRole().toString());
     			}			
     			Optional<RolesAssign> roles = rolesRepository.findByRole(emp.getRole().toString());
-    			RolesAssign role = roles.get();
+    			RolesAssign role = null;
     			if(roles.isEmpty()) {
     				role = new RolesAssign();
     				role.setRole(emp.getRole().toString());
+    			}
+    			else {
+    				role = roles.get();
     			}
     			
     			List<Employee> lstRole = role.getEmployee();
