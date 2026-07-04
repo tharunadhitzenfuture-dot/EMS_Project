@@ -9,5 +9,6 @@ import com.example.EMS.EmployeeEntity.Departments.Departments;
 public interface DepartmentRepository extends JpaRepository<Departments, Long> {
 	
 	Optional<Departments> findByName(String name);
+	
 
 }

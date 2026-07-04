@@ -12,6 +12,8 @@ import lombok.Setter;
 
 
 @Entity
+@Getter
+@Setter
 public class Designation {
 
 	@Id

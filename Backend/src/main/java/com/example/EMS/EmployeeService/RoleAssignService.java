@@ -24,5 +24,15 @@ public class RoleAssignService {
 		return ResponseEntity.ok(res);
 	}
 	
+	public ResponseEntity<?> update(RolesAssign exist, RolesAssign request){
+		
+		exist.setRole(request.getRole());
+		exist.setParent_Role(request.getParent_Role());
+		exist.setDescription(request.getDescription());
+		
+		RolesAssign res =  repository.save(exist);
+		return ResponseEntity.ok(res);
+		
+	}
 	
 }

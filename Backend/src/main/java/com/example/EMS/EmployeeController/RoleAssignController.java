@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -79,6 +80,22 @@ public class RoleAssignController {
 		repository.deleteById(id);
 		
 		return ResponseEntity.ok("Role deleted with id: "+id);
+	}
+	
+	@PutMapping("/updateById/{id}")
+	public ResponseEntity<?> updateById(@PathVariable Long id,@RequestBody RolesAssign request){
+		if(request.getRole() == null || request.getRole().isBlank()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter role name");
+		}
+		Optional<RolesAssign> exist = repository.findById(id);
+		
+		if(exist.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Role is not found with id: "+id);
+		}
+		
+		return service.update(exist.get(), request);
+		
+		
 	}
 
 }
