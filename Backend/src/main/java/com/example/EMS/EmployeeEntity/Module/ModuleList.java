@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
@@ -32,17 +31,17 @@ public class ModuleList {
 	private Long id;
 	@ManyToOne
 	@JoinColumn(name="module_id")
-	private Module module;	
+	private ModuleEntity module;	
 	@ManyToOne
 	@JoinColumn(name="employee_id")
 	private Employee employee;	
 	@ManyToOne
 	@JoinColumn(name="role_id")
 	private RolesAssign rolesAssign;	
-	private boolean create;	
-	private boolean view;	
-	private boolean edit;	
-	private boolean delete;
+	private boolean createPermission;	
+	private boolean viewPermission;	
+	private boolean editPermission;	
+	private boolean deletePermission;
 	public Long getId() {
 		return id;
 	}
@@ -50,10 +49,11 @@ public class ModuleList {
 		this.id = id;
 	}
 	
-	public Module getModule() {
+	
+	public ModuleEntity getModule() {
 		return module;
 	}
-	public void setModule(Module module) {
+	public void setModule(ModuleEntity module) {
 		this.module = module;
 	}
 	public Employee getEmployee() {
@@ -68,30 +68,31 @@ public class ModuleList {
 	public void setRolesAssign(RolesAssign rolesAssign) {
 		this.rolesAssign = rolesAssign;
 	}
-	public boolean isCreate() {
-		return create;
+	public boolean isCreatePermission() {
+		return createPermission;
 	}
-	public void setCreate(boolean create) {
-		this.create = create;
+	public void setCreatePermission(boolean createPermission) {
+		this.createPermission = createPermission;
 	}
-	public boolean isView() {
-		return view;
+	public boolean isViewPermission() {
+		return viewPermission;
 	}
-	public void setView(boolean view) {
-		this.view = view;
+	public void setViewPermission(boolean viewPermission) {
+		this.viewPermission = viewPermission;
 	}
-	public boolean isEdit() {
-		return edit;
+	public boolean isEditPermission() {
+		return editPermission;
 	}
-	public void setEdit(boolean edit) {
-		this.edit = edit;
+	public void setEditPermission(boolean editPermission) {
+		this.editPermission = editPermission;
 	}
-	public boolean isDelete() {
-		return delete;
+	public boolean isDeletePermission() {
+		return deletePermission;
 	}
-	public void setDelete(boolean delete) {
-		this.delete = delete;
+	public void setDeletePermission(boolean deletePermission) {
+		this.deletePermission = deletePermission;
 	}
+    
 	
 	
 	

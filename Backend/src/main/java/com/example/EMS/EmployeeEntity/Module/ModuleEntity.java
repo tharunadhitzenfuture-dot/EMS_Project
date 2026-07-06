@@ -1,5 +1,7 @@
 package com.example.EMS.EmployeeEntity.Module;
 
+
+
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -13,7 +15,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class Module {
+public class ModuleEntity {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
