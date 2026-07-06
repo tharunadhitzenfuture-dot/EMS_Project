@@ -31,6 +31,7 @@ public class RolesAssign {
 	private List<Employee> employee;
 	
 	@OneToMany(mappedBy="rolesAssign")
+	@JsonManagedReference("role-moduleList")
 	private List<ModuleList> moduleList;
 
 	public Long getId() {

@@ -4,6 +4,8 @@ package com.example.EMS.EmployeeEntity.Module;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,6 +26,7 @@ public class ModuleEntity {
     private String moduleName;
     
 	@OneToMany(mappedBy="module")
+	@JsonManagedReference("module-moduleList")
 	private List<ModuleList> moduleList;
 
 	public Long getId() {

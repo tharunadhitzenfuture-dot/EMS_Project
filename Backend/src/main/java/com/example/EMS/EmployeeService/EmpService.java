@@ -46,6 +46,8 @@ import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeavePolicy;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
+import com.example.EMS.EmployeeEntity.Module.ModuleEntity;
+import com.example.EMS.EmployeeEntity.Module.ModuleList;
 import com.example.EMS.EmployeeEntity.Role.Role;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
@@ -53,6 +55,8 @@ import com.example.EMS.EmployeeRepository.ProfessionalDetailRepository;
 import com.example.EMS.EmployeeRepository.RoleAssignRepository;
 import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeavePolicyRepository;
+import com.example.EMS.EmployeeRepository.ModuleRepository.ModuleListRepository;
+import com.example.EMS.EmployeeRepository.ModuleRepository.ModuleRepository;
 import com.example.EMS.EmployeeRepository.RoleRepository.RoleRepository;
 import com.example.EMS.enums.JobLevel;
 
@@ -66,10 +70,16 @@ public class EmpService {
     public DepartmentRepository departmentRepository;
     public RoleAssignRepository rolesRepository;
     public RoleRepository roleRepo;
+    public ModuleRepository moduleRepository;
+    public ModuleListRepository moduleListRepository;
+	
+
     
+	
 	public EmpService(EmpRepository empRepo, PasswordEncoder passwordEncoder,
 			ProfessionalDetailRepository professionalRepo, LeavePolicyRepository leavePolicyRepo,
-			DepartmentRepository departmentRepository, RoleAssignRepository rolesRepository, RoleRepository roleRepo) {
+			DepartmentRepository departmentRepository, RoleAssignRepository rolesRepository, RoleRepository roleRepo,
+			ModuleRepository moduleRepository, ModuleListRepository moduleListRepository) {
 
 		this.empRepo = empRepo;
 		this.passwordEncoder = passwordEncoder;
@@ -78,6 +88,8 @@ public class EmpService {
 		this.departmentRepository = departmentRepository;
 		this.rolesRepository = rolesRepository;
 		this.roleRepo = roleRepo;
+		this.moduleRepository = moduleRepository;
+		this.moduleListRepository = moduleListRepository;
 	}
 
 	public Long getIdByEmployeeId(String empId) {
@@ -544,6 +556,37 @@ public class EmpService {
 		
 
 		Employee employee = empRepo.save(emp);
+		
+		List<ModuleEntity> modules = moduleRepository.findAll();
+
+		List<ModuleList> permissions = new ArrayList<>();
+
+		for (ModuleEntity module : modules) {
+
+			
+			ModuleList permission = null;
+		    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndEmployee(module, employee);
+		    if(moduleLst.isEmpty()) {
+		    	permission = new ModuleList();
+		    }
+		    else {
+		    	permission = moduleLst.get();
+		    }
+
+		    permission.setEmployee(emp);
+		    permission.setRolesAssign(emp.getRolesAssign());
+		    permission.setModule(module);
+
+		    permission.setCreatePermission(false);
+		    permission.setViewPermission(false);
+		    permission.setEditPermission(false);
+		    permission.setDeletePermission(false);
+
+		    permissions.add(permission);
+		}
+		
+		emp.setModuleList(permissions);
+		moduleListRepository.saveAll(permissions);
 		
 		
 		return ResponseEntity.ok(employee);
@@ -1708,7 +1751,7 @@ public class EmpService {
          // ================= RoleAssign =================
     		if(emp.getRole() != null) {			
     			
-    			Optional<Role> rolePresent =  roleRepo.findByRole(emp.getRole().toString());			
+    			Optional<Role> rolePresent =  roleRepo.findByRole(emp.getRole().toString());
     			if(rolePresent.isEmpty()) {
     				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role not presented with name: "+emp.getRole().toString());
     			}			
@@ -1961,10 +2004,39 @@ public class EmpService {
                 if (i >= list.size()) list.add(e);
             }
         }
-
+        
         Employee saved = empRepo.save(existing);
-        System.out.println(saved.getProfessional_details()
-                .getProfessional_department().getClass());
+        
+     // ================= Module List =================
+		List<ModuleEntity> modules = moduleRepository.findAll();
+
+		List<ModuleList> permissions = existing.getModuleList();
+
+		for (ModuleEntity module : modules) {
+
+			ModuleList permission = null;
+		    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndEmployee(module, existing);
+		    if(moduleLst.isEmpty()) {
+		    	permission = new ModuleList();
+		    }
+		    else {
+		    	permission = moduleLst.get();
+		    }
+
+		    permission.setEmployee(existing);
+		    permission.setRolesAssign(existing.getRolesAssign());
+		    permission.setModule(module);
+
+		    permission.setCreatePermission(false);
+		    permission.setViewPermission(false);
+		    permission.setEditPermission(false);
+		    permission.setDeletePermission(false);
+
+		    permissions.add(permission);
+		}
+		
+		existing.setModuleList(permissions);     
+        moduleListRepository.saveAll(permissions);
         return ResponseEntity.ok(saved);
     }
 

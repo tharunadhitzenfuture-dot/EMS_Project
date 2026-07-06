@@ -84,6 +84,7 @@ public class Employee {
 	private ProfessionalDetails professional_details;
 	
 	@OneToMany(mappedBy="employee", cascade= CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference("employee-moduleList")
 	private List<ModuleList> moduleList;
 	
 	@OneToMany(mappedBy = "employee",
