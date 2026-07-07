@@ -1,7 +1,7 @@
 package com.example.EMS.EmployeeEntity.Module;
 
-import com.example.EMS.EmployeeEntity.Employee;
-import com.example.EMS.EmployeeEntity.RolesAssign;
+
+import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.Role.Role;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -36,17 +36,23 @@ public class ModuleList {
 	
 	@JsonProperty("empId")
 	public String getEmpId() {
-	    return employee != null ? employee.getEmployeeId() : null;
+
+	    if (user == null || user.getEmployee() == null) {
+	        return null;
+	    }
+
+	    return user.getEmployee().getEmployeeId();
 	}
 	
 	@ManyToOne
 	@JoinColumn(name="module_id")
 	@JsonBackReference("module-moduleList")
 	private ModuleEntity module;	
+	
 	@ManyToOne
-	@JoinColumn(name="employee_id")
-	@JsonBackReference("employee-moduleList")
-	private Employee employee;	
+	@JoinColumn(name="user_id")
+	@JsonBackReference("user-moduleList")
+	private User user;	
 	
 	@ManyToOne
 	@JoinColumn(name="role_id")
@@ -72,13 +78,16 @@ public class ModuleList {
 	public void setModule(ModuleEntity module) {
 		this.module = module;
 	}
-	public Employee getEmployee() {
-		return employee;
-	}
-	public void setEmployee(Employee employee) {
-		this.employee = employee;
-	}
 	
+	
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
 	public boolean isCreatePermission() {
 		return createPermission;
 	}

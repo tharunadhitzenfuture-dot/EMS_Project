@@ -137,7 +137,7 @@ public class UserService {
 		    response.setEmail(existingUser.getEmail());
 
 		    
-		    response.setRole(existingUser.getRoles());
+		    response.setRole(existingUser.getRoleEntity().getRole());
 
 		    return ResponseEntity.ok(response);
 		}
@@ -425,8 +425,8 @@ public class UserService {
 		        existing.setEmail(updatedUser.getEmail());
 		    }
 
-		    if (updatedUser.getRoles() != null) {
-		        existing.setRoles(updatedUser.getRoles());
+		    if (updatedUser.getRoleEntity() != null) {
+		        existing.setRoleEntity(updatedUser.getRoleEntity());
 		    }
 
 		    if (updatedUser.getPassword() != null &&

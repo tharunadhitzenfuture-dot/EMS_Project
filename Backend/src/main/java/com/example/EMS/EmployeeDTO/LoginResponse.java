@@ -7,19 +7,20 @@ import com.example.EMS.enums.Role;
 import lombok.Data;
 
 
-@Data
+
 public class LoginResponse {
     private String email;
     private String name;
     private String token;
-    private Set<String> role;
+    private String role;
     
     
     
-    public Set<String> getRole() {
+    
+	public String getRole() {
 		return role;
 	}
-	public void setRole(Set<String> role) {
+	public void setRole(String role) {
 		this.role = role;
 	}
 	public String getToken() {

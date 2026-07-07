@@ -47,7 +47,7 @@ public class ModuleListService {
 	
 	public ResponseEntity<?> employeePermission(EmployeePermissionDTO dto, Long id){
 		
-		 Optional<ModuleList> modules = moduleListRepository.findByEmployeeIdAndModuleId(id, dto.getModuleId());
+		 Optional<ModuleList> modules = moduleListRepository.findByUserIdAndModuleId(id, dto.getModuleId());
 		 
 		 if(modules.isEmpty()) {
 			 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No records found with employee id: "+id+" and module Id: "+dto.getModuleId());

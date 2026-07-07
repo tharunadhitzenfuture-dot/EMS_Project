@@ -1,18 +1,23 @@
 package com.example.EMS.EmployeeEntity;
 
 
-import java.util.Set;
+import java.util.List;
 
+import com.example.EMS.EmployeeEntity.Module.ModuleList;
+import com.example.EMS.EmployeeEntity.Role.Role;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -24,28 +29,28 @@ public class User {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long userId;
+	private Long id;
 	private String name;
 	private String email;
 	private String password;
 	private String confirmPassword;
 	private boolean active = true;
 	
-	@Enumerated(EnumType.STRING)
-	@ElementCollection(fetch= FetchType.EAGER)
-	private Set<String> roles;
+	 @ManyToOne(fetch = FetchType.EAGER)
+	 @JoinColumn(name = "roleEntity_id")
+	 @JsonBackReference("roleEntity-employee")
+	 private Role roleEntity;
 	
 	@OneToOne(mappedBy="user")
 	@JsonIgnore 
 	private Employee employee;
 	
+	@OneToMany(mappedBy="user", cascade= CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference("user-moduleList")
+	private List<ModuleList> moduleList;
+	
 
-	public Long getUserId() {
-		return userId;
-	}
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+	
 	public String getName() {
 		return name;
 	}
@@ -85,12 +90,27 @@ public class User {
 	public void setEmployee(Employee employee) {
 		this.employee = employee;
 	}
-	public Set<String> getRoles() {
-		return roles;
+	public Role getRoleEntity() {
+		return roleEntity;
 	}
-	public void setRoles(Set<String> roles) {
-		this.roles = roles;
+	public void setRoleEntity(Role roleEntity) {
+		this.roleEntity = roleEntity;
 	}
+	
+	public List<ModuleList> getModuleList() {
+		return moduleList;
+	}
+	public void setModuleList(List<ModuleList> moduleList) {
+		this.moduleList = moduleList;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	
+	
     
 	
 	

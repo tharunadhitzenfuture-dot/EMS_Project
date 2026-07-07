@@ -51,6 +51,11 @@ public class ModuleListController {
 			return ResponseEntity.badRequest().body("Please enter role name");
 		}
 		Optional<Role> role = roleRepository.findByRole(dto.getRole());
+		
+		if(dto.getRole().equalsIgnoreCase("ADMIN")) {
+			return ResponseEntity.badRequest().body("ADMIN permission menu cannot be modified");
+		}
+		
 		if(role.isEmpty()) {
 			return ResponseEntity.badRequest().body("Please valid role name");
 		}

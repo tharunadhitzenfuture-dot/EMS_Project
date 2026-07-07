@@ -59,11 +59,9 @@ public class JwtFilter extends OncePerRequestFilter {
         userRepository.findByEmail(email)
                 .ifPresent(user -> {
 
-                    List<SimpleGrantedAuthority> authorities =user.getRoles()
-                                    .stream()
-                                    .map(role ->
-                                            new SimpleGrantedAuthority("ROLE_" + role))
-                                    .toList();
+                	List<SimpleGrantedAuthority> authorities =
+                	        List.of(new SimpleGrantedAuthority(
+                	                "ROLE_" + user.getRoleEntity().getRole()));
 
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(user,null,authorities);

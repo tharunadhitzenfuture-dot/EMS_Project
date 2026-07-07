@@ -6,8 +6,6 @@ import java.util.List;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
-import com.example.EMS.EmployeeEntity.Module.ModuleList;
-import com.example.EMS.EmployeeEntity.Role.Role;
 import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyReportDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -15,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -69,10 +66,7 @@ public class Employee {
     @JsonBackReference("role-employee")
     private RolesAssign rolesAssign;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "roleEntity_id")
-    @JsonBackReference("roleEntity-employee")
-    private Role roleEntity;
+  
     
     
 	@OneToOne(mappedBy="employee", cascade= CascadeType.ALL, orphanRemoval = true)
@@ -90,9 +84,7 @@ public class Employee {
 	@OneToOne(mappedBy="employee", cascade= CascadeType.ALL, orphanRemoval = true)
 	private ProfessionalDetails professional_details;
 	
-	@OneToMany(mappedBy="employee", cascade= CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference("employee-moduleList")
-	private List<ModuleList> moduleList;
+	
 	
 	@OneToMany(mappedBy = "employee",
 			cascade = CascadeType.ALL,
@@ -422,18 +414,7 @@ public class Employee {
 	public void setRole(String role) {
 		this.role = role;
 	}
-	public List<ModuleList> getModuleList() {
-		return moduleList;
-	}
-	public void setModuleList(List<ModuleList> moduleList) {
-		this.moduleList = moduleList;
-	}
-	public Role getRoleEntity() {
-		return roleEntity;
-	}
-	public void setRoleEntity(Role roleEntity) {
-		this.roleEntity = roleEntity;
-	}
+
     
 	
 	

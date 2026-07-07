@@ -9,8 +9,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.EMS.EmployeeEntity.User;
+import com.example.EMS.EmployeeEntity.Role.Role;
 import com.example.EMS.EmployeeRepository.UserRepository;
-import com.example.EMS.enums.Role;
+import com.example.EMS.EmployeeRepository.RoleRepository.RoleRepository;
+
 
 
 
@@ -18,13 +20,14 @@ import com.example.EMS.enums.Role;
 public class DataSeeder {
 	
 	private final PasswordEncoder passwordEncoder;
-	
-	
+	private final RoleRepository roleRepository;
 
-    public DataSeeder(PasswordEncoder passwordEncoder) {
+
+	public DataSeeder(PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+	
 		this.passwordEncoder = passwordEncoder;
+		this.roleRepository = roleRepository;
 	}
-
 
 
 	@Bean
@@ -35,12 +38,15 @@ public class DataSeeder {
             if (userRepository.findByEmail("admin@gmail.com").isEmpty()) {
 
                 User user = new User();
+                Role role = new Role();
+                role.setRole("ADMIN");
+                Role savedRole = roleRepository.save(role);
                 user.setName("Admin");
                 user.setEmail("admin@gmail.com");
                 user.setPassword(passwordEncoder.encode("admin123")); 
                 HashSet<String> roles = new HashSet<>();
                 roles.add("ADMIN");
-                user.setRoles(roles);
+                user.setRoleEntity(savedRole);
 
                 userRepository.save(user);
 

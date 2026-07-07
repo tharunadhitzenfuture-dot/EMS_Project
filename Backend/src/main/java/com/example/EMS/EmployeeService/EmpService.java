@@ -165,7 +165,7 @@ public class EmpService {
 				
 		User user = new User();
 		emp.setUser(user);		
-		emp.getUser().setRoles(Set.of(emp.getRole()));
+		
 		emp.getUser().setName(emp.getFirst_name());
 		
 //		Role Assign
@@ -186,6 +186,7 @@ public class EmpService {
 			}
 			
 			List<Employee> lstRole = role.getEmployee();
+			emp.getUser().setRoleEntity(rolePresent.get());
 			if(role.getEmployee() == null) {
 			 lstRole = new ArrayList<>();
 			}
@@ -571,7 +572,7 @@ public class EmpService {
 
 			
 			ModuleList permission = null;
-		    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndEmployee(module, employee);
+		    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndUser(module, user);
 		    if(moduleLst.isEmpty()) {
 		    	permission = new ModuleList();
 		    }
@@ -579,7 +580,7 @@ public class EmpService {
 		    	permission = moduleLst.get();
 		    }
 
-		    permission.setEmployee(emp);
+		    permission.setUser(user);
 		    
 		    
 		    permission.setRole(role);		   
@@ -593,7 +594,7 @@ public class EmpService {
 		    permissions.add(permission);
 		}
 		
-		emp.setModuleList(permissions);
+		user.setModuleList(permissions);
 		moduleListRepository.saveAll(permissions);
 		
 		
@@ -1451,7 +1452,7 @@ public class EmpService {
             	existing.setRole(emp.getRole());
             	Set<String> roles = new HashSet<>();
             	roles.add(emp.getRole());
-            	existingUser.setRoles(roles);
+            	
             	existing.setUser(existingUser);
             }
 
@@ -1779,6 +1780,7 @@ public class EmpService {
     			if(role.getEmployee() == null) {
     			 lstRole = new ArrayList<>();
     			}
+    			existingUser.setRoleEntity(rolePresent.get());
     			
     			if(emp.getProfessional_details().getProfessional_designation() != null || !emp.getProfessional_details().getProfessional_designation().isBlank()) {
     				role.setSub_designation(Set.of(emp.getProfessional_details().getProfessional_designation()));
@@ -2020,7 +2022,7 @@ public class EmpService {
      // ================= Module List =================
 		List<ModuleEntity> modules = moduleRepository.findAll();
 
-		List<ModuleList> permissions = existing.getModuleList();
+		List<ModuleList> permissions = existingUser.getModuleList();
 		Optional<Role> roles = roleRepo.findByRole(saved.getRole());
 		if(roles.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role name not created with name: "+saved.getRole());
@@ -2029,7 +2031,7 @@ public class EmpService {
 		for (ModuleEntity module : modules) {
 
 			ModuleList permission = null;
-		    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndEmployee(module, existing);
+		    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndUser(module, existingUser);
 		    if(moduleLst.isEmpty()) {
 		    	permission = new ModuleList();
 		    }
@@ -2037,7 +2039,7 @@ public class EmpService {
 		    	permission = moduleLst.get();
 		    }
 
-		    permission.setEmployee(existing);
+		    permission.setUser(existingUser);
 		    permission.setRole(role);	
 		    permission.setModule(module);
 
@@ -2049,7 +2051,7 @@ public class EmpService {
 		    permissions.add(permission);
 		}
 		
-		existing.setModuleList(permissions);     
+		existingUser.setModuleList(permissions);    
         moduleListRepository.saveAll(permissions);
         return ResponseEntity.ok(saved);
     }
