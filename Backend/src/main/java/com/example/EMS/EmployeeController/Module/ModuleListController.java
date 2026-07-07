@@ -52,9 +52,7 @@ public class ModuleListController {
 		}
 		Optional<Role> role = roleRepository.findByRole(dto.getRole());
 		
-		if(dto.getRole().equalsIgnoreCase("ADMIN")) {
-			return ResponseEntity.badRequest().body("ADMIN permission menu cannot be modified");
-		}
+		
 		
 		if(role.isEmpty()) {
 			return ResponseEntity.badRequest().body("Please valid role name");
@@ -62,6 +60,10 @@ public class ModuleListController {
 		
 		Long roleId  = role.get().getId();
 		Long moduleId = dto.getModuleId();
+		
+		if(dto.getRole().equalsIgnoreCase("ADMIN") || roleId == 1) {
+			return ResponseEntity.badRequest().body("ADMIN permission menu cannot be modified");
+		}
 		
 		Optional<ModuleEntity> entity = moduleRepository.findById(moduleId);
 		
