@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.EMS.EmployeeDTO.CompanyDetailDTO;
 import com.example.EMS.EmployeeEntity.CompanySettings;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.CompanySettingsRepository;
@@ -90,6 +91,18 @@ public class CompanySettingsService {
 	public List<CompanySettings> getAll() {
         return repository.findAll();
     }
+	
+	public List<CompanyDetailDTO> getAllDetail() {
+
+	    List<CompanySettings> settings = repository.findAll();
+
+	    return settings.stream().map(company -> {
+	        CompanyDetailDTO dto = new CompanyDetailDTO();
+	        dto.setCompanyName(company.getCompanyName());
+	        dto.setCompanyLogo(company.getCompanyLogo());
+	        return dto;
+	    }).toList();
+	}
 
     public CompanySettings getById(Long id) {
         return repository.findById(id)

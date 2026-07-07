@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.EMS.EmployeeDTO.CompanyDetailDTO;
 import com.example.EMS.EmployeeEntity.CompanySettings;
 import com.example.EMS.EmployeeRepository.CompanySettingsRepository;
 import com.example.EMS.EmployeeService.CompanySettingsService;
@@ -98,6 +99,11 @@ public class CompanySettingsController {
 	@GetMapping("/getAll")
     public ResponseEntity<List<CompanySettings>> getAll() {
         return ResponseEntity.ok(service.getAll());
+    }
+	
+	@GetMapping("/getAllDetails")
+    public ResponseEntity<List<CompanyDetailDTO>> getAllDetails() { 
+        return ResponseEntity.ok(service.getAllDetail());
     }
 
     @GetMapping("/getById/{id}")
