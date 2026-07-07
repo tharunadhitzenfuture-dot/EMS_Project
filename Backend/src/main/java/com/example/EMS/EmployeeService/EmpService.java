@@ -560,6 +560,11 @@ public class EmpService {
 		List<ModuleEntity> modules = moduleRepository.findAll();
 
 		List<ModuleList> permissions = new ArrayList<>();
+		Optional<Role> roles = roleRepo.findByRole(employee.getRole());
+		if(roles.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role name not created with name: "+employee.getRole());
+		}
+		Role role = roles.get();
 
 		for (ModuleEntity module : modules) {
 
@@ -574,7 +579,9 @@ public class EmpService {
 		    }
 
 		    permission.setEmployee(emp);
-		    permission.setRolesAssign(emp.getRolesAssign());
+		    
+		    
+		    permission.setRole(role);		   
 		    permission.setModule(module);
 
 		    permission.setCreatePermission(false);
@@ -2011,7 +2018,11 @@ public class EmpService {
 		List<ModuleEntity> modules = moduleRepository.findAll();
 
 		List<ModuleList> permissions = existing.getModuleList();
-
+		Optional<Role> roles = roleRepo.findByRole(saved.getRole());
+		if(roles.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role name not created with name: "+saved.getRole());
+		}
+		Role role = roles.get();
 		for (ModuleEntity module : modules) {
 
 			ModuleList permission = null;
@@ -2024,7 +2035,7 @@ public class EmpService {
 		    }
 
 		    permission.setEmployee(existing);
-		    permission.setRolesAssign(existing.getRolesAssign());
+		    permission.setRole(role);	
 		    permission.setModule(module);
 
 		    permission.setCreatePermission(false);

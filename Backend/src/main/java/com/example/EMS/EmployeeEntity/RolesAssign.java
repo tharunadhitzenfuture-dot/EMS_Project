@@ -30,9 +30,9 @@ public class RolesAssign {
 	@JsonManagedReference("role-employee")
 	private List<Employee> employee;
 	
-	@OneToMany(mappedBy="rolesAssign")
-	@JsonManagedReference("role-moduleList")
-	private List<ModuleList> moduleList;
+//	@OneToMany(mappedBy="rolesAssign")
+//	@JsonManagedReference("role-moduleList")
+//	private List<ModuleList> moduleList;
 
 	public Long getId() {
 		return id;
@@ -82,13 +82,13 @@ public class RolesAssign {
 		this.sub_designation = sub_designation;
 	}
 
-	public List<ModuleList> getModuleList() {
-		return moduleList;
-	}
-
-	public void setModuleList(List<ModuleList> moduleList) {
-		this.moduleList = moduleList;
-	}
+//	public List<ModuleList> getModuleList() {
+//		return moduleList;
+//	}
+//
+//	public void setModuleList(List<ModuleList> moduleList) {
+//		this.moduleList = moduleList;
+//	}
     
 	
 	

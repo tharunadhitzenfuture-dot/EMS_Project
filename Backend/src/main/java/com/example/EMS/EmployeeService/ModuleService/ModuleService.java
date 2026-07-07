@@ -13,6 +13,7 @@ import com.example.EMS.EmployeeEntity.Module.ModuleList;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.ModuleRepository.ModuleListRepository;
 import com.example.EMS.EmployeeRepository.ModuleRepository.ModuleRepository;
+import com.example.EMS.EmployeeRepository.RoleRepository.RoleRepository;
 
 @Service
 public class ModuleService {
@@ -20,17 +21,23 @@ public class ModuleService {
 	private ModuleRepository repository;
 	private EmpRepository employeeRepository;
 	private ModuleListRepository moduleListRepository;
+	private RoleRepository roleRepository;
 
 	
-	
-	
+
+
+
+
 	public ModuleService(ModuleRepository repository, EmpRepository employeeRepository,
-			ModuleListRepository moduleListRepository) {
-	
+			ModuleListRepository moduleListRepository, RoleRepository roleRepository) {
+
 		this.repository = repository;
 		this.employeeRepository = employeeRepository;
 		this.moduleListRepository = moduleListRepository;
+		this.roleRepository = roleRepository;
 	}
+
+
 
 
 
@@ -56,7 +63,8 @@ public class ModuleService {
 		    
 
 		    permission.setEmployee(employee);
-		    permission.setRolesAssign(employee.getRolesAssign());
+		    
+		    permission.setRole(employee.getRoleEntity());	
 		    permission.setModule(res);
 
 		    permission.setCreatePermission(false);

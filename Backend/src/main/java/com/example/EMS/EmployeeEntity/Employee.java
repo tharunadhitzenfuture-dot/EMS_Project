@@ -7,6 +7,7 @@ import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
 import com.example.EMS.EmployeeEntity.Module.ModuleList;
+import com.example.EMS.EmployeeEntity.Role.Role;
 import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyReportDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -66,6 +68,11 @@ public class Employee {
     @JoinColumn(name="role_id")
     @JsonBackReference("role-employee")
     private RolesAssign rolesAssign;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "roleEntity_id")
+    @JsonBackReference("roleEntity-employee")
+    private Role roleEntity;
     
     
 	@OneToOne(mappedBy="employee", cascade= CascadeType.ALL, orphanRemoval = true)
@@ -221,7 +228,7 @@ public class Employee {
 		this.phone_number = phone_number;
 	}
 
-
+	
 	public String getGender() {
 		return gender;
 	}
@@ -420,6 +427,12 @@ public class Employee {
 	}
 	public void setModuleList(List<ModuleList> moduleList) {
 		this.moduleList = moduleList;
+	}
+	public Role getRoleEntity() {
+		return roleEntity;
+	}
+	public void setRoleEntity(Role roleEntity) {
+		this.roleEntity = roleEntity;
 	}
     
 	
