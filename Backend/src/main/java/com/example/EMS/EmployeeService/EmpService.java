@@ -205,7 +205,8 @@ public class EmpService {
 		
 		if(emp.getApproval() != null) {
 			if(emp.getApproval().getApproverEmail1() != null 
-					&& emp.getApproval().getApproverEmail2() != null ) {
+					&& emp.getApproval().getApproverEmail2() != null && !emp.getApproval().getApproverEmail1().isBlank() &&
+					!emp.getApproval().getApproverEmail2().isBlank()) {
 				String email1 = emp.getApproval().getApproverEmail1();
 				String email2 = emp.getApproval().getApproverEmail2();
 				
@@ -216,7 +217,7 @@ public class EmpService {
                      return ResponseEntity.badRequest()
                              .body("Employee cannot be their own approver.");
                  }
-                int n1 = getJobLevel(emp.getEmail());
+                int n1 = Integer.parseInt(emp.getProfessional_details().getJobLevel().toString().substring(2));
 				int n2 = getJobLevel(email1);
 				int n3 = getJobLevel(email2);
 				
@@ -230,7 +231,7 @@ public class EmpService {
 				
 				
 			}
-			 else if(emp.getApproval().getApproverEmail1() != null) {
+			 else if(emp.getApproval().getApproverEmail1() != null && !emp.getApproval().getApproverEmail1().isBlank()) {
              	if (emp.getApproval().getApproverEmail1().equalsIgnoreCase(emp.getEmail())) {
 
                      return ResponseEntity.badRequest()
@@ -1628,8 +1629,8 @@ public class EmpService {
                 String email2 = emp.getApproval().getApproverEmail2(); 
 
                 // Validate hierarchy only when both approvers are available
-                if (email1 != null && email2 != null) {
-
+                if (email1 != null && email2 != null && !email1.isBlank() && !email2.isBlank()) {
+                	
                     if (email1.equalsIgnoreCase(email2)) {
                         return ResponseEntity.badRequest()
                                 .body("Approver 1 and Approver 2 cannot be the same employee.");
@@ -1642,7 +1643,7 @@ public class EmpService {
                                 .body("Employee cannot be their own approver.");
                     }
                     
-                    int n1 = getJobLevel(emp.getEmail());
+                    int n1 = Integer.parseInt(existing.getProfessional_details().getJobLevel().toString().substring(2));
                     int n2 = getJobLevel(email1);
                     int n3 = getJobLevel(email2);
 
@@ -1654,13 +1655,14 @@ public class EmpService {
     					return ResponseEntity.badRequest().body("Approver 2 should be higher than approver 1");
     				}
                 }
-                else if(email1 != null) {
+                else if(email1 != null && !email1.isBlank()) {
 
                     if (email1.equalsIgnoreCase(existing.getEmail())) {
 
                         return ResponseEntity.badRequest()
                                 .body("Employee cannot be their own approver.");
                     }
+                    
                     
                     int n1 = getJobLevel(emp.getEmail());
                     int n2 = getJobLevel(email1);
@@ -1677,6 +1679,7 @@ public class EmpService {
                     exist.setApproverEmail2(emp.getApproval().getApproverEmail2());
                 
             }
+            
             
             
          // ================= leave balance =================
