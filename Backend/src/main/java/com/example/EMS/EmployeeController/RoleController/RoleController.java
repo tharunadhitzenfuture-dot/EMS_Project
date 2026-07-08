@@ -76,6 +76,10 @@ public class RoleController {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Role is not found.");
 		}
 		
+		if(id == 1) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You cannot delete admin");
+		}
+		
 		repository.deleteById(id);
 		
 		return ResponseEntity.ok("Role deleted with id: "+id);
@@ -87,6 +91,10 @@ public class RoleController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter role name");
 		}
 		Optional<Role> exist = repository.findById(id);
+		
+		if(id == 1 || request.getRole().equalsIgnoreCase("ADMIN")) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You cannot update admin");
+		}
 		
 		if(exist.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Role is not found with id: "+id);

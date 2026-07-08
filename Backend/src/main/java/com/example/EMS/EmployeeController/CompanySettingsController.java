@@ -32,7 +32,7 @@ public class CompanySettingsController {
 		this.service = service;
 	}
 
-
+    
 
 	@PostMapping("/create")
 	public ResponseEntity<?> createCompany(@RequestPart(value="request",required=true) CompanySettings request, 

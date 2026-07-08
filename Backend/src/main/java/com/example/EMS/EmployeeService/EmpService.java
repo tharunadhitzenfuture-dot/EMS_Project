@@ -175,6 +175,9 @@ public class EmpService {
 			if(rolePresent.isEmpty()) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role not presented with name: "+emp.getRole().toString());
 			}			
+			if(emp.getRole().toString().equalsIgnoreCase("ADMIN")) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot assign as ADMIN");
+			}
 			Optional<RolesAssign> roles = rolesRepository.findByRole(emp.getRole().toString());
 			RolesAssign role = null;
 			if(roles.isEmpty()) {
@@ -1765,7 +1768,11 @@ public class EmpService {
     			Optional<Role> rolePresent =  roleRepo.findByRole(emp.getRole().toString());
     			if(rolePresent.isEmpty()) {
     				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role not presented with name: "+emp.getRole().toString());
-    			}			
+    			}		
+    			if(emp.getRole().toString().equalsIgnoreCase("ADMIN")) {
+    				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot assign as ADMIN");
+    			}
+    			
     			Optional<RolesAssign> roles = rolesRepository.findByRole(emp.getRole().toString());
     			RolesAssign role = null;
     			if(roles.isEmpty()) {
