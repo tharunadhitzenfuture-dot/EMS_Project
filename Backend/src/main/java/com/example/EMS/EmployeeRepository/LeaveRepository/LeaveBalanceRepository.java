@@ -6,8 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
-import com.example.EMS.enums.Department;
-import com.example.EMS.enums.LeaveType;
+import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveType;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -24,12 +24,12 @@ public interface LeaveBalanceRepository extends JpaRepository<LeaveBalance, Long
             Integer year
     );
     
-    Optional<LeaveBalance> findByEmployeeAndYearAndType(
+    Optional<LeaveBalance> findByEmployeeAndYearAndLeaveType(
     		Employee emp,
     		int year,
     		LeaveType type);
     
-    Optional<LeaveBalance> findByEmployeeAndYearAndTypeAndDepartment_Name(
+    Optional<LeaveBalance> findByEmployeeAndYearAndLeaveTypeAndDepartment_Name(
     		Employee emp,
     		int year,
     		LeaveType type,

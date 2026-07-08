@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.User;
+import com.example.EMS.EmployeeEntity.Departments.Departments;
 
 
 public interface EmpRepository extends JpaRepository<Employee, Long>{
@@ -35,7 +36,7 @@ public interface EmpRepository extends JpaRepository<Employee, Long>{
 		    FROM Employee e
 		    WHERE e.professional_details.professional_department = :department
 		    """)
-	List<Employee> findByProfessional_detailsProfessional_department(String department);
+		List<Employee> findEmployeesByDepartment(@Param("department") Departments department);
 	
 	@Query("""
 		    SELECT e
@@ -43,5 +44,7 @@ public interface EmpRepository extends JpaRepository<Employee, Long>{
 		    WHERE LOWER(e.first_name) LIKE LOWER(CONCAT('%', :keyword, '%'))
 		""")
 	List<Employee> searchByFirstName(@Param("keyword") String keyword);
+	
+	
 
 }

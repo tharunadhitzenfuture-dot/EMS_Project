@@ -2,10 +2,10 @@ package com.example.EMS.EmployeeEntity.LeaveEntity;
 
 
 
+import java.util.List;
+
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.Departments.Departments;
-import com.example.EMS.enums.Department;
-import com.example.EMS.enums.LeaveType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -43,9 +43,9 @@ public class LeaveBalance {
  
     private Integer month;
     
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private LeaveType type;
+    @ManyToOne
+	@JoinColumn(name="leaveType_id")
+	private LeaveType leaveType;
     
 //    @Enumerated(EnumType.STRING)
 //    @Column(nullable = false)
@@ -122,13 +122,7 @@ public class LeaveBalance {
 		this.remainingDays = remainingDays;
 	}
 
-	public LeaveType getType() {
-		return type;
-	}
-
-	public void setType(LeaveType type) {
-		this.type = type;
-	}
+	
 
 	public Departments getDepartment() {
 		return department;
@@ -138,6 +132,15 @@ public class LeaveBalance {
 		this.department = department;
 	}
 
+	public LeaveType getLeaveType() {
+		return leaveType;
+	}
+
+	public void setLeaveType(LeaveType leaveType) {
+		this.leaveType = leaveType;
+	}
+
+	
     
 	
     

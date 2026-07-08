@@ -20,12 +20,14 @@ import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
+import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveType;
 import com.example.EMS.EmployeeException.BadRequestException;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveBalanceRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
+import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveTypeRepository;
 import com.example.EMS.enums.LeaveStatus;
 
 import jakarta.transaction.Transactional;
@@ -37,14 +39,21 @@ public class LeaveRequestService {
 	private final LeaveBalanceRepository leaveBalanceRepository;
 	private final LeaveRequestRepository leaveRequestRepository;
 	private final DepartmentRepository departmentRepository;
+	private final LeaveTypeRepository leaveTypeRepository;
+
+	
+
+	
 
 
 	public LeaveRequestService(EmpRepository empRepository, LeaveBalanceRepository leaveBalanceRepository,
-			LeaveRequestRepository leaveRequestRepository, DepartmentRepository departmentRepository) {
+			LeaveRequestRepository leaveRequestRepository, DepartmentRepository departmentRepository,
+			LeaveTypeRepository leaveTypeRepository) {
 		this.empRepository = empRepository;
 		this.leaveBalanceRepository = leaveBalanceRepository;
 		this.leaveRequestRepository = leaveRequestRepository;
 		this.departmentRepository = departmentRepository;
+		this.leaveTypeRepository = leaveTypeRepository;
 	}
 
 
@@ -59,10 +68,8 @@ public class LeaveRequestService {
 			email2 = emp.getApproval().getApproverEmail2();
 		}
 		
-		
-		
 		if(email1 == null || email1.isBlank()) {
-			return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Approver 1 not set");
+			return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Approver 1 not set for employee: "+empId);
 		}
 		else {
 			request.setApproverEmail1(email1);
@@ -109,9 +116,14 @@ public class LeaveRequestService {
         	request.setDepartment(department.get());
         }
         
-        Optional<LeaveBalance> balance =leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment_Name(emp, year, request.getLeaveType(), dept );
+        Optional<LeaveType> leaveType = leaveTypeRepository.findByName(request.getLeaveType().getName());
+        if(leaveType.isEmpty()) {
+        	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Leave type not found with name: "+request.getLeaveType().getName());
+        }
+        
+        Optional<LeaveBalance> balance =leaveBalanceRepository.findByEmployeeAndYearAndLeaveTypeAndDepartment_Name(emp, year, leaveType.get(), dept );
         if(balance.isEmpty()) {
-        	return ResponseEntity.badRequest().body("Employee leave policy for type: "+request.getLeaveType()+" department: "+dept+" not found");
+        	return ResponseEntity.badRequest().body("Employee leave policy for type: "+request.getLeaveType().getName()+" department: "+dept+" not found");
         }
         
         
@@ -125,6 +137,7 @@ public class LeaveRequestService {
         request.setEmployee(emp);
         request.setTotalDays(workingDays);
         request.setDepartment(department.get());
+        request.setLeaveType(leaveType.get());
         LeaveRequest req = leaveRequestRepository.save(request);
         return ResponseEntity.ok(req);
         
@@ -202,7 +215,13 @@ public class LeaveRequestService {
         	request.setDepartment(deptEntity);
         }
         
-        Optional<LeaveBalance> balance = leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment_Name(emp, year, request.getLeaveType(), dept);
+        Optional<LeaveType> leaveType = leaveTypeRepository.findByName(request.getLeaveType().getName());
+        if(leaveType.isEmpty()) {
+        	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Leave type not found with name: "+request.getLeaveType().getName());
+        }
+        request.setLeaveType(leaveType.get());
+        
+        Optional<LeaveBalance> balance = leaveBalanceRepository.findByEmployeeAndYearAndLeaveTypeAndDepartment_Name(emp, year, request.getLeaveType(), dept);
         
         if(balance.isEmpty()) {
         	return ResponseEntity.badRequest().body("Employee leave policy for type: "+request.getLeaveType()+" not set");
@@ -237,12 +256,17 @@ public class LeaveRequestService {
 //	        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not authorized to review leave requests");
 //	        }
 	        
-	        if(!emp.getEmail().equals(req.getApproverEmail1()) && !emp.getEmail().equals(req.getApproverEmail2())) {
+	        if(!emp.getEmail().equalsIgnoreCase(req.getApproverEmail1()) && !emp.getEmail().equalsIgnoreCase(req.getApproverEmail2())) {
 	        	return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body("You are not authorized to approve this leave request. Only the designated approver (" 
-	                    + req.getApproverEmail1() +" or "+req.getApproverEmail1()+") can perform this action.");
+	                    + req.getApproverEmail1() +" or "+req.getApproverEmail2()+") can perform this action.");
 	        }
 	        
 	        
+	        Optional<LeaveType> leaveType = leaveTypeRepository.findByName(req.getLeaveType().getName());
+	        if(leaveType.isEmpty()) {
+	        	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Leave type not found with name: "+req.getLeaveType().getName());
+	        }
+	        req.setLeaveType(leaveType.get());
 	        
 	        if (req.getStatus() == LeaveStatus.CANCELLED)
 	            throw new BadRequestException("Cannot review a cancelled request");
@@ -250,7 +274,7 @@ public class LeaveRequestService {
 	            throw new BadRequestException("Request has already been reviewed");
 	        if (dto.getStatus() != LeaveStatus.APPROVED && dto.getStatus() != LeaveStatus.REJECTED)
 	            throw new BadRequestException("Status must be APPROVED or REJECTED");
-	        
+	        LeaveBalance remaining = null;
 	        if (dto.getStatus() == LeaveStatus.APPROVED) {
 
 	            LocalDate current = req.getStartDate();
@@ -269,7 +293,7 @@ public class LeaveRequestService {
 //	                                year
 //	                        );
 	               
-	                Optional<LeaveBalance> bal = leaveBalanceRepository.findByEmployeeAndYearAndTypeAndDepartment_Name(req.getEmployee(), year, req.getLeaveType(), req.getDepartment().getName());
+	                Optional<LeaveBalance> bal = leaveBalanceRepository.findByEmployeeAndYearAndLeaveTypeAndDepartment_Name(req.getEmployee(), year, leaveType.get(), req.getDepartment().getName());
                
 	                if (bal.isEmpty()) {
 
@@ -291,7 +315,7 @@ public class LeaveRequestService {
 
 
 	                balance.setRemainingDays(balance.getRemainingDays()); 
-	                leaveBalanceRepository.save(balance);
+	                remaining = leaveBalanceRepository.save(balance);
 
 	               
 	                current = current.plusDays(1);
@@ -346,6 +370,14 @@ public class LeaveRequestService {
 	        req.setHrRemarks(dto.getHrRemarks());
 	        req.setReviewedBy(emp);
 	        req.setReviewedAt(LocalDateTime.now());
+	        
+	        if(remaining.getRemainingDays() > 0) {
+	        	req.setLeavePaid(true);
+	        }
+	        else {
+	        	req.setLeavePaid(false);
+	        }
+	        
 
 	        LeaveRequest res = leaveRequestRepository.save(req);
 	        return ResponseEntity.ok(res);
@@ -364,12 +396,16 @@ public class LeaveRequestService {
 //	        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not authorized to review leave requests");
 //	        }
 	        
-	        if(!emp.getEmail().equals(req.getApproverEmail1()) && !emp.getEmail().equals(req.getApproverEmail2())) {
+	        if(!emp.getEmail().equalsIgnoreCase(req.getApproverEmail1()) && !emp.getEmail().equalsIgnoreCase(req.getApproverEmail2())) {
 	        	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You are not authorized to approve this leave request. Only the designated approver (" 
 	                    + req.getApproverEmail1() +" or "+req.getApproverEmail1()+") can perform this action.");
 	        }
 	        
-	        
+	        Optional<LeaveType> leaveType = leaveTypeRepository.findByName(req.getLeaveType().getName());
+	        if(leaveType.isEmpty()) {
+	        	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Leave type not found with name: "+req.getLeaveType().getName());
+	        }
+	        req.setLeaveType(leaveType.get());
 
 	        if (req.getStatus() == LeaveStatus.CANCELLED)
 	            throw new BadRequestException("Cannot review a cancelled request");
@@ -480,10 +516,13 @@ public class LeaveRequestService {
 	     if (request.getReason() != null) {
 	         leave.setReason(request.getReason());
 	     }
+	     
+        Optional<LeaveType> leaveType = leaveTypeRepository.findByName(request.getLeaveType().getName());
+        if(leaveType.isEmpty()) {
+        	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Leave type not found with name: "+request.getLeaveType().getName());
+        }
+        request.setLeaveType(leaveType.get());
 
-	     if (request.getLeaveType() != null) {
-	         leave.setLeaveType(request.getLeaveType());
-	     }
 
 	     List<LeaveRequest> overlaps =
 	             leaveRequestRepository.findOverlappingLeaves(

@@ -4,8 +4,8 @@ package com.example.EMS.EmployeeEntity;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.example.EMS.enums.Department;
-import com.example.EMS.enums.LeaveType;
+import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveType;
+import com.example.EMS.enums.LeaveTypes;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -18,6 +18,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -39,8 +40,13 @@ public class Attendance {
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable=true)
-	private LeaveType status = LeaveType.PRESENT;
+	private LeaveTypes status = LeaveTypes.PRESENT;
+	
 	private String totalWorkingHours;
+	
+	@ManyToOne
+	@JoinColumn(name="leaveType_id")
+	private LeaveType leaveType;
 	
 	
 	@JsonProperty("empId")
@@ -111,12 +117,19 @@ public class Attendance {
 	public void setAttendanceDate(LocalDate attendanceDate) {
 		this.attendanceDate = attendanceDate;
 	}
-	public LeaveType getStatus() {
+	public LeaveTypes getStatus() {
 		return status;
 	}
-	public void setStatus(LeaveType status) {
+	public void setStatus(LeaveTypes status) {
 		this.status = status;
 	}
+	public LeaveType getLeaveType() {
+		return leaveType;
+	}
+	public void setLeaveType(LeaveType leaveType) {
+		this.leaveType = leaveType;
+	}
+	
 
 	
 	

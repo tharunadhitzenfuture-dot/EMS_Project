@@ -7,7 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.enums.LeaveStatus;
-import com.example.EMS.enums.LeaveType;
+import com.example.EMS.enums.LeaveTypes;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -44,7 +44,7 @@ public class Permission {
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable=true)
-	private LeaveType leaveType = LeaveType.PERMISSION;
+	private LeaveTypes leaveType = LeaveTypes.PERMISSION;
 	
 	private String approverEmail1;
 	private String approverEmail2;
@@ -104,11 +104,11 @@ public class Permission {
 		 this.employee = employee;
 	 }
 
-	 public LeaveType getLeaveType() {
-		 return leaveType;
-	 }
+	 public LeaveTypes getLeaveType() {
+		return leaveType;
+	}
 
-	 public void setLeaveType(LeaveType leaveType) {
+	 public void setLeaveType(LeaveTypes leaveType) {
 		 this.leaveType = leaveType;
 	 }
 

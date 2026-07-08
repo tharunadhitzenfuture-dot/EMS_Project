@@ -1,6 +1,6 @@
 package com.example.EMS.enums;
 
-public enum LeaveType {
+public enum LeaveTypes {
 	
 	PRESENT,
     ABSENT,
@@ -13,5 +13,6 @@ public enum LeaveType {
     ON_LEAVE,
     HOLIDAY,
     WEEK_OFF
-	
+
+
 }

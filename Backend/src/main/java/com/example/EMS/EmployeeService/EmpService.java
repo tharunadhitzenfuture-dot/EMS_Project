@@ -275,7 +275,7 @@ public class EmpService {
 				List<LeaveBalance> employeeBalances = new ArrayList<>();
 				for (LeavePolicy balance : lst) {
 				    LeaveBalance newBalance = new LeaveBalance();
-				    newBalance.setType(balance.getType());
+				    newBalance.setLeaveType(balance.getLeaveType());
 				    newBalance.setTotalDays(balance.getTotalDays());
 				    newBalance.setRemainingDays(balance.getTotalDays());
 				    newBalance.setYear(balance.getYear());
@@ -1536,7 +1536,7 @@ public class EmpService {
             				List<LeaveBalance> employeeBalances = new ArrayList<>();
             				for (LeavePolicy balance : lst) {
             				    LeaveBalance newBalance = new LeaveBalance();
-            				    newBalance.setType(balance.getType());
+            				    newBalance.setLeaveType(balance.getLeaveType());
             				    newBalance.setTotalDays(balance.getTotalDays());
             				    newBalance.setRemainingDays(balance.getTotalDays());
             				    newBalance.setYear(balance.getYear());

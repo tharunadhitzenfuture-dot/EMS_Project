@@ -48,7 +48,7 @@ public class LeavePolicyController {
 //		                .body("Month cannot be null");
 //		    }
 		    
-		    if(request.getType() == null) {
+		    if(request.getLeaveType() == null) {
 		    	return ResponseEntity.badRequest()
 		    			.body("Please select leave type");
 		    }
@@ -107,11 +107,18 @@ public class LeavePolicyController {
 		if(request.getYear() != null) {
 			exist.setYear(request.getYear());
 		}
-		
-		if(request.getDepartment() != null) {
-			exist.setDepartment(request.getDepartment());
+				
+		if (request.getCarryForward() != null) {
+		    exist.setCarryForward(request.getCarryForward());
 		}
-		
+
+		exist.setEncashment(request.isEncashment());
+
+		exist.setStatus(request.isStatus());
+
+		if (request.getLastUpdateDateTime() != null) {
+		    exist.setLastUpdateDateTime(request.getLastUpdateDateTime());
+		}
 		
 		return leavePolicyService.updateById(id, exist);
 	}

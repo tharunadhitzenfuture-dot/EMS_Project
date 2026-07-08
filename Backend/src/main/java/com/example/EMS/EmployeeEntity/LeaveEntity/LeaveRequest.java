@@ -7,9 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.Departments.Departments;
-import com.example.EMS.enums.Department;
 import com.example.EMS.enums.LeaveStatus;
-import com.example.EMS.enums.LeaveType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,6 +22,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -45,9 +44,11 @@ public class LeaveRequest {
 	private LocalDate endDate;
 	private Integer totalDays;
 	
-	@Enumerated(EnumType.STRING)
-	@Column(nullable=true)
-	private LeaveType leaveType = LeaveType.EARNED_LEAVE;
+	@ManyToOne
+	@JoinColumn(name="leaveType_id")
+	private LeaveType leaveType;
+	
+	
 	
 //	@Enumerated(EnumType.STRING)
 //	@Column(nullable=false)
@@ -75,7 +76,7 @@ public class LeaveRequest {
 	private Employee reviewedBy;
 	
 	private LocalDateTime reviewedAt;
-	
+	private boolean leavePaid;
 	 @CreationTimestamp 
 	 private LocalDateTime createdAt;
 
@@ -172,13 +173,7 @@ public class LeaveRequest {
 		 this.reviewedAt = reviewedAt;
 	 }
 
-	 public LeaveType getLeaveType() {
-		 return leaveType;
-	 }
-
-	 public void setLeaveType(LeaveType leaveType) {
-		 this.leaveType = leaveType;
-	 }
+	 
 
      
 
@@ -205,6 +200,24 @@ public class LeaveRequest {
 	 public void setDepartment(Departments department) {
 		 this.department = department;
 	 }
+
+	 public LeaveType getLeaveType() {
+		 return leaveType;
+	 }
+
+	 public void setLeaveType(LeaveType leaveType) {
+		 this.leaveType = leaveType;
+	 }
+
+	 public boolean isLeavePaid() {
+		 return leavePaid;
+	 }
+
+	 public void setLeavePaid(boolean leavePaid) {
+		 this.leavePaid = leavePaid;
+	 }
+	 
+	 
 	 
      
 	 

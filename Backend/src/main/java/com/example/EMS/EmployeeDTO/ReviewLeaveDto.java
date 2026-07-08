@@ -3,7 +3,7 @@ package com.example.EMS.EmployeeDTO;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import com.example.EMS.enums.LeaveStatus;
-import com.example.EMS.enums.LeaveType;
+import com.example.EMS.enums.LeaveTypes;
 
 import lombok.Data;
 
