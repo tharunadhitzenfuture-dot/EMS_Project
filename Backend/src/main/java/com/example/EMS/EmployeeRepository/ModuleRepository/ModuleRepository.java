@@ -11,4 +11,5 @@ import com.example.EMS.EmployeeEntity.Module.ModuleEntity;
 public interface ModuleRepository extends JpaRepository<ModuleEntity, Long>{
 
 	Optional<ModuleEntity> findByModuleName(String name);
+    boolean existsByModuleName(String moduleName);
 }
