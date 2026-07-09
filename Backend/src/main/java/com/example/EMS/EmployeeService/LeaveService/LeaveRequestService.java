@@ -78,7 +78,7 @@ public class LeaveRequestService {
 		if(email2 != null && !email2.isBlank()) {
 			request.setApproverEmail2(email2);
 		}
-	
+		
 		
 		List<LeaveRequest> res = leaveRequestRepository.findOverlappingLeaves(id, request.getStartDate(), request.getEndDate());
 		if(!res.isEmpty()) {
@@ -109,10 +109,10 @@ public class LeaveRequestService {
         String dept = department1.getName();
         Optional<Departments> department = departmentRepository.findByName(dept);
         if(department.isEmpty()) {
-        	return ResponseEntity.badRequest().body("Employee department should be either IT/ FINANCE/ HR");
+        	return ResponseEntity.badRequest().body("Employee department not available: "+department.get().getName());
         }
         else {
-        	
+ 
         	request.setDepartment(department.get());
         }
         
@@ -204,6 +204,7 @@ public class LeaveRequestService {
         
         String dept = emp.getProfessional_details().getProfessional_department().getName();
         Optional<Departments> department = departmentRepository.findByName(dept);
+        
         if(department.isEmpty()) {
         	return ResponseEntity.badRequest().body("Employee department should be either IT/ FINANCE/ HR");
         }
@@ -216,9 +217,11 @@ public class LeaveRequestService {
         }
         
         Optional<LeaveType> leaveType = leaveTypeRepository.findByName(request.getLeaveType().getName());
+        
         if(leaveType.isEmpty()) {
         	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Leave type not found with name: "+request.getLeaveType().getName());
         }
+       
         request.setLeaveType(leaveType.get());
         
         Optional<LeaveBalance> balance = leaveBalanceRepository.findByEmployeeAndYearAndLeaveTypeAndDepartment_Name(emp, year, request.getLeaveType(), dept);

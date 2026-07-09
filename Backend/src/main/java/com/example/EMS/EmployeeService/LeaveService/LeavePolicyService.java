@@ -58,48 +58,48 @@ public class LeavePolicyService {
 		
 		List<Employee> employee = empRepo.findEmployeesByDepartment(department);
 		
-		if(employee.isEmpty()) {
-			return ResponseEntity.badRequest().body("Employee list for department "+department.getName()+" is empty");
-		}
+		if(employee.size() > 0) {
+			for(Employee emp: employee) {
+				
+				Optional<LeaveBalance> existing = leaveBalRepository.findByEmployeeAndYearAndLeaveTypeAndDepartment_Name(emp,  request.getYear(), leaveType.get(), department.getName());
+				if(existing.isPresent()) {
+					LeaveBalance balance = existing.get();
+					balance.setTotalDays(request.getTotalDays());
+					balance.setRemainingDays(request.getTotalDays());
+					balance.setLeaveType(leaveType.get());
+					balance.setDepartment(department);
+					leaveBalRepository.save(balance);
+					
+				}
+				else {
+					  LeaveBalance balance = new LeaveBalance();
 
-		for(Employee emp: employee) {
-			
-			Optional<LeaveBalance> existing = leaveBalRepository.findByEmployeeAndYearAndLeaveTypeAndDepartment_Name(emp,  request.getYear(), leaveType.get(), department.getName());
-			if(existing.isPresent()) {
-				LeaveBalance balance = existing.get();
-				balance.setTotalDays(request.getTotalDays());
-				balance.setRemainingDays(request.getTotalDays());
-				balance.setLeaveType(leaveType.get());
-				balance.setDepartment(department);
-				leaveBalRepository.save(balance);
+			            balance.setEmployee(emp);
+
+//			            balance.setMonth(
+//			                    request.getMonth()
+//			            );
+
+			            balance.setYear(
+			                    request.getYear()
+			            );
+
+			            balance.setTotalDays(
+			                    request.getTotalDays()
+			            );
+			            
+			            balance.setLeaveType(leaveType.get());
+			            balance.setRemainingDays(request.getTotalDays());
+			            balance.setUsedDays(0);
+			            balance.setDepartment(department);
+
+			            leaveBalRepository.save(balance);
+				}
 				
 			}
-			else {
-				  LeaveBalance balance = new LeaveBalance();
-
-		            balance.setEmployee(emp);
-
-//		            balance.setMonth(
-//		                    request.getMonth()
-//		            );
-
-		            balance.setYear(
-		                    request.getYear()
-		            );
-
-		            balance.setTotalDays(
-		                    request.getTotalDays()
-		            );
-		            
-		            balance.setLeaveType(leaveType.get());
-		            balance.setRemainingDays(request.getTotalDays());
-		            balance.setUsedDays(0);
-		            balance.setDepartment(department);
-
-		            leaveBalRepository.save(balance);
-			}
-			
 		}
+
+
 		LeavePolicy save = leavePolicyRepo.save(request);
 
 		return ResponseEntity.ok(save);
