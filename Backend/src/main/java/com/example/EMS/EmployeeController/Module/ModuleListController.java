@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.EmployeePermissionDTO;
 import com.example.EMS.EmployeeDTO.ModuleListDTO.RolePermissionDTO;
+import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.Module.ModuleEntity;
 import com.example.EMS.EmployeeEntity.Module.ModuleList;
 import com.example.EMS.EmployeeEntity.Role.Role;
@@ -83,9 +84,16 @@ public class ModuleListController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Enter employee id");
 		}
 		
-		Long id = employeeRepository.findIdByEmployeeId(dto.getEmpId());
+		Optional<Employee> emp =employeeRepository.findByEmployeeId(dto.getEmpId());
+		Employee employee = emp.get();
+		
+		Long id = employee.getUser().getId();
 		if(id == null) {
 			ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found with employee id: "+dto.getEmpId());
+		}
+		
+		if(id == 1) {
+			return ResponseEntity.badRequest().body("ADMIN permission menu cannot be modified");	
 		}
 		
 		if(dto.getModuleId() == null) {
