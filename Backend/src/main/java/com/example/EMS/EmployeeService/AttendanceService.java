@@ -28,6 +28,7 @@ import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveTypeRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.PermissionRepository;
 import com.example.EMS.EmployeeRepository.WeeklyCalculations.WeeklyCalculationRepository;
 import com.example.EMS.EmployeeService.LeaveService.LeaveRequestService;
+import com.example.EMS.enums.LeaveTime;
 import com.example.EMS.enums.LeaveTypes;
 
 import jakarta.transaction.Transactional;
@@ -172,12 +173,14 @@ public class AttendanceService {
           		   }              		   
           		   
           		   request.setLeaveType(type);
+          		   
+          		   request.setLeaveTime(LeaveTime.FULL_DAY);
                		   request.setReason("Auto-generated due to insufficient work hours "+ totalTime+" on: "+date);
                		   attendance.setStatus(LeaveTypes.ABSENT);
                		   return leaveService.applyLeave(emp.getEmployeeId(), request);
                		   
                	   }
-               	   else if(hours < hour_Per_Day) {
+               	   else if(hours < hour_Per_Day -1) {
                		   LeaveRequest request = new LeaveRequest();
                		   
                		   request.setStartDate(date);
@@ -196,6 +199,7 @@ public class AttendanceService {
              		   }              		   
              		   
              		   request.setLeaveType(type);
+             		   request.setLeaveTime(LeaveTime.HALF_DAY);
                		   request.setReason("Auto-generated due to insufficient work hours "+totalTime+" on: "+date);
                		   
                		   attendance.setStatus(LeaveTypes.HALF_DAY);
@@ -380,18 +384,18 @@ public class AttendanceService {
   		   
   		   requestDTO.setLeaveType(type);
        		   requestDTO.setReason("Auto-generated due to insufficient work hours "+hours+" on: "+attendance.getAttendanceDate());
-       		   
+       		   requestDTO.setLeaveTime(LeaveTime.FULL_DAY);
        		   attendance.setStatus(LeaveTypes.ABSENT);
        		   return leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
        		  
        		   
        	       }
-              else if(hours < hour_Per_Day) {
+              else if(hours < hour_Per_Day-1) {
          		   
          		   LeaveRequest requestDTO = new LeaveRequest();
          		   requestDTO.setStartDate(attendance.getAttendanceDate());
          		   requestDTO.setEndDate(attendance.getAttendanceDate());
-         		  LeaveType type = null;
+         		   LeaveType type = null;
         		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
         		   if(existing.isEmpty()) {
         			   type = new LeaveType();
@@ -405,7 +409,7 @@ public class AttendanceService {
         		   
         		   requestDTO.setLeaveType(type);
          		   requestDTO.setReason("Auto-generated due to insufficient work hours on: "+attendance.getAttendanceDate());
-         		   
+         		   requestDTO.setLeaveTime(LeaveTime.HALF_DAY);
          		   attendance.setStatus(LeaveTypes.HALF_DAY);
          		   return leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
          		   

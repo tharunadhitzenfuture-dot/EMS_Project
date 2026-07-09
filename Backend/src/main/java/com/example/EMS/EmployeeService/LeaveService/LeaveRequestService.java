@@ -29,6 +29,7 @@ import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveBalanceRepository
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveTypeRepository;
 import com.example.EMS.enums.LeaveStatus;
+import com.example.EMS.enums.LeaveTime;
 
 import jakarta.transaction.Transactional;
 
@@ -56,6 +57,19 @@ public class LeaveRequestService {
 		this.leaveTypeRepository = leaveTypeRepository;
 	}
 
+	public ResponseEntity<?> handleReviewLeave(String empId, Long leaveId, ReviewLeaveDto dto){
+		
+		 Long id = empRepository.findIdByEmployeeId(empId);
+         Employee emp = getUserByEmployeeId(id);
+         LeaveRequest req = getLeaveById(leaveId);
+        
+		if(req.getLeaveTime() == LeaveTime.FULL_DAY) {
+			return reviewLeave(emp.getEmployeeId(), leaveId, dto);
+		}
+		else {
+			return reviewHalfDayLeave(emp.getEmployeeId(), leaveId, dto);
+		}
+	}
 
 	public ResponseEntity<?> applyLeave(String empId, LeaveRequest request){
 		Long id = empRepository.findIdByEmployeeId(empId);
@@ -374,7 +388,7 @@ public class LeaveRequestService {
 	        req.setReviewedBy(emp);
 	        req.setReviewedAt(LocalDateTime.now());
 	        
-	        if(remaining.getRemainingDays() > 0) {
+	        if(remaining.getRemainingDays() >= 0) {
 	        	req.setLeavePaid(true);
 	        }
 	        else {
@@ -416,7 +430,7 @@ public class LeaveRequestService {
 	            throw new BadRequestException("Request has already been reviewed");
 	        if (dto.getStatus() != LeaveStatus.APPROVED && dto.getStatus() != LeaveStatus.REJECTED)
 	            throw new BadRequestException("Status must be APPROVED or REJECTED");
-	        
+	        LeaveBalance remaining = null;
 	        if (dto.getStatus() == LeaveStatus.APPROVED) {
 
 	            LocalDate current = req.getStartDate();
@@ -427,21 +441,16 @@ public class LeaveRequestService {
 	                int month = current.getMonthValue();
 	                int year = current.getYear();
 
-	                LeaveBalance balance =
-	                        leaveBalanceRepository
-	                        .findByEmployeeIdAndMonthAndYear(
-	                                req.getEmployee().getId(),
-	                                month,
-	                                year
-	                        );
-
-	                if (balance == null) {
+	                Optional<LeaveBalance> bal = leaveBalanceRepository.findByEmployeeAndYearAndLeaveTypeAndDepartment_Name(req.getEmployee(), year, leaveType.get(), req.getDepartment().getName());
+	                
+	                if (bal.isEmpty()) {
 
 	                    throw new BadRequestException(
-	                            "Leave balance not found for "
-	                            + month + "/" + year
+	                            "Leave balance not found for employee: "+req.getEmployee_Id()+"/"
+	                            + req.getLeaveType() + "/" + year + "/" +  req.getDepartment()
 	                    );
 	                }
+	                LeaveBalance balance =  bal.get();
 
 	                
 
@@ -452,7 +461,7 @@ public class LeaveRequestService {
 
 
 	                balance.setRemainingDays(balance.getRemainingDays()); 
-	                leaveBalanceRepository.save(balance);
+	                remaining = leaveBalanceRepository.save(balance);
 
 	               
 	                current = current.plusDays(1);
@@ -475,6 +484,13 @@ public class LeaveRequestService {
 	        req.setHrRemarks(dto.getHrRemarks());
 	        req.setReviewedBy(emp);
 	        req.setReviewedAt(LocalDateTime.now());
+	        
+	        if(remaining.getRemainingDays() >=0) {
+	        	req.setLeavePaid(true);
+	        }
+	        else {
+	        	req.setLeavePaid(false);
+	        }
 
 	        LeaveRequest res = leaveRequestRepository.save(req);
 	        return ResponseEntity.ok(res);

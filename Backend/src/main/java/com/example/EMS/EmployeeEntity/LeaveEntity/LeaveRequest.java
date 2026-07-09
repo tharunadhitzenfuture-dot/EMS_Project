@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.enums.LeaveStatus;
+import com.example.EMS.enums.LeaveTime;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,6 +43,10 @@ public class LeaveRequest {
 	private LocalDate startDate;
 	private LocalDate endDate;
 	private Integer totalDays;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(nullable=false)
+	private LeaveTime leaveTime;
 	
 	@ManyToOne
 	@JoinColumn(name="leaveType_id")
@@ -214,6 +219,14 @@ public class LeaveRequest {
 
 	 public void setLeavePaid(boolean leavePaid) {
 		 this.leavePaid = leavePaid;
+	 }
+
+	 public LeaveTime getLeaveTime() {
+		 return leaveTime;
+	 }
+
+	 public void setLeaveTime(LeaveTime leaveTime) {
+		 this.leaveTime = leaveTime;
 	 }
 	 
 	 

@@ -99,7 +99,7 @@ public class LeaveRequestController {
 //			return requestService.reviewLeave(empId, leaveId, dto);
 //		}
 		
-		return requestService.reviewLeave(empId, leaveId, dto);
+		return requestService.handleReviewLeave(empId, leaveId, dto);
 		
 //		return ResponseEntity.badRequest().body("Please mention correct leave type EARNED_LEAVE , CASUAL_LEAVE, SICK_LEAVE");
 	}
@@ -129,7 +129,7 @@ public class LeaveRequestController {
 //			return requestService.reviewLeave(empId, leaveId, dto);
 //		}
 		
-		return requestService.reviewLeave(empId, leaveId, dto);
+		return requestService.handleReviewLeave(empId, leaveId, dto);
 		
 	//	return ResponseEntity.badRequest().body("Please mention correct leave type EARNED_LEAVE , CASUAL_LEAVE, SICK_LEAVE");
 	}
