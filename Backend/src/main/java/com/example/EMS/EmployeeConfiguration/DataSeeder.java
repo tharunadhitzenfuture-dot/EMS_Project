@@ -14,11 +14,7 @@ import com.example.EMS.EmployeeEntity.Role.Role;
 import com.example.EMS.EmployeeRepository.UserRepository;
 import com.example.EMS.EmployeeRepository.RoleRepository.RoleRepository;
 
-
-
-
 @Configuration
-@Order(1)
 public class DataSeeder {
 	
 	private final PasswordEncoder passwordEncoder;
@@ -33,6 +29,7 @@ public class DataSeeder {
 
 
 	@Bean
+	@Order(1)
     CommandLineRunner initUsers(UserRepository userRepository) {
         return args -> {
 
@@ -51,6 +48,8 @@ public class DataSeeder {
                 user.setRoleEntity(savedRole);
 
                 userRepository.save(user);
+                
+                
 
                 System.out.println("✅ Default admin user created");
             } else {
