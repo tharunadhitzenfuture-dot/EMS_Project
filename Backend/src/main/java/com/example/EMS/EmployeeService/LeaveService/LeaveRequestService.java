@@ -13,7 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-
+import com.example.EMS.EmployeeDTO.LeaveRequestDTO;
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.User;
@@ -153,7 +153,22 @@ public class LeaveRequestService {
         request.setDepartment(department.get());
         request.setLeaveType(leaveType.get());
         LeaveRequest req = leaveRequestRepository.save(request);
-        return ResponseEntity.ok(req);
+        
+        LeaveRequestDTO dto = new LeaveRequestDTO();
+        
+        dto.setId(req.getId());
+        dto.setStartDate(req.getStartDate());
+        dto.setEndDate(req.getEndDate());
+        dto.setTotalDays(req.getTotalDays());
+        dto.setLeaveTime(req.getLeaveTime());
+        dto.setLeaveType(req.getLeaveType().getName());
+        dto.setDepartment(req.getDepartment());
+        dto.setApproverEmail1(req.getApproverEmail1());
+        dto.setApproverEmail2(req.getApproverEmail2());
+        dto.setStatus(req.getStatus());
+        dto.setReason(req.getReason());
+        dto.setHrRemarks(req.getHrRemarks());
+        return ResponseEntity.ok(dto);
         
 	      	
 		
@@ -251,9 +266,22 @@ public class LeaveRequestService {
       
         request.setEmployee(emp);
         LeaveRequest req = leaveRequestRepository.save(request);
-       
+        LeaveRequestDTO dto = new LeaveRequestDTO();
+        
+        dto.setId(req.getId());
+        dto.setStartDate(req.getStartDate());
+        dto.setEndDate(req.getEndDate());
+        dto.setTotalDays(req.getTotalDays());
+        dto.setLeaveTime(req.getLeaveTime());
+        dto.setLeaveType(req.getLeaveType().getName());
+        dto.setDepartment(req.getDepartment());
+        dto.setApproverEmail1(req.getApproverEmail1());
+        dto.setApproverEmail2(req.getApproverEmail2());
+        dto.setStatus(req.getStatus());
+        dto.setReason(req.getReason());
+        dto.setHrRemarks(req.getHrRemarks());
 
-        return ResponseEntity.ok(req);
+        return ResponseEntity.ok(dto);
         
 	      	
 		
@@ -397,7 +425,21 @@ public class LeaveRequestService {
 	        
 
 	        LeaveRequest res = leaveRequestRepository.save(req);
-	        return ResponseEntity.ok(res);
+	        LeaveRequestDTO dto1 = new LeaveRequestDTO();
+	        
+	        dto1.setId(res.getId());
+	        dto1.setStartDate(res.getStartDate());
+	        dto1.setEndDate(res.getEndDate());
+	        dto1.setTotalDays(res.getTotalDays());
+	        dto1.setLeaveTime(res.getLeaveTime());
+	        dto1.setLeaveType(res.getLeaveType().getName());
+	        dto1.setDepartment(res.getDepartment());
+	        dto1.setApproverEmail1(res.getApproverEmail1());
+	        dto1.setApproverEmail2(res.getApproverEmail2());
+	        dto1.setStatus(res.getStatus());
+	        dto1.setReason(res.getReason());
+	        dto1.setHrRemarks(res.getHrRemarks());
+	        return ResponseEntity.ok(dto1);
 
 	    }
 	    
@@ -493,7 +535,21 @@ public class LeaveRequestService {
 	        }
 
 	        LeaveRequest res = leaveRequestRepository.save(req);
-	        return ResponseEntity.ok(res);
+	        LeaveRequestDTO dto1 = new LeaveRequestDTO();
+	        
+	        dto1.setId(res.getId());
+	        dto1.setStartDate(res.getStartDate());
+	        dto1.setEndDate(res.getEndDate());
+	        dto1.setTotalDays(res.getTotalDays());
+	        dto1.setLeaveTime(res.getLeaveTime());
+	        dto1.setLeaveType(res.getLeaveType().getName());
+	        dto1.setDepartment(res.getDepartment());
+	        dto1.setApproverEmail1(res.getApproverEmail1());
+	        dto1.setApproverEmail2(res.getApproverEmail2());
+	        dto1.setStatus(res.getStatus());
+	        dto1.setReason(res.getReason());
+	        dto1.setHrRemarks(res.getHrRemarks());
+	        return ResponseEntity.ok(dto1);
 
 	    }
 	    
@@ -559,6 +615,21 @@ public class LeaveRequestService {
 
 	     LeaveRequest updated =
 	             leaveRequestRepository.save(leave);
+	     
+	       LeaveRequestDTO dto = new LeaveRequestDTO();
+	        
+	        dto.setId(updated.getId());
+	        dto.setStartDate(updated.getStartDate());
+	        dto.setEndDate(updated.getEndDate());
+	        dto.setTotalDays(updated.getTotalDays());
+	        dto.setLeaveTime(updated.getLeaveTime());
+	        dto.setLeaveType(updated.getLeaveType().getName());
+	        dto.setDepartment(updated.getDepartment());
+	        dto.setApproverEmail1(updated.getApproverEmail1());
+	        dto.setApproverEmail2(updated.getApproverEmail2());
+	        dto.setStatus(updated.getStatus());
+	        dto.setReason(updated.getReason());
+	        dto.setHrRemarks(updated.getHrRemarks());
 
 	     return ResponseEntity.ok(updated);
 	 }

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.EMS.EmployeeEntity.User;
@@ -17,6 +18,7 @@ import com.example.EMS.EmployeeRepository.RoleRepository.RoleRepository;
 
 
 @Configuration
+@Order(1)
 public class DataSeeder {
 	
 	private final PasswordEncoder passwordEncoder;

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.example.EMS.EmployeeEntity.User;
@@ -15,6 +16,7 @@ import com.example.EMS.EmployeeRepository.ModuleRepository.ModuleListRepository;
 import com.example.EMS.EmployeeRepository.ModuleRepository.ModuleRepository;
 
 @Component
+@Order(2)
 public class ModuleDataLoader implements CommandLineRunner {
 
     private final ModuleRepository moduleRepository;
