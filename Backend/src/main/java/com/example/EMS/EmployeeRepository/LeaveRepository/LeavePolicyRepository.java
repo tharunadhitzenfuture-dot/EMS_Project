@@ -22,5 +22,6 @@ public interface LeavePolicyRepository extends JpaRepository<LeavePolicy,Long>{
 	Optional<LeavePolicy> findByYearAndLeaveType(Integer year, LeaveType type);
 	Optional<LeavePolicy> findByYearAndLeaveTypeAndDepartment_Name(Integer year, LeaveType type, String department);
 	Optional<List<LeavePolicy>> findByDepartment_Name(String department);
+	boolean existsByLeaveType(LeaveType leaveType);
 
 }
