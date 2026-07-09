@@ -3,6 +3,7 @@ package com.example.EMS.EmployeeService.LeaveService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.example.EMS.EmployeeDTO.LeaveTypeDTO;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveType;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveTypeRepository;
 
@@ -18,7 +19,10 @@ public class LeaveTypeService {
 	public ResponseEntity<?> createLeaveType(LeaveType type){
 		
 		LeaveType saved = repository.save(type);
-		return ResponseEntity.ok(saved);
+		LeaveTypeDTO dto  = new LeaveTypeDTO();
+		dto.setId(saved.getId());
+		dto.setName(saved.getName());
+		return ResponseEntity.ok(dto);
 	}
 	
 

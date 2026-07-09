@@ -170,17 +170,19 @@ public class AttendanceService {
                		   request.setStartDate(date);
                		   request.setEndDate(date);
                		   
-               		   LeaveType type = null;
-               		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
-               		   if(existing.isEmpty()) {
-               			   type = new LeaveType();
-               		   }
-               		   else {
-               			   type = existing.get();
-               		   }              		   
-               		   type.setName("CASUAL_LEAVE");
-               		   LeaveType saved = leaveTypeRepository.save(type);
-               		   request.setLeaveType(saved);
+               		LeaveType type = null;
+          		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
+          		   if(existing.isEmpty()) {
+          			   type = new LeaveType();
+          			  type.setName("CASUAL_LEAVE");
+          			  leaveTypeRepository.save(type);
+          		   }
+          		   else {
+          			   type = existing.get();
+          			   
+          		   }              		   
+          		   
+          		   request.setLeaveType(type);
                		   request.setReason("Auto-generated due to insufficient work hours "+ totalTime+" on: "+date);
                		   
                		   attendance.setStatus(LeaveTypes.ABSENT);
@@ -197,13 +199,15 @@ public class AttendanceService {
              		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
              		   if(existing.isEmpty()) {
              			   type = new LeaveType();
+             			  type.setName("CASUAL_LEAVE");
+             			  leaveTypeRepository.save(type);
              		   }
              		   else {
              			   type = existing.get();
+             			   
              		   }              		   
-             		   type.setName("CASUAL_LEAVE");
-             		   LeaveType saved = leaveTypeRepository.save(type);
-             		   request.setLeaveType(saved);
+             		   
+             		   request.setLeaveType(type);
                		   request.setReason("Auto-generated due to insufficient work hours "+totalTime+" on: "+date);
                		   
                		   attendance.setStatus(LeaveTypes.HALF_DAY);
@@ -243,17 +247,19 @@ public class AttendanceService {
                		   request.setStartDate(date);
                		   request.setEndDate(date);
                		   
-               		   LeaveType type = null;
-             		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
-             		   if(existing.isEmpty()) {
-             			   type = new LeaveType();
-             		   }
-             		   else {
-             			   type = existing.get();
-             		   }              		   
-             		   type.setName("CASUAL_LEAVE");
-             		   LeaveType saved = leaveTypeRepository.save(type);
-             		   request.setLeaveType(saved);
+               		LeaveType type = null;
+          		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
+          		   if(existing.isEmpty()) {
+          			   type = new LeaveType();
+          			  type.setName("CASUAL_LEAVE");
+          			  leaveTypeRepository.save(type);
+          		   }
+          		   else {
+          			   type = existing.get();
+          			   
+          		   }              		   
+          		   
+          		   request.setLeaveType(type);
                		   request.setReason("Auto-generated due to insufficient work hours "+totalTime +" on: "+date);
                		   
                		   attendance.setStatus(LeaveTypes.ABSENT);
@@ -266,17 +272,19 @@ public class AttendanceService {
                		   
                		   request.setStartDate(date);
                		   request.setEndDate(date);
-               		   LeaveType type = null;
-             		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
-             		   if(existing.isEmpty()) {
-             			   type = new LeaveType();
-             		   }
-             		   else {
-             			   type = existing.get();
-             		   }              		   
-             		   type.setName("CASUAL_LEAVE");
-             		   LeaveType saved = leaveTypeRepository.save(type);
-             		   request.setLeaveType(saved);
+               		LeaveType type = null;
+          		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
+          		   if(existing.isEmpty()) {
+          			   type = new LeaveType();
+          			  type.setName("CASUAL_LEAVE");
+          			  leaveTypeRepository.save(type);
+          		   }
+          		   else {
+          			   type = existing.get();
+          			   
+          		   }              		   
+          		   
+          		   request.setLeaveType(type);
                		   request.setReason("Auto-generated due to insufficient work hours "+totalTime+" on: "+date);
                		   
                		   attendance.setStatus(LeaveTypes.HALF_DAY);
@@ -446,17 +454,19 @@ public class AttendanceService {
        		   
        		   requestDTO.setStartDate(attendance.getAttendanceDate());
        		   requestDTO.setEndDate(attendance.getAttendanceDate());
-       		   LeaveType type = null;
-     		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
-     		   if(existing.isEmpty()) {
-     			   type = new LeaveType();
-     		   }
-     		   else {
-     			   type = existing.get();
-     		   }              		   
-     		   type.setName("CASUAL_LEAVE");
-     		   LeaveType saved = leaveTypeRepository.save(type);
-     		   requestDTO.setLeaveType(saved);
+       		LeaveType type = null;
+  		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
+  		   if(existing.isEmpty()) {
+  			   type = new LeaveType();
+  			  type.setName("CASUAL_LEAVE");
+  			  leaveTypeRepository.save(type);
+  		   }
+  		   else {
+  			   type = existing.get();
+  			   
+  		   }              		   
+  		   
+  		   requestDTO.setLeaveType(type);
        		   requestDTO.setReason("Auto-generated due to insufficient work hours "+hours+" on: "+attendance.getAttendanceDate());
        		   
        		   attendance.setStatus(LeaveTypes.ABSENT);
@@ -471,17 +481,19 @@ public class AttendanceService {
          		   LeaveRequest requestDTO = new LeaveRequest();
          		   requestDTO.setStartDate(attendance.getAttendanceDate());
          		   requestDTO.setEndDate(attendance.getAttendanceDate());
-         		   LeaveType type = null;
-          		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
-          		   if(existing.isEmpty()) {
-          			   type = new LeaveType();
-          		   }
-          		   else {
-          			   type = existing.get();
-          		   }              		   
-          		   type.setName("CASUAL_LEAVE");
-          		   LeaveType saved = leaveTypeRepository.save(type);
-          		   requestDTO.setLeaveType(saved);
+         		  LeaveType type = null;
+        		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
+        		   if(existing.isEmpty()) {
+        			   type = new LeaveType();
+        			  type.setName("CASUAL_LEAVE");
+        			  leaveTypeRepository.save(type);
+        		   }
+        		   else {
+        			   type = existing.get();
+        			   
+        		   }              		   
+        		   
+        		   requestDTO.setLeaveType(type);
          		   requestDTO.setReason("Auto-generated due to insufficient work hours on: "+attendance.getAttendanceDate());
          		   
          		   attendance.setStatus(LeaveTypes.HALF_DAY);
@@ -518,17 +530,19 @@ public class AttendanceService {
        		   
        		   requestDTO.setStartDate(attendance.getAttendanceDate());
        		   requestDTO.setEndDate(attendance.getAttendanceDate());
-       		   LeaveType type = null;
-     		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
-     		   if(existing.isEmpty()) {
-     			   type = new LeaveType();
-     		   }
-     		   else {
-     			   type = existing.get();
-     		   }              		   
-     		   type.setName("CASUAL_LEAVE");
-     		   LeaveType saved = leaveTypeRepository.save(type);
-     		   requestDTO.setLeaveType(saved);
+       		LeaveType type = null;
+  		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
+  		   if(existing.isEmpty()) {
+  			   type = new LeaveType();
+  			  type.setName("CASUAL_LEAVE");
+  			  leaveTypeRepository.save(type);
+  		   }
+  		   else {
+  			   type = existing.get();
+  			   
+  		   }              		   
+  		   
+  		   requestDTO.setLeaveType(type);
        		   requestDTO.setReason("Auto-generated due to insufficient work hours "+hours+" on: "+attendance.getAttendanceDate());
        		   
        		   attendance.setStatus(LeaveTypes.ABSENT);
@@ -545,17 +559,19 @@ public class AttendanceService {
          		   
          		   requestDTO.setStartDate(attendance.getAttendanceDate());
          		   requestDTO.setEndDate(attendance.getAttendanceDate());
-         		   LeaveType type = null;
-          		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
-          		   if(existing.isEmpty()) {
-          			   type = new LeaveType();
-          		   }
-          		   else {
-          			   type = existing.get();
-          		   }              		   
-          		   type.setName("CASUAL_LEAVE");
-          		   LeaveType saved = leaveTypeRepository.save(type);
-          		   requestDTO.setLeaveType(saved);
+         		  LeaveType type = null;
+        		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
+        		   if(existing.isEmpty()) {
+        			   type = new LeaveType();
+        			  type.setName("CASUAL_LEAVE");
+        			  leaveTypeRepository.save(type);
+        		   }
+        		   else {
+        			   type = existing.get();
+        			   
+        		   }              		   
+        		   
+        		   requestDTO.setLeaveType(type);
          		   requestDTO.setReason("Auto-generated due to insufficient work hours "+hours+" on: "+attendance.getAttendanceDate());
          		   
          		   attendance.setStatus(LeaveTypes.HALF_DAY);
