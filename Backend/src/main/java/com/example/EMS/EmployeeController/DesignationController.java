@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeEntity.Designation;
 import com.example.EMS.EmployeeEntity.Departments.Departments;
+import com.example.EMS.EmployeeEntity.Role.Role;
 import com.example.EMS.EmployeeRepository.DesignationRepository;
 import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;
+import com.example.EMS.EmployeeRepository.RoleRepository.RoleRepository;
 import com.example.EMS.EmployeeService.DesignationService;
 
 @RestController
@@ -25,14 +27,17 @@ public class DesignationController {
 	private DesignationService service;
 	private DesignationRepository repository;
 	private DepartmentRepository departmentRepository;
+	private RoleRepository roleRepository;
 	
 	
-	
+
 	public DesignationController(DesignationService service, DesignationRepository repository,
-			DepartmentRepository departmentRepository) {
+			DepartmentRepository departmentRepository, RoleRepository roleRepository) {
+		
 		this.service = service;
 		this.repository = repository;
 		this.departmentRepository = departmentRepository;
+		this.roleRepository = roleRepository;
 	}
 
 	@PostMapping("/create")
@@ -47,9 +52,9 @@ public class DesignationController {
 			return ResponseEntity.badRequest().body("Designation already presented");
 		}		
 		
-		Optional<Departments> department = departmentRepository.findByName(request.getDepartment());
+		Optional<Role> department = roleRepository.findByRole(request.getDepartment());
 		if(department.isEmpty()) {
-			return ResponseEntity.badRequest().body("Department not presented with name: "+request.getDepartment());
+			return ResponseEntity.badRequest().body("Role not presented with name: "+request.getDepartment());
 		}
 		
 		return service.create(request);

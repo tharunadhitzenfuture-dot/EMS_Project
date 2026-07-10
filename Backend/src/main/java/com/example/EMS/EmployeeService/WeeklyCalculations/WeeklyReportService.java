@@ -17,6 +17,7 @@ import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
 import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyCalculation;
 import com.example.EMS.EmployeeEntity.WeeklyCalculations.WeeklyReportDTO;
+import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.AttendanceRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.PermissionRepository;
@@ -102,7 +103,7 @@ public class WeeklyReportService {
 	             //daily hours
 	             req.setHours(dailyHours);
 			
-	           	 
+	             
 	        	
 
 	             LocalDate startOfWeek =
@@ -150,7 +151,7 @@ public class WeeklyReportService {
 	             
 	             req.setTotalHours(weeklyHours);
 	    		
-
+	             
 	            String permission =  getPermissionHours(empId, startOfWeek, endOfWeek);	            
 	            //Permission
 	            req.setPermission(permission);
@@ -161,11 +162,11 @@ public class WeeklyReportService {
 	            if(!dept.equalsIgnoreCase("IT") && !dept.equalsIgnoreCase("Finance")) {
 	            	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee id: "+emp.get().getEmployeeId()+" department mismatched with: "+dept);
 	            }
-	       
+	            
 	            String total = getByDepartment(emp.get().getProfessional_details().getProfessional_department().getName());
 	            
 	            req.setDepartment_workHours(total);
-	                                
+	            
 	                              //9:00:00                 //8:30:00
 	           long balance =   timeToSeconds(weeklyHours) -  timeToSeconds(total);
 	           
@@ -278,8 +279,7 @@ public class WeeklyReportService {
 	
 
 	  public String getByDepartment(String dept) {
-		  Optional<WeeklyCalculation> calcStart =  weeklyCalculation.findByDeptName(dept);		  
-		  WeeklyCalculation res = calcStart.get();
+		  WeeklyCalculation res =  weeklyCalculation.findByDeptName(dept).orElseThrow(()-> new ResourceNotFoundException("There is no record for weekly working hours for department: "+dept));
 		  return res.getTotalWorkHours();
 	  }
 	  

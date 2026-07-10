@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.ApproverResponseDTO;
+import com.example.EMS.EmployeeDTO.RoleAssignDTO;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.RolesAssign;
 import com.example.EMS.EmployeeRepository.RoleAssignRepository;
@@ -57,7 +58,16 @@ public class RoleAssignController {
 	public ResponseEntity<?> getAll(){
 		
 		List<RolesAssign> lst = repository.findAll();
-		return ResponseEntity.ok(lst);
+		List<RoleAssignDTO> dtoLst = new ArrayList<>();
+		for(RolesAssign role: lst) {
+			RoleAssignDTO dto = new RoleAssignDTO();
+			dto.setRole(role.getRole());
+			dto.setParent_Role(role.getParent_Role());
+			dto.setDescription(role.getDescription());
+			dto.setSub_designation(role.getSub_designation());
+			dtoLst.add(dto);
+		}
+		return ResponseEntity.ok(dtoLst);
 		
 	
 	}

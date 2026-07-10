@@ -30,6 +30,10 @@ public class ModuleEntity {
 	@OneToMany(mappedBy="module")
 	@JsonManagedReference("module-moduleList")
 	private List<ModuleList> moduleList;
+	
+	@OneToMany(mappedBy="userModule")
+	@JsonManagedReference("user-moduleEntity")
+	private List<UserModule> usermodule;
 
 	public Long getId() {
 		return id;

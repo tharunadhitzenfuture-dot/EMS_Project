@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.Module.ModuleList;
+import com.example.EMS.EmployeeEntity.Module.UserModule;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -41,6 +42,10 @@ public class Role {
 	@OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference("role-moduleList")
 	private List<ModuleList> moduleList = new ArrayList<>();
+	
+	@OneToMany(mappedBy="role", cascade= CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference("user-module")
+	private List<UserModule> userModule;
 	
 	
 	public Long getId() {

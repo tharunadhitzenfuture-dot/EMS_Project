@@ -11,9 +11,11 @@ import org.springframework.stereotype.Component;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.Module.ModuleEntity;
 import com.example.EMS.EmployeeEntity.Module.ModuleList;
+import com.example.EMS.EmployeeEntity.Module.UserModule;
 import com.example.EMS.EmployeeRepository.UserRepository;
 import com.example.EMS.EmployeeRepository.ModuleRepository.ModuleListRepository;
 import com.example.EMS.EmployeeRepository.ModuleRepository.ModuleRepository;
+import com.example.EMS.EmployeeRepository.ModuleRepository.UserModuleRepository;
 
 @Component
 @Order(2)
@@ -22,20 +24,18 @@ public class ModuleDataLoader implements CommandLineRunner {
     private final ModuleRepository moduleRepository;
     private final UserRepository userRepository;
     private final ModuleListRepository moduleListRepository;
+    private final UserModuleRepository userModuleRepository;
+
 
 
 	public ModuleDataLoader(ModuleRepository moduleRepository, UserRepository userRepository,
-			ModuleListRepository moduleListRepository) {
-
+			ModuleListRepository moduleListRepository, UserModuleRepository userModuleRepository) {
+		
 		this.moduleRepository = moduleRepository;
 		this.userRepository = userRepository;
 		this.moduleListRepository = moduleListRepository;
+		this.userModuleRepository = userModuleRepository;
 	}
-
-
-
-
-
 
 
 	@Override
@@ -73,12 +73,12 @@ public class ModuleDataLoader implements CommandLineRunner {
                 module.setModuleName(moduleName);
 
                 ModuleEntity res = moduleRepository.save(module);
-                List<User> users = userRepository.findAll();
 
         		List<ModuleList> permissions = new ArrayList<>();
-
-        		for (User user : users) {
-
+        		
+        		Optional<User> exist = userRepository.findById(1L);
+        		User user = exist.get();
+        		
         			ModuleList permission = null;
         		    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndUser(res, user);
         		    if(moduleLst.isEmpty()) {
@@ -92,29 +92,30 @@ public class ModuleDataLoader implements CommandLineRunner {
         		    permission.setUser(user);
         		    
         		    permission.setRole(user.getRoleEntity());
-        		    permission.setModule(res);
+        		    permission.setModule(res); 
         		    
-        		    if(!user.getRoleEntity().getRole().equalsIgnoreCase("ADMIN")){
-        		    	 permission.setCreatePermission(false);
-        				 permission.setViewPermission(false);
-        				 permission.setEditPermission(false);
-        				 permission.setDeletePermission(false);
-        				 permission.setApprovePermission(false);
-        				 permission.setExportPermission(false);
-        		    }
-        		    else {
-        		    	 permission.setCreatePermission(true);
-        				 permission.setViewPermission(true);
-        				 permission.setEditPermission(true);
-        				 permission.setDeletePermission(true);
-        				 permission.setApprovePermission(true);
-        				 permission.setExportPermission(true);
-        		    }
         		    
-        		   
+			    	permission.setCreatePermission(true);
+					permission.setViewPermission(true);
+					permission.setEditPermission(true);
+					permission.setDeletePermission(true);
+					permission.setApprovePermission(true);
+					permission.setExportPermission(true);
+        		    
+        		    UserModule userModule = new  UserModule();
+        		    userModule.setCreatePermission(true);
+					userModule.setViewPermission(true);
+					userModule.setEditPermission(true);
+					userModule.setDeletePermission(true);
+					userModule.setApprovePermission(true);
+					userModule.setExportPermission(true);
+					userModule.setRole(user.getRoleEntity());
+					userModule.setUserModule(module);
+					
+					userModuleRepository.save(userModule);
 
         		    permissions.add(permission);
-        		}
+        		
 
         		moduleListRepository.saveAll(permissions);
         		res.setModuleList(permissions);

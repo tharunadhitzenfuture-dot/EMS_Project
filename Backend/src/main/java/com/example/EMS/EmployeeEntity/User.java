@@ -49,6 +49,8 @@ public class User {
 	@JsonManagedReference("user-moduleList")
 	private List<ModuleList> moduleList;
 	
+	
+	
 
 	
 	public String getName() {
@@ -109,14 +111,7 @@ public class User {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
-	
-    
-	
-	
-	
-	
-	
-	
+
+
 
 }
