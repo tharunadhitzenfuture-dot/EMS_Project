@@ -45,6 +45,7 @@ public class ModuleDataLoader implements CommandLineRunner {
                 "Dashboard",
                 "Employee",
                 "Hr Attendance",
+                "Leave Policy",
                 "Emp Attendance",
                 "HR Leave",
                 "Emp Leave",
