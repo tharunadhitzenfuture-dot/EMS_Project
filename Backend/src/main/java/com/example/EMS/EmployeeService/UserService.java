@@ -132,6 +132,7 @@ public class UserService {
 
 		    LoginResponse response = new LoginResponse();
 
+		    response.setUserId(existingUser.getId());
 		    response.setToken(token);
 		    response.setName(existingUser.getName());
 		    response.setEmail(existingUser.getEmail());

@@ -1,14 +1,14 @@
 package com.example.EMS.EmployeeDTO;
 
-import java.util.Set;
 
-import com.example.EMS.enums.Role;
 
 import lombok.Data;
 
 
-
+@Data
 public class LoginResponse {
+	
+	private Long userId;
     private String email;
     private String name;
     private String token;
@@ -17,6 +17,12 @@ public class LoginResponse {
     
     
     
+	public Long getUserId() {
+		return userId;
+	}
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 	public String getRole() {
 		return role;
 	}
