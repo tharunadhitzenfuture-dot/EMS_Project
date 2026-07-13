@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.example.EMS.EmployeeDTO.LeavePolicyDTO;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveBalance;
@@ -101,8 +102,20 @@ public class LeavePolicyService {
 
 
 		LeavePolicy save = leavePolicyRepo.save(request);
+		LeavePolicyDTO dto = new  LeavePolicyDTO();
+		dto.setId(save.getId());
+		dto.setTotalDays(save.getTotalDays());
+		dto.setYear(save.getYear());
+		dto.setMonth(save.getMonth());
+		dto.setLeaveType(save.getLeaveType().getName());
+		dto.setDepartment(save.getDepartment().getName());
+		dto.setCarryForward(save.getCarryForward());
+		dto.setEncashment(save.isEncashment());
+		dto.setStatus(save.isStatus());
+		dto.setLastUpdateDateTime(save.getLastUpdateDateTime());
+		
 
-		return ResponseEntity.ok(save);
+		return ResponseEntity.ok(dto);
 		
 		
 	}
@@ -171,8 +184,19 @@ public class LeavePolicyService {
 			
 		}
 		LeavePolicy save = leavePolicyRepo.save(request);
+		LeavePolicyDTO dto = new  LeavePolicyDTO();
+		dto.setId(save.getId());
+		dto.setTotalDays(save.getTotalDays());
+		dto.setYear(save.getYear());
+		dto.setMonth(save.getMonth());
+		dto.setLeaveType(save.getLeaveType().getName());
+		dto.setDepartment(save.getDepartment().getName());
+		dto.setCarryForward(save.getCarryForward());
+		dto.setEncashment(save.isEncashment());
+		dto.setStatus(save.isStatus());
+		dto.setLastUpdateDateTime(save.getLastUpdateDateTime());
 
-		return ResponseEntity.ok(save);
+		return ResponseEntity.ok(dto);
 		
 		
 	}

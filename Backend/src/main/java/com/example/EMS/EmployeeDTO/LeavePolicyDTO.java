@@ -1,55 +1,33 @@
-package com.example.EMS.EmployeeEntity.LeaveEntity;
-
-
+package com.example.EMS.EmployeeDTO;
 
 import java.time.LocalDateTime;
 
-import com.example.EMS.EmployeeEntity.Departments.Departments;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Entity
-@Getter
-@Setter
-public class LeavePolicy {
 
-	@Id
-	@GeneratedValue(strategy= GenerationType.IDENTITY)
+@Data
+public class LeavePolicyDTO {
+	
 	private Long id;
 	private Integer totalDays;
 	private Integer year;
 	private Integer month;
 	
-//	@Enumerated(EnumType.STRING)
-//    @Column(nullable=false)
-//	private LeaveType type;
+
+	private String leaveType;
 	
-	@ManyToOne
-	@JoinColumn(name="leaveType_id")
-	private LeaveType leaveType;
 	
-	@ManyToOne
-	@JoinColumn(name="department_id")
-	private Departments department;
+	private String department;
 	
 	private Integer carryForward;
 	private boolean encashment;
 	private boolean status;
 	private LocalDateTime lastUpdateDateTime;
-	
-	
 	public Long getId() {
 		return id;
 	}
 	public void setId(Long id) {
 		this.id = id;
-		
 	}
 	public Integer getTotalDays() {
 		return totalDays;
@@ -69,18 +47,16 @@ public class LeavePolicy {
 	public void setMonth(Integer month) {
 		this.month = month;
 	}
-	
-	
-	public LeaveType getLeaveType() {
+	public String getLeaveType() {
 		return leaveType;
 	}
-	public void setLeaveType(LeaveType leaveType) {
+	public void setLeaveType(String leaveType) {
 		this.leaveType = leaveType;
 	}
-	public Departments getDepartment() {
+	public String getDepartment() {
 		return department;
 	}
-	public void setDepartment(Departments department) {
+	public void setDepartment(String department) {
 		this.department = department;
 	}
 	public Integer getCarryForward() {
@@ -109,7 +85,5 @@ public class LeavePolicy {
 	}
 	
 	
-	
-	
-	
+
 }

@@ -323,8 +323,6 @@ public class UserService {
 			if(password.isEmpty()) {
 				return ResponseEntity.badRequest().body("OTP expired");
 			}
-			System.out.println(password.get().getOtp());
-			System.out.println(passwordDTO.getOtp());
 			
 			 if(!passwordEncoder.matches(passwordDTO.getOtp(), password.get().getOtp())) {
 				 return ResponseEntity.badRequest().body("One time password not matched");

@@ -1,5 +1,6 @@
 package com.example.EMS.EmployeeController.LeaveController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.EMS.EmployeeDTO.LeavePolicyDTO;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeavePolicy;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeavePolicyRepository;
 import com.example.EMS.EmployeeService.LeaveService.LeavePolicyService;
@@ -70,7 +72,25 @@ public class LeavePolicyController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Leave policy list is empty");
 		}
 		
-		return ResponseEntity.ok(lst);
+		List<LeavePolicyDTO> dtoList = new ArrayList<>();
+		
+		for(LeavePolicy save: lst) {
+			LeavePolicyDTO dto = new  LeavePolicyDTO();
+			dto.setId(save.getId());
+			dto.setTotalDays(save.getTotalDays());
+			dto.setYear(save.getYear());
+			dto.setMonth(save.getMonth());
+			dto.setLeaveType(save.getLeaveType().getName());
+			dto.setDepartment(save.getDepartment().getName());
+			dto.setCarryForward(save.getCarryForward());
+			dto.setEncashment(save.isEncashment());
+			dto.setStatus(save.isStatus());
+			dto.setLastUpdateDateTime(save.getLastUpdateDateTime());
+			
+			dtoList.add(dto);
+		}
+		
+		return ResponseEntity.ok(dtoList);
 	}
 	
 	@DeleteMapping("/deleteById/{id}")
