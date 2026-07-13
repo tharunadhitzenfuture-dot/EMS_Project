@@ -159,7 +159,7 @@ public class LeaveRequestService {
         dto.setId(req.getId());
         dto.setStartDate(req.getStartDate());
         dto.setEndDate(req.getEndDate());
-        dto.setTotalDays(req.getTotalDays());
+//      dto.setTotalDays(req.getTotalDays());
         dto.setLeaveTime(req.getLeaveTime());
         dto.setLeaveType(req.getLeaveType().getName());
         dto.setDepartment(req.getDepartment());
@@ -271,7 +271,7 @@ public class LeaveRequestService {
         dto.setId(req.getId());
         dto.setStartDate(req.getStartDate());
         dto.setEndDate(req.getEndDate());
-        dto.setTotalDays(req.getTotalDays());
+//      dto.setTotalDays(req.getTotalDays());
         dto.setLeaveTime(req.getLeaveTime());
         dto.setLeaveType(req.getLeaveType().getName());
         dto.setDepartment(req.getDepartment());
@@ -436,8 +436,13 @@ public class LeaveRequestService {
 	        dto1.setDepartment(res.getDepartment());
 	        dto1.setApproverEmail1(res.getApproverEmail1());
 	        dto1.setApproverEmail2(res.getApproverEmail2());
+	        dto1.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getLast_name());
+	        dto1.setReviewedAt(req.getReviewedAt());
+	        dto1.setCreatedAt(req.getCreatedAt());
+	        dto1.setHrRemarks(req.getHrRemarks());
 	        dto1.setStatus(res.getStatus());
 	        dto1.setReason(res.getReason());
+	        dto1.setLeavePaid(req.isLeavePaid());
 	        dto1.setHrRemarks(res.getHrRemarks());
 	        return ResponseEntity.ok(dto1);
 
@@ -546,8 +551,13 @@ public class LeaveRequestService {
 	        dto1.setDepartment(res.getDepartment());
 	        dto1.setApproverEmail1(res.getApproverEmail1());
 	        dto1.setApproverEmail2(res.getApproverEmail2());
+	        dto1.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getLast_name());
+	        dto1.setReviewedAt(req.getReviewedAt());
+	        dto1.setCreatedAt(req.getCreatedAt());
+	        dto1.setHrRemarks(req.getHrRemarks());
 	        dto1.setStatus(res.getStatus());
 	        dto1.setReason(res.getReason());
+	        dto1.setLeavePaid(req.isLeavePaid());
 	        dto1.setHrRemarks(res.getHrRemarks());
 	        return ResponseEntity.ok(dto1);
 
@@ -627,9 +637,13 @@ public class LeaveRequestService {
 	        dto.setDepartment(updated.getDepartment());
 	        dto.setApproverEmail1(updated.getApproverEmail1());
 	        dto.setApproverEmail2(updated.getApproverEmail2());
+	        dto.setReviewedBy(updated.getReviewedBy().getFirst_name()+" "+updated.getReviewedBy().getLast_name());
+	        dto.setReviewedAt(updated.getReviewedAt());
+	        dto.setCreatedAt(updated.getCreatedAt());
 	        dto.setStatus(updated.getStatus());
 	        dto.setReason(updated.getReason());
 	        dto.setHrRemarks(updated.getHrRemarks());
+	        dto.setLeavePaid(updated.isLeavePaid());
 
 	     return ResponseEntity.ok(updated);
 	 }

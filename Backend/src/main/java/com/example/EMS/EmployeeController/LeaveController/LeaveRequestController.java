@@ -1,6 +1,7 @@
 package com.example.EMS.EmployeeController.LeaveController;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.EMS.EmployeeDTO.LeaveRequestDTO;
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.User;
@@ -140,7 +142,31 @@ public class LeaveRequestController {
 		if(lst.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Leave requests list empty");
 		}
-	    return ResponseEntity.ok(lst);
+		
+		List<LeaveRequestDTO> lstDTO = new ArrayList<>();
+		
+		for(LeaveRequest req: lst) {
+		       LeaveRequestDTO dto = new LeaveRequestDTO();
+		        
+		        dto.setId(req.getId());
+		        dto.setStartDate(req.getStartDate());
+		        dto.setEndDate(req.getEndDate());
+   		        dto.setTotalDays(req.getTotalDays());
+		        dto.setLeaveTime(req.getLeaveTime());
+		        dto.setLeaveType(req.getLeaveType().getName());
+		        dto.setDepartment(req.getDepartment());
+		        dto.setApproverEmail1(req.getApproverEmail1());
+		        dto.setApproverEmail2(req.getApproverEmail2());
+		        dto.setStatus(req.getStatus());
+		        dto.setReason(req.getReason());
+		        dto.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getLast_name());
+		        dto.setReviewedAt(req.getReviewedAt());
+		        dto.setCreatedAt(req.getCreatedAt());
+		        dto.setHrRemarks(req.getHrRemarks());
+		        dto.setLeavePaid(req.isLeavePaid());
+		        lstDTO.add(dto);
+		}
+	    return ResponseEntity.ok(lstDTO);
 	}
 	
 	
