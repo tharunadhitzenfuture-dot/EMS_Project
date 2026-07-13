@@ -436,7 +436,7 @@ public class LeaveRequestService {
 	        dto1.setDepartment(res.getDepartment());
 	        dto1.setApproverEmail1(res.getApproverEmail1());
 	        dto1.setApproverEmail2(res.getApproverEmail2());
-	        dto1.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getLast_name());
+	        dto1.setReviewedBy(req.getReviewedBy().getEmail());
 	        dto1.setReviewedAt(req.getReviewedAt());
 	        dto1.setCreatedAt(req.getCreatedAt());
 	        dto1.setHrRemarks(req.getHrRemarks());
@@ -551,7 +551,7 @@ public class LeaveRequestService {
 	        dto1.setDepartment(res.getDepartment());
 	        dto1.setApproverEmail1(res.getApproverEmail1());
 	        dto1.setApproverEmail2(res.getApproverEmail2());
-	        dto1.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getLast_name());
+	        dto1.setReviewedBy(req.getReviewedBy().getEmail());
 	        dto1.setReviewedAt(req.getReviewedAt());
 	        dto1.setCreatedAt(req.getCreatedAt());
 	        dto1.setHrRemarks(req.getHrRemarks());
@@ -637,7 +637,7 @@ public class LeaveRequestService {
 	        dto.setDepartment(updated.getDepartment());
 	        dto.setApproverEmail1(updated.getApproverEmail1());
 	        dto.setApproverEmail2(updated.getApproverEmail2());
-	        dto.setReviewedBy(updated.getReviewedBy().getFirst_name()+" "+updated.getReviewedBy().getLast_name());
+	        dto.setReviewedBy(updated.getReviewedBy().getEmail());
 	        dto.setReviewedAt(updated.getReviewedAt());
 	        dto.setCreatedAt(updated.getCreatedAt());
 	        dto.setStatus(updated.getStatus());
