@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.EMS.EmployeeDTO.ForgotPasswordDTO;
 import com.example.EMS.EmployeeDTO.LoginRequest;
 import com.example.EMS.EmployeeDTO.ResetPasswordDTO;
+import com.example.EMS.EmployeeDTO.UserControlDTO;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeRepository.EmpRepository;
@@ -91,7 +92,7 @@ public class UserController {
 		Optional<Employee> empUser = empRepository.findByUser(user);
 		
 		if(empUser.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User employee details not found");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User employee details not found");
 		}
 		
 		String email = empUser.get().getEmail();
@@ -242,12 +243,17 @@ public class UserController {
 	@GetMapping("/getDetails")
 	public ResponseEntity<?> getEmployeeDetails(){
 		
-		Employee empUser = getCurrentEmployee();
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		
-		String empId = empUser.getEmployeeId();
+		User user = (User) authentication.getPrincipal();
 		
-		Optional<Employee>  emp = empRepository.findByEmployeeId(empId);
-		return ResponseEntity.ok(emp);
+		UserControlDTO dto = new UserControlDTO();
+		dto.setUserId(user.getId());
+		dto.setEmail(user.getEmail());
+		dto.setName(user.getName());
+		dto.setUserRole(user.getRoleEntity().getRole());
+		
+		return ResponseEntity.ok(dto);
 
 	}
 	
