@@ -1,5 +1,7 @@
 package com.example.EMS.EmployeeDTO;
 
+import com.example.EMS.EmployeeEntity.Employee;
+
 import lombok.Data;
 
 @Data
@@ -10,7 +12,8 @@ public class UserControlDTO {
 	private String email;
 	private String password;
 	private String userRole;
-	
+	private boolean active;
+	private Employee employee;
 	
 	public Long getUserId() {
 		return userId;
@@ -42,6 +45,19 @@ public class UserControlDTO {
 	public void setUserRole(String userRole) {
 		this.userRole = userRole;
 	}
+	public boolean isActive() {
+		return active;
+	}
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+	public Employee getEmployee() {
+		return employee;
+	}
+	public void setEmployee(Employee employee) {
+		this.employee = employee;
+	}
+	
 		
 
 }

@@ -252,6 +252,9 @@ public class UserController {
 		dto.setEmail(user.getEmail());
 		dto.setName(user.getName());
 		dto.setUserRole(user.getRoleEntity().getRole());
+		dto.setActive(user.isActive());
+//		dto.setPassword(user.getPassword());
+		dto.setEmployee(user.getEmployee());
 		
 		return ResponseEntity.ok(dto);
 
