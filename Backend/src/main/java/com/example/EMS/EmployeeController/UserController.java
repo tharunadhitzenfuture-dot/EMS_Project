@@ -247,16 +247,22 @@ public class UserController {
 		
 		User user = (User) authentication.getPrincipal();
 		
-		UserControlDTO dto = new UserControlDTO();
-		dto.setUserId(user.getId());
-		dto.setEmail(user.getEmail());
-		dto.setName(user.getName());
-		dto.setUserRole(user.getRoleEntity().getRole());
-		dto.setActive(user.isActive());
-//		dto.setPassword(user.getPassword());
-		dto.setEmployee(user.getEmployee());
+		if(user.getId() == 1) {
+			UserControlDTO dto = new UserControlDTO();
+			dto.setUserId(user.getId());
+			dto.setEmail(user.getEmail());
+			dto.setName(user.getName());
+			dto.setUserRole(user.getRoleEntity().getRole());
+			dto.setActive(user.isActive());
+//			dto.setPassword(user.getPassword());
+			return ResponseEntity.ok(dto);
+		}
+		else {
+			Employee emp = getCurrentEmployee();
+			return ResponseEntity.ok(emp);
+		}
 		
-		return ResponseEntity.ok(dto);
+		
 
 	}
 	
