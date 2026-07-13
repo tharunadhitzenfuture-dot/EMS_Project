@@ -60,6 +60,11 @@ public class Permission {
 	@JsonIgnore
 	private Employee reviewedBy;
 	
+	@JsonProperty("reviewedBy")
+	public String getReviewedByEmail() {
+	    return reviewedBy != null ? reviewedBy.getEmail() : null;
+	}
+	
 	private LocalDateTime reviewedAt;
 	
 	 @CreationTimestamp 

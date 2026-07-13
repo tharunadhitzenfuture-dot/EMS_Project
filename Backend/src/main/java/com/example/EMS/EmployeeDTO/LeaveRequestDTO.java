@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 
 
 import com.example.EMS.EmployeeEntity.Departments.Departments;
-import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveType;
 import com.example.EMS.enums.LeaveStatus;
 import com.example.EMS.enums.LeaveTime;
 

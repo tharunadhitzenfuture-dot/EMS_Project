@@ -201,7 +201,7 @@ public class LeaveRequestService {
 		
 		
 		if(email1 == null || email1.isBlank()) {
-			return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Approver 1 not set");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Approver 1 not set");
 		}
 		else {
 			request.setApproverEmail1(email1);
