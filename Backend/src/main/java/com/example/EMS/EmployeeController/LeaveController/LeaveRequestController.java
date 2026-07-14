@@ -149,6 +149,7 @@ public class LeaveRequestController {
 		       LeaveRequestDTO dto = new LeaveRequestDTO();
 		        
 		        dto.setId(req.getId());
+		        dto.setEmpId(req.getEmployee_Id());
 		        dto.setStartDate(req.getStartDate());
 		        dto.setEndDate(req.getEndDate());
    		        dto.setTotalDays(req.getTotalDays());
