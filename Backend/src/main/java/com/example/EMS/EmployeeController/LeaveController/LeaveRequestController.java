@@ -192,6 +192,53 @@ public class LeaveRequestController {
 		}
 		return ResponseEntity.ok(leave);
 	}
+	 
+	 @GetMapping("/getListLeave")
+	 public ResponseEntity<?> getListPermission() {
+		 
+		 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			
+			User user = (User) authentication.getPrincipal();
+			
+			Optional<Employee> empUser = empRepo.findByUser(user);
+			
+			if(empUser.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User employee details not found");
+			}
+			
+	      String empId = empUser.get().getEmployeeId();
+		  Long id = empRepo.findIdByEmployeeId(empId);
+		  List<LeaveRequest> list = requestRepository.findByEmployeeIdOrderByCreatedAtDesc(id);
+		  
+		  List<LeaveRequestDTO> lstDTO = new ArrayList<>();
+			
+			for(LeaveRequest req: list) {
+			       LeaveRequestDTO dto = new LeaveRequestDTO();
+			        
+			        dto.setId(req.getId());
+			        dto.setEmpId(req.getEmployee_Id());
+			        dto.setStartDate(req.getStartDate());
+			        dto.setEndDate(req.getEndDate());
+	   		        dto.setTotalDays(req.getTotalDays());
+			        dto.setLeaveTime(req.getLeaveTime());
+			        dto.setLeaveType(req.getLeaveType().getName());
+			        dto.setDepartment(req.getDepartment());
+			        dto.setApproverEmail1(req.getApproverEmail1());
+			        dto.setApproverEmail2(req.getApproverEmail2());
+			        dto.setStatus(req.getStatus());
+			        dto.setReason(req.getReason());
+			        if(req.getReviewedBy() != null) {
+			        	 dto.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getLast_name());
+			        }		       
+			        dto.setReviewedAt(req.getReviewedAt());
+			        dto.setCreatedAt(req.getCreatedAt());
+			        dto.setHrRemarks(req.getHrRemarks());
+			        dto.setLeavePaid(req.isLeavePaid());
+			        lstDTO.add(dto);
+			}
+		
+		return ResponseEntity.ok(lstDTO);
+	}
 	
 	@PutMapping("/update/{empId}/{leaveId}")
 	public ResponseEntity<?> updateLeave(
