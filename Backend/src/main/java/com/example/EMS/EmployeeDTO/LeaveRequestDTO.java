@@ -12,6 +12,7 @@ import com.example.EMS.enums.LeaveTime;
 public class LeaveRequestDTO {
 	
 	private Long id;
+	private String empId;
 	private LocalDate startDate;
 	private LocalDate endDate;
 	private Integer totalDays;
@@ -31,6 +32,15 @@ public class LeaveRequestDTO {
 	public Long getId() {
 		return id;
 	}
+	
+	public String getEmpId() {
+		return empId;
+	}
+
+	public void setEmpId(String empId) {
+		this.empId = empId;
+	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}

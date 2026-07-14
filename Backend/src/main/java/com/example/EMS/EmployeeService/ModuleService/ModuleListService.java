@@ -11,12 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.EMS.EmployeeDTO.EmployeePermissionDTO;
 import com.example.EMS.EmployeeDTO.ModuleListDTO.RolePermissionDTO;
-import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.Module.ModuleEntity;
 import com.example.EMS.EmployeeEntity.Module.ModuleList;
 import com.example.EMS.EmployeeEntity.Module.UserModule;
 import com.example.EMS.EmployeeEntity.Role.Role;
-import com.example.EMS.EmployeeRepository.UserRepository;
 import com.example.EMS.EmployeeRepository.ModuleRepository.ModuleListRepository;
 import com.example.EMS.EmployeeRepository.ModuleRepository.ModuleRepository;
 import com.example.EMS.EmployeeRepository.ModuleRepository.UserModuleRepository;
@@ -85,7 +83,7 @@ public class ModuleListService {
 		
 
 		if(list.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No records found with role id: "+roleId+" and module Id: "+moduleId);
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No employee list found with role id: "+roleId+" and module Id: "+moduleId);
 		}
 		
 		for(ModuleList module: list) {

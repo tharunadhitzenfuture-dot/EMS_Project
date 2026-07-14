@@ -157,6 +157,7 @@ public class LeaveRequestService {
         LeaveRequestDTO dto = new LeaveRequestDTO();
         
         dto.setId(req.getId());
+        dto.setEmpId(empId);
         dto.setStartDate(req.getStartDate());
         dto.setEndDate(req.getEndDate());
 //      dto.setTotalDays(req.getTotalDays());
@@ -269,6 +270,7 @@ public class LeaveRequestService {
         LeaveRequestDTO dto = new LeaveRequestDTO();
         
         dto.setId(req.getId());
+        dto.setEmpId(empId);
         dto.setStartDate(req.getStartDate());
         dto.setEndDate(req.getEndDate());
 //      dto.setTotalDays(req.getTotalDays());
@@ -428,6 +430,7 @@ public class LeaveRequestService {
 	        LeaveRequestDTO dto1 = new LeaveRequestDTO();
 	        
 	        dto1.setId(res.getId());
+	        dto1.setEmpId(req.getEmployee_Id());
 	        dto1.setStartDate(res.getStartDate());
 	        dto1.setEndDate(res.getEndDate());
 	        dto1.setTotalDays(res.getTotalDays());
@@ -543,6 +546,7 @@ public class LeaveRequestService {
 	        LeaveRequestDTO dto1 = new LeaveRequestDTO();
 	        
 	        dto1.setId(res.getId());
+	        dto1.setEmpId(req.getEmployee_Id());
 	        dto1.setStartDate(res.getStartDate());
 	        dto1.setEndDate(res.getEndDate());
 	        dto1.setTotalDays(res.getTotalDays());
@@ -629,6 +633,7 @@ public class LeaveRequestService {
 	       LeaveRequestDTO dto = new LeaveRequestDTO();
 	        
 	        dto.setId(updated.getId());
+	        dto.setEmpId(empId);
 	        dto.setStartDate(updated.getStartDate());
 	        dto.setEndDate(updated.getEndDate());
 	        dto.setTotalDays(updated.getTotalDays());

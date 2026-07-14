@@ -159,7 +159,9 @@ public class LeaveRequestController {
 		        dto.setApproverEmail2(req.getApproverEmail2());
 		        dto.setStatus(req.getStatus());
 		        dto.setReason(req.getReason());
-		        dto.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getLast_name());
+		        if(req.getReviewedBy() != null) {
+		        	 dto.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getLast_name());
+		        }		       
 		        dto.setReviewedAt(req.getReviewedAt());
 		        dto.setCreatedAt(req.getCreatedAt());
 		        dto.setHrRemarks(req.getHrRemarks());
