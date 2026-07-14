@@ -15,7 +15,7 @@ public class LeaveRequestDTO {
 	private String empId;
 	private LocalDate startDate;
 	private LocalDate endDate;
-	private Integer totalDays;
+	private double totalDays;
 	private LeaveTime leaveTime;
 	private String leaveType;
 	private Departments department;
@@ -56,12 +56,15 @@ public class LeaveRequestDTO {
 	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
 	}
-	public Integer getTotalDays() {
+	
+	public double getTotalDays() {
 		return totalDays;
 	}
-	public void setTotalDays(Integer totalDays) {
+
+	public void setTotalDays(double totalDays) {
 		this.totalDays = totalDays;
 	}
+
 	public LeaveTime getLeaveTime() {
 		return leaveTime;
 	}

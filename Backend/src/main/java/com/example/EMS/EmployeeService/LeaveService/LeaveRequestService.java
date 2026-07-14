@@ -105,7 +105,8 @@ public class LeaveRequestService {
         if (request.getEndDate().isBefore(request.getStartDate()))
             throw new BadRequestException("End date must be on or after start date");
         
-        int workingDays = countWorkingDays(request.getStartDate(), request.getEndDate());
+        boolean time = request.getLeaveTime().toString() == "FULL_DAY" ? false : true;
+        double workingDays = countWorkingDays(request.getStartDate(), request.getEndDate(), time);
         int month = request.getStartDate().getMonthValue();
         int year = request.getStartDate().getYear();
         
@@ -160,7 +161,7 @@ public class LeaveRequestService {
         dto.setEmpId(empId);
         dto.setStartDate(req.getStartDate());
         dto.setEndDate(req.getEndDate());
-//      dto.setTotalDays(req.getTotalDays());
+        dto.setTotalDays(req.getTotalDays());
         dto.setLeaveTime(req.getLeaveTime());
         dto.setLeaveType(req.getLeaveType().getName());
         dto.setDepartment(req.getDepartment());
@@ -224,7 +225,8 @@ public class LeaveRequestService {
         if (request.getEndDate().isBefore(request.getStartDate()))
             throw new BadRequestException("End date must be on or after start date");
         
-        int workingDays = countWorkingDays(request.getStartDate(), request.getEndDate());
+        boolean time = request.getLeaveTime().toString() == "FULL_DAY" ? false : true;
+        double workingDays = countWorkingDays(request.getStartDate(), request.getEndDate(), time);
         int month = request.getStartDate().getMonthValue();
         int year = request.getStartDate().getYear();
         
@@ -266,6 +268,7 @@ public class LeaveRequestService {
 //        
       
         request.setEmployee(emp);
+        request.setTotalDays(workingDays);
         LeaveRequest req = leaveRequestRepository.save(request);
         LeaveRequestDTO dto = new LeaveRequestDTO();
         
@@ -273,7 +276,7 @@ public class LeaveRequestService {
         dto.setEmpId(empId);
         dto.setStartDate(req.getStartDate());
         dto.setEndDate(req.getEndDate());
-//      dto.setTotalDays(req.getTotalDays());
+        dto.setTotalDays(req.getTotalDays());
         dto.setLeaveTime(req.getLeaveTime());
         dto.setLeaveType(req.getLeaveType().getName());
         dto.setDepartment(req.getDepartment());
@@ -653,13 +656,40 @@ public class LeaveRequestService {
 	     return ResponseEntity.ok(updated);
 	 }
 	
-	private int countWorkingDays(LocalDate start, LocalDate end) {
-        int count = 0;
-        for (LocalDate d = start; !d.isAfter(end); d = d.plusDays(1))
-            if (d.getDayOfWeek() != DayOfWeek.SATURDAY && d.getDayOfWeek() != DayOfWeek.SUNDAY)
-                count++;
-        return count;
-    }
+	 public double countWorkingDays(LocalDate start, LocalDate end, boolean isHalfDay) {
+
+		    double count = 0;
+
+		    for (LocalDate d = start; !d.isAfter(end); d = d.plusDays(1)) {
+		        if (d.getDayOfWeek() != DayOfWeek.SATURDAY &&
+		            d.getDayOfWeek() != DayOfWeek.SUNDAY) {
+
+		            if (isHalfDay && start.equals(end)) {
+		                count += 0.5;
+		            } else {
+		                count += 1;
+		            }
+		        }
+		    }
+
+		    return count;
+		}
+	
+	public double countHalfDays(LocalDate start, LocalDate end) {
+
+	    double count = 0;
+
+	    for (LocalDate d = start; !d.isAfter(end); d = d.plusDays(1)) {
+	        if (d.getDayOfWeek() != DayOfWeek.SATURDAY &&
+	            d.getDayOfWeek() != DayOfWeek.SUNDAY) {
+	                count += 0.5;      
+	        }
+	    }
+
+	    return count;
+	}
+	
+	
 	
 	@Transactional
 	public ResponseEntity<?> deleteLeave(

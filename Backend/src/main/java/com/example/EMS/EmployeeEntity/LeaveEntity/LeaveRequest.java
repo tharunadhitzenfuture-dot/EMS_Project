@@ -42,7 +42,7 @@ public class LeaveRequest {
 	
 	private LocalDate startDate;
 	private LocalDate endDate;
-	private Integer totalDays;
+	private double totalDays;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable=false)
@@ -121,13 +121,7 @@ public class LeaveRequest {
 		 this.endDate = endDate;
 	 }
 
-	 public Integer getTotalDays() {
-		 return totalDays;
-	 }
-
-	 public void setTotalDays(Integer totalDays) {
-		 this.totalDays = totalDays;
-	 }
+	
 
 	 public String getReason() {
 		 return reason;
@@ -227,6 +221,14 @@ public class LeaveRequest {
 
 	 public void setLeaveTime(LeaveTime leaveTime) {
 		 this.leaveTime = leaveTime;
+	 }
+
+	 public double getTotalDays() {
+		 return totalDays;
+	 }
+
+	 public void setTotalDays(double totalDays) {
+		 this.totalDays = totalDays;
 	 }
 	 
 	 
