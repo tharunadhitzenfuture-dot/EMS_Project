@@ -48,6 +48,7 @@ import com.example.EMS.EmployeeEntity.LeaveEntity.LeavePolicy;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 import com.example.EMS.EmployeeEntity.Module.ModuleEntity;
 import com.example.EMS.EmployeeEntity.Module.ModuleList;
+import com.example.EMS.EmployeeEntity.Module.UserModule;
 import com.example.EMS.EmployeeEntity.Role.Role;
 import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
@@ -57,6 +58,7 @@ import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentReposit
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeavePolicyRepository;
 import com.example.EMS.EmployeeRepository.ModuleRepository.ModuleListRepository;
 import com.example.EMS.EmployeeRepository.ModuleRepository.ModuleRepository;
+import com.example.EMS.EmployeeRepository.ModuleRepository.UserModuleRepository;
 import com.example.EMS.EmployeeRepository.RoleRepository.RoleRepository;
 import com.example.EMS.enums.JobLevel;
 
@@ -72,15 +74,17 @@ public class EmpService {
     public RoleRepository roleRepo;
     public ModuleRepository moduleRepository;
     public ModuleListRepository moduleListRepository;
+    public UserModuleRepository userModuleRepository;
 	
 
     
-	
+
 	public EmpService(EmpRepository empRepo, PasswordEncoder passwordEncoder,
 			ProfessionalDetailRepository professionalRepo, LeavePolicyRepository leavePolicyRepo,
 			DepartmentRepository departmentRepository, RoleAssignRepository rolesRepository, RoleRepository roleRepo,
-			ModuleRepository moduleRepository, ModuleListRepository moduleListRepository) {
-
+			ModuleRepository moduleRepository, ModuleListRepository moduleListRepository,
+			UserModuleRepository userModuleRepository) {
+		
 		this.empRepo = empRepo;
 		this.passwordEncoder = passwordEncoder;
 		this.professionalRepo = professionalRepo;
@@ -90,6 +94,7 @@ public class EmpService {
 		this.roleRepo = roleRepo;
 		this.moduleRepository = moduleRepository;
 		this.moduleListRepository = moduleListRepository;
+		this.userModuleRepository = userModuleRepository;
 	}
 
 	public Long getIdByEmployeeId(String empId) {
@@ -576,24 +581,35 @@ public class EmpService {
 			
 			ModuleList permission = null;
 		    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndUser(module, user);
+		   
+		    
+		    
 		    if(moduleLst.isEmpty()) {
 		    	permission = new ModuleList();
 		    }
 		    else {
 		    	permission = moduleLst.get();
 		    }
-
-		    permission.setUser(user);
 		    
+		    Optional<UserModule> userModule = userModuleRepository.findByUserModule_IdAndRole_Id(module.getId(),role.getId());
 		    
+		    if(userModule.isPresent()) {
+		    	UserModule access = userModule.get();
+		    	permission.setCreatePermission(access.isCreatePermission());
+			    permission.setViewPermission(access.isViewPermission());
+			    permission.setEditPermission(access.isEditPermission());
+			    permission.setDeletePermission(access.isDeletePermission());		    
+		    }
+		    else {
+		    	
+			    permission.setCreatePermission(false);
+			    permission.setViewPermission(false);
+			    permission.setEditPermission(false);
+			    permission.setDeletePermission(false);
+		    }
+		    permission.setUser(user);	    
 		    permission.setRole(role);		   
 		    permission.setModule(module);
-
-		    permission.setCreatePermission(false);
-		    permission.setViewPermission(false);
-		    permission.setEditPermission(false);
-		    permission.setDeletePermission(false);
-
 		    permissions.add(permission);
 		}
 		
