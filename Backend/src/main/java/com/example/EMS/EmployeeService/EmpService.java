@@ -2062,15 +2062,28 @@ public class EmpService {
 		    	permission = moduleLst.get();
 		    }
 
+		    
+		    
+		    Optional<UserModule> userModule = userModuleRepository.findByUserModule_IdAndRole_Id(module.getId(),role.getId());
+		    
+		    if(userModule.isPresent()) {
+		    	UserModule access = userModule.get();
+		    	permission.setCreatePermission(access.isCreatePermission());
+			    permission.setViewPermission(access.isViewPermission());
+			    permission.setEditPermission(access.isEditPermission());
+			    permission.setDeletePermission(access.isDeletePermission());		    
+		    }
+		    else {
+		    	permission.setCreatePermission(false);
+			    permission.setViewPermission(false);
+			    permission.setEditPermission(false);
+			    permission.setDeletePermission(false);
+		    }
+		    
+		    
 		    permission.setUser(existingUser);
 		    permission.setRole(role);	
 		    permission.setModule(module);
-
-		    permission.setCreatePermission(false);
-		    permission.setViewPermission(false);
-		    permission.setEditPermission(false);
-		    permission.setDeletePermission(false);
-
 		    permissions.add(permission);
 		}
 		
