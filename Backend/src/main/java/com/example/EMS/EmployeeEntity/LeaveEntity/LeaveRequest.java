@@ -79,6 +79,11 @@ public class LeaveRequest {
 	@JsonIgnore
 	private Employee reviewedBy;
 	
+	@JsonProperty
+	 public String getEmployee_Id() {
+		 return employee != null ? employee.getEmployeeId() : null;
+	 }
+	
 	private LocalDateTime reviewedAt;
 	private boolean leavePaid;
 	 @CreationTimestamp 
@@ -92,10 +97,7 @@ public class LeaveRequest {
 		 this.id = id;
 	 }
 	 
-	 @JsonProperty
-	 public String getEmployee_Id() {
-		 return employee != null ? employee.getEmployeeId() : null;
-	 }
+	 
 
 	 public Employee getEmployee() {
 		 return employee;
