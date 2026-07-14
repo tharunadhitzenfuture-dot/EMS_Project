@@ -1,5 +1,8 @@
 package com.example.EMS.EmployeeEntity;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -29,6 +32,8 @@ public class ApprovalSystem {
 	 public String getEmployee_Id() {
 		 return employee != null ? employee.getEmployeeId() : null;
 	 }
+	
+
 	
 	public Long getId() {
 		return id;

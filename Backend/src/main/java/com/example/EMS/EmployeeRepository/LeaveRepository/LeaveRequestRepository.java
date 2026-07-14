@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.example.EMS.EmployeeEntity.ApprovalSystem;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
 
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long>{
@@ -38,6 +39,14 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
     	List<LeaveRequest> findLeavesContainingDate(
     	        @org.springframework.data.repository.query.Param("empId") Long empId,
     	        @org.springframework.data.repository.query.Param("date") LocalDate date);
+    
+    @Query("""
+    	       SELECT l
+    	       FROM LeaveRequest l
+    	       WHERE l.approverEmail1 = :email
+    	          OR l.approverEmail2 = :email
+    	       """)
+    	List<LeaveRequest> findByApproverEmail(@Param("email") String email);
     
     
 }

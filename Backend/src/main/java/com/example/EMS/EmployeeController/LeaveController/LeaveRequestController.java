@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.LeaveRequestDTO;
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
+import com.example.EMS.EmployeeEntity.ApprovalSystem;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
@@ -60,6 +61,58 @@ public class LeaveRequestController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please provide start date and end date");
 		}
 		return requestService.applyEmpLeave( request);
+
+	}
+	
+	@GetMapping("/getLeaveist")
+	public ResponseEntity<?> getApprovalList(){
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		User user = (User) authentication.getPrincipal();
+		
+		Optional<Employee> empUser = empRepo.findByUser(user);
+		
+		if(empUser.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User employee details not found");
+		}
+		
+		String email = empUser.get().getEmail();
+		List<LeaveRequest> lst = requestRepository.findByApproverEmail(email);
+		
+		if(lst.size() == 0) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("You dont have approval list");
+		}
+		
+		List<LeaveRequestDTO> lstDTO = new ArrayList<>();
+		
+		for(LeaveRequest req: lst) {
+		       LeaveRequestDTO dto = new LeaveRequestDTO();
+		        
+		        dto.setId(req.getId());
+		        dto.setEmpId(req.getEmployee_Id());
+		        dto.setStartDate(req.getStartDate());
+		        dto.setEndDate(req.getEndDate());
+   		        dto.setTotalDays(req.getTotalDays());
+		        dto.setLeaveTime(req.getLeaveTime());
+		        dto.setLeaveType(req.getLeaveType().getName());
+		        dto.setDepartment(req.getDepartment());
+		        
+		        dto.setApproverEmail1(req.getApproverEmail1());
+		        dto.setApproverEmail2(req.getApproverEmail2());
+		        dto.setStatus(req.getStatus());
+		        dto.setReason(req.getReason());
+		        if(req.getReviewedBy() != null) {
+		        	 dto.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getEmployeeId());
+		        }		       
+		        dto.setReviewedAt(req.getReviewedAt());
+		        dto.setCreatedAt(req.getCreatedAt());
+		        dto.setHrRemarks(req.getHrRemarks());
+		        dto.setLeavePaid(req.isLeavePaid());
+		        lstDTO.add(dto);
+		}
+		return ResponseEntity.ok(lstDTO);
+		
 
 	}
 	
@@ -156,12 +209,13 @@ public class LeaveRequestController {
 		        dto.setLeaveTime(req.getLeaveTime());
 		        dto.setLeaveType(req.getLeaveType().getName());
 		        dto.setDepartment(req.getDepartment());
+		        
 		        dto.setApproverEmail1(req.getApproverEmail1());
 		        dto.setApproverEmail2(req.getApproverEmail2());
 		        dto.setStatus(req.getStatus());
 		        dto.setReason(req.getReason());
 		        if(req.getReviewedBy() != null) {
-		        	 dto.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getLast_name());
+		        	 dto.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getEmployeeId());
 		        }		       
 		        dto.setReviewedAt(req.getReviewedAt());
 		        dto.setCreatedAt(req.getCreatedAt());
@@ -228,7 +282,7 @@ public class LeaveRequestController {
 			        dto.setStatus(req.getStatus());
 			        dto.setReason(req.getReason());
 			        if(req.getReviewedBy() != null) {
-			        	 dto.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getLast_name());
+			        	 dto.setReviewedBy(req.getReviewedBy().getFirst_name()+" "+req.getReviewedBy().getEmployeeId());
 			        }		       
 			        dto.setReviewedAt(req.getReviewedAt());
 			        dto.setCreatedAt(req.getCreatedAt());
