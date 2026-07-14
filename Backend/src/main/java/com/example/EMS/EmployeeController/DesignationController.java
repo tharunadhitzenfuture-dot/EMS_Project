@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeEntity.Designation;
-import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.EmployeeEntity.Role.Role;
 import com.example.EMS.EmployeeRepository.DesignationRepository;
 import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;

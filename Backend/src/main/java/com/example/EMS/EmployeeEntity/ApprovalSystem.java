@@ -1,6 +1,7 @@
 package com.example.EMS.EmployeeEntity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,6 +24,11 @@ public class ApprovalSystem {
 	@JoinColumn(name = "employee_id")
 	@JsonBackReference("employee-Report")
 	private Employee employee;
+	
+	@JsonProperty
+	 public String getEmployee_Id() {
+		 return employee != null ? employee.getEmployeeId() : null;
+	 }
 	
 	public Long getId() {
 		return id;

@@ -2,9 +2,12 @@ package com.example.EMS.EmployeeController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.EMS.EmployeeDTO.ApproverResponseDTO;
+import com.example.EMS.EmployeeEntity.ApprovalSystem;
 import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.User;
+import com.example.EMS.EmployeeRepository.ApprovalRepository;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeService.EmpService;
 
@@ -31,15 +37,14 @@ public class EmpController {
 	
 	public EmpService empService;
 	public EmpRepository empRepository;
-	
-	
-	
-	public EmpController(EmpService empService, EmpRepository empRepository) {
+	public ApprovalRepository approvalRepository;
+
+
+	public EmpController(EmpService empService, EmpRepository empRepository, ApprovalRepository approvalRepository) {
 		this.empService = empService;
 		this.empRepository = empRepository;
+		this.approvalRepository = approvalRepository;
 	}
-
-
 
 	@PostMapping("/register")
 	public ResponseEntity<?> createUserControll(@RequestBody Employee emp){
@@ -47,6 +52,29 @@ public class EmpController {
 		
 	}
 	
+	@GetMapping("/GetApprovalList")
+	public ResponseEntity<?> getApprovalList(){
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		User user = (User) authentication.getPrincipal();
+		
+		Optional<Employee> empUser = empRepository.findByUser(user);
+		
+		if(empUser.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User employee details not found");
+		}
+		
+		String email = empUser.get().getEmail();
+		List<ApprovalSystem> res = approvalRepository.findByApproverEmail(email);
+		
+		if(res.size() == 0) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("You dont have approval list");
+		}
+		return ResponseEntity.ok(res);
+		
+
+	}
 	
 	
 	@PostMapping("/registerEmp")
