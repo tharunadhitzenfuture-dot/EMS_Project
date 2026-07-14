@@ -8,6 +8,7 @@ import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -46,6 +47,11 @@ public class LeaveBalance {
     @ManyToOne
 	@JoinColumn(name="leaveType_id")
 	private LeaveType leaveType;
+    
+    @JsonProperty
+	 public String getEmployee_Id() {
+		 return employee != null ? employee.getEmployeeId() : null;
+	 }
     
 //    @Enumerated(EnumType.STRING)
 //    @Column(nullable = false)
