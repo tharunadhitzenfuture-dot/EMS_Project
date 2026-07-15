@@ -8,18 +8,22 @@ import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.enums.LeaveStatus;
 import com.example.EMS.enums.LeaveTime;
 
+import lombok.Data;
 
+@Data
 public class LeaveRequestDTO {
 	
 	private Long id;
 	private String empId;
 	private LocalDate startDate;
 	private LocalDate endDate;
+	
 	private double totalDays;
 	private LeaveTime leaveTime;
 	private String leaveType;
 	private Departments department;
 	private String approverEmail1;
+	private String approverDetail;
 	private String approverEmail2;
 	private LeaveStatus status;
 	private String reason;
@@ -35,6 +39,14 @@ public class LeaveRequestDTO {
 	
 	public String getEmpId() {
 		return empId;
+	}
+	
+	public String getApproverDetail() {
+		return approverDetail;
+	}
+
+	public void setApproverDetail(String approverDetail) {
+		this.approverDetail = approverDetail;
 	}
 
 	public void setEmpId(String empId) {

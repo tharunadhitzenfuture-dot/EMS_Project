@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeDTO.LeaveRequestDTO;
 import com.example.EMS.EmployeeDTO.ReviewLeaveDto;
-import com.example.EMS.EmployeeEntity.ApprovalSystem;
 import com.example.EMS.EmployeeEntity.Employee;
 import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
@@ -97,8 +96,14 @@ public class LeaveRequestController {
 		        dto.setLeaveTime(req.getLeaveTime());
 		        dto.setLeaveType(req.getLeaveType().getName());
 		        dto.setDepartment(req.getDepartment());
-		        
-		        dto.setApproverEmail1(req.getApproverEmail1());
+		        dto.setApproverEmail1(req.getApproverEmail1());		        
+		        if(req.getApproverEmail1() != null) {
+		        	Optional<Employee> employee = empRepo.findByEmail(req.getApproverEmail1());
+		        	if(employee.isPresent()) {
+		        		Employee emp = employee.get();
+		        		dto.setApproverDetail(emp.getFirst_name()+" "+emp.getEmployeeId());
+		        	}
+		        }
 		        dto.setApproverEmail2(req.getApproverEmail2());
 		        dto.setStatus(req.getStatus());
 		        dto.setReason(req.getReason());
@@ -211,6 +216,13 @@ public class LeaveRequestController {
 		        dto.setDepartment(req.getDepartment());
 		        
 		        dto.setApproverEmail1(req.getApproverEmail1());
+		        if(req.getApproverEmail1() != null) {
+		        	Optional<Employee> employee = empRepo.findByEmail(req.getApproverEmail1());
+		        	if(employee.isPresent()) {
+		        		Employee emp = employee.get();
+		        		dto.setApproverDetail(emp.getFirst_name()+" "+emp.getEmployeeId());
+		        	}
+		        }
 		        dto.setApproverEmail2(req.getApproverEmail2());
 		        dto.setStatus(req.getStatus());
 		        dto.setReason(req.getReason());
@@ -278,6 +290,13 @@ public class LeaveRequestController {
 			        dto.setLeaveType(req.getLeaveType().getName());
 			        dto.setDepartment(req.getDepartment());
 			        dto.setApproverEmail1(req.getApproverEmail1());
+			        if(req.getApproverEmail1() != null) {
+			        	Optional<Employee> employee = empRepo.findByEmail(req.getApproverEmail1());
+			        	if(employee.isPresent()) {
+			        		Employee emp = employee.get();
+			        		dto.setApproverDetail(emp.getFirst_name()+" "+emp.getEmployeeId());
+			        	}
+			        }
 			        dto.setApproverEmail2(req.getApproverEmail2());
 			        dto.setStatus(req.getStatus());
 			        dto.setReason(req.getReason());
