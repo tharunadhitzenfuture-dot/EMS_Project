@@ -3,11 +3,14 @@ package com.example.EMS.EmployeeController.LeaveController;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,11 +20,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
+import com.example.EMS.EmployeeDTO.PermissionDTO;
+import com.example.EMS.EmployeeEntity.Employee;
+import com.example.EMS.EmployeeEntity.User;
 import com.example.EMS.EmployeeEntity.LeaveEntity.Permission;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.PermissionRepository;
 import com.example.EMS.EmployeeService.PermissionService;
+import com.example.EMS.enums.LeaveStatus;
 
 
 @RestController
@@ -105,7 +111,53 @@ public class PermissionController {
 		if(list.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Permission requests list empty");
 		}
-		return ResponseEntity.ok(list);
+		
+		List<PermissionDTO> dto = new ArrayList<>();
+		for (Permission permission : list) {
+
+		    PermissionDTO permissionDTO = new PermissionDTO();
+
+		    permissionDTO.setId(permission.getId());
+		    permissionDTO.setReason(permission.getReason());
+		    permissionDTO.setHours(permission.getHours());
+		    permissionDTO.setStartDate(permission.getStartDate());
+		    permissionDTO.setEndDate(permission.getEndDate());
+		    permissionDTO.setPermissionDate(permission.getPermissionDate());
+
+		    permissionDTO.setEmployeeId(
+		            permission.getEmployee() != null
+		                    ? permission.getEmployee().getEmployeeId()
+		                    : null);
+
+		    permissionDTO.setLeaveType(permission.getLeaveType());
+
+		    permissionDTO.setApproverEmail1(permission.getApproverEmail1());
+		    permissionDTO.setApproverEmail2(permission.getApproverEmail2());
+
+		    // Approver 1 Details
+		    if (permission.getApproverEmail1() != null) {
+		        empRepo.findByEmail(permission.getApproverEmail1())
+		                .ifPresent(emp -> permissionDTO.setApprover1Detail(
+		                		emp.getFirst_name()+" "+
+				                		emp.getLast_name()+ " "+
+				                        emp.getEmployeeId()));
+		    }
+
+		    permissionDTO.setStatus(permission.getStatus());
+		    permissionDTO.setHrRemarks(permission.getHrRemarks());
+
+		    permissionDTO.setReviewedBy(
+		            permission.getReviewedBy() != null
+		                    ? permission.getReviewedBy().getEmail()
+		                    : null);
+
+		    permissionDTO.setReviewedAt(permission.getReviewedAt());
+		    permissionDTO.setCreatedAt(permission.getCreatedAt());
+
+		    dto.add(permissionDTO);
+		}
+		
+		return ResponseEntity.ok(dto);
 	}
 	 
 	 @GetMapping("/getPermissionById/{id}")
@@ -167,6 +219,150 @@ public class PermissionController {
 	             empId,
 	             permissionId
 	     );
+	 }
+	 
+	 @GetMapping("/getmyPermissionsList")
+	 public ResponseEntity<?> getMyPermissionList(){
+		 
+		    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			
+			User user = (User) authentication.getPrincipal();
+			
+			Optional<Employee> empUser = empRepo.findByUser(user);
+			
+			if(empUser.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User employee details not found");
+			}
+			
+			Long empId = empUser.get().getId();
+			
+			List<Permission>  lst = permissionService.getListPermissionById(empId);
+			
+			if(lst.size() == 0 ) {
+				return ResponseEntity.badRequest().body("Permission request list is empty");
+			}
+			
+			List<PermissionDTO> dto = new ArrayList<>();
+			for (Permission permission : lst) {
+
+			    PermissionDTO permissionDTO = new PermissionDTO();
+
+			    permissionDTO.setId(permission.getId());
+			    permissionDTO.setReason(permission.getReason());
+			    permissionDTO.setHours(permission.getHours());
+			    permissionDTO.setStartDate(permission.getStartDate());
+			    permissionDTO.setEndDate(permission.getEndDate());
+			    permissionDTO.setPermissionDate(permission.getPermissionDate());
+
+			    permissionDTO.setEmployeeId(
+			            permission.getEmployee() != null
+			                    ? permission.getEmployee().getEmployeeId()
+			                    : null);
+
+			    permissionDTO.setLeaveType(permission.getLeaveType());
+
+			    permissionDTO.setApproverEmail1(permission.getApproverEmail1());
+			    permissionDTO.setApproverEmail2(permission.getApproverEmail2());
+
+			    // Approver 1 Details
+			    if (permission.getApproverEmail1() != null) {
+			        empRepo.findByEmail(permission.getApproverEmail1())
+			                .ifPresent(emp -> permissionDTO.setApprover1Detail(
+			                		emp.getFirst_name()+" "+
+					                		emp.getLast_name()+ " "+
+					                        emp.getEmployeeId()));
+			    }
+
+			    permissionDTO.setStatus(permission.getStatus());
+			    permissionDTO.setHrRemarks(permission.getHrRemarks());
+
+			    permissionDTO.setReviewedBy(
+			            permission.getReviewedBy() != null
+			                    ? permission.getReviewedBy().getEmail()
+			                    : null);
+
+			    permissionDTO.setReviewedAt(permission.getReviewedAt());
+			    permissionDTO.setCreatedAt(permission.getCreatedAt());
+
+			    dto.add(permissionDTO);
+			}
+			
+			return ResponseEntity.ok(dto);
+			
+	 }
+	 
+	 @GetMapping("/getApproverList/permission")
+	 public ResponseEntity<?> getApproverList(){
+		 
+		    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			
+			User user = (User) authentication.getPrincipal();
+			
+			Optional<Employee> empUser = empRepo.findByUser(user);
+			
+			if(empUser.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User employee details not found");
+			}
+			
+			String email = empUser.get().getEmail();
+			List<Permission> list = permissionRepo.findByApproverEmailAndStatus(email, LeaveStatus.PENDING);
+			
+			if(list.size() == 0) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Your permission approval list is empty");
+			}
+			
+			List<PermissionDTO> dto = new ArrayList<>();
+			
+			for (Permission permission : list) {
+
+			    PermissionDTO permissionDTO = new PermissionDTO();
+
+			    permissionDTO.setId(permission.getId());
+			    permissionDTO.setReason(permission.getReason());
+			    permissionDTO.setHours(permission.getHours());
+			    permissionDTO.setStartDate(permission.getStartDate());
+			    permissionDTO.setEndDate(permission.getEndDate());
+			    permissionDTO.setPermissionDate(permission.getPermissionDate());
+
+			    permissionDTO.setEmployeeId(
+			            permission.getEmployee() != null
+			                    ? permission.getEmployee().getEmployeeId()
+			                    : null);
+
+			    permissionDTO.setLeaveType(permission.getLeaveType());
+
+			    permissionDTO.setApproverEmail1(permission.getApproverEmail1());
+			    permissionDTO.setApproverEmail2(permission.getApproverEmail2());
+
+			    // Approver 1 Details
+			    if (permission.getApproverEmail1() != null) {
+			        empRepo.findByEmail(permission.getApproverEmail1())
+			                .ifPresent(emp -> permissionDTO.setApprover1Detail(
+			                		emp.getFirst_name()+" "+
+			                		emp.getLast_name()+ " "+
+			                        emp.getEmployeeId()
+			                        
+			                        ));
+			    }
+
+			    permissionDTO.setStatus(permission.getStatus());
+			    permissionDTO.setHrRemarks(permission.getHrRemarks());
+
+			    permissionDTO.setReviewedBy(
+			            permission.getReviewedBy() != null
+			                    ? permission.getReviewedBy().getEmail()
+			                    : null);
+
+			    permissionDTO.setReviewedAt(permission.getReviewedAt());
+			    permissionDTO.setCreatedAt(permission.getCreatedAt());
+
+			    dto.add(permissionDTO);
+			}
+			
+			return ResponseEntity.ok(dto);
+			
+			
+		 
 	 }
 	 
 
