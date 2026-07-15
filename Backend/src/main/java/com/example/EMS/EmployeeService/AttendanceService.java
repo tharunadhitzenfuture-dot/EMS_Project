@@ -386,7 +386,7 @@ public class AttendanceService {
        		   requestDTO.setReason("Auto-generated due to insufficient work hours "+hours+" on: "+attendance.getAttendanceDate());
        		   requestDTO.setLeaveTime(LeaveTime.FULL_DAY);
        		   attendance.setStatus(LeaveTypes.ABSENT);
-       		   return leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
+       		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
        		  
        		   
        	       }
@@ -411,7 +411,7 @@ public class AttendanceService {
          		   requestDTO.setReason("Auto-generated due to insufficient work hours on: "+attendance.getAttendanceDate());
          		   requestDTO.setLeaveTime(LeaveTime.HALF_DAY);
          		   attendance.setStatus(LeaveTypes.HALF_DAY);
-         		   return leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
+         		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
          		   
          		   
          		   
