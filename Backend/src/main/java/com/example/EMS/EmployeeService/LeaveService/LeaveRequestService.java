@@ -421,13 +421,14 @@ public class LeaveRequestService {
 	        req.setReviewedBy(emp);
 	        req.setReviewedAt(LocalDateTime.now());
 	        
+	        if (dto.getStatus() == LeaveStatus.APPROVED) {
 	        if(remaining.getRemainingDays() >= 0) {
 	        	req.setLeavePaid(true);
 	        }
 	        else {
 	        	req.setLeavePaid(false);
 	        }
-	        
+	        }
 
 	        LeaveRequest res = leaveRequestRepository.save(req);
 	        LeaveRequestDTO dto1 = new LeaveRequestDTO();
@@ -538,12 +539,14 @@ public class LeaveRequestService {
 	        req.setReviewedBy(emp);
 	        req.setReviewedAt(LocalDateTime.now());
 	        
-	        if(remaining.getRemainingDays() >=0) {
-	        	req.setLeavePaid(true);
-	        }
-	        else {
-	        	req.setLeavePaid(false);
-	        }
+	        if (dto.getStatus() == LeaveStatus.APPROVED) {
+		        if(remaining.getRemainingDays() >= 0) {
+		        	req.setLeavePaid(true);
+		        }
+		        else {
+		        	req.setLeavePaid(false);
+		        }
+		    }
 
 	        LeaveRequest res = leaveRequestRepository.save(req);
 	        LeaveRequestDTO dto1 = new LeaveRequestDTO();
