@@ -27,6 +27,7 @@ import com.example.EMS.EmployeeException.ResourceNotFoundException;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.LeaveRepository.LeaveRequestRepository;
 import com.example.EMS.EmployeeService.LeaveService.LeaveRequestService;
+import com.example.EMS.enums.LeaveStatus;
 
 @RestController
 @RequestMapping("/api/leave")
@@ -77,7 +78,7 @@ public class LeaveRequestController {
 		}
 		
 		String email = empUser.get().getEmail();
-		List<LeaveRequest> lst = requestRepository.findByApproverEmail(email);
+		List<LeaveRequest> lst = requestRepository.findByApproverEmailAndStatus(email, LeaveStatus.PENDING);
 		
 		if(lst.size() == 0) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("You dont have approval list");

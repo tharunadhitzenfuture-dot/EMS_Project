@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.example.EMS.EmployeeEntity.ApprovalSystem;
 import com.example.EMS.EmployeeEntity.LeaveEntity.LeaveRequest;
+import com.example.EMS.enums.LeaveStatus;
 
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long>{
 
@@ -43,10 +44,12 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
     @Query("""
     	       SELECT l
     	       FROM LeaveRequest l
-    	       WHERE l.approverEmail1 = :email
-    	          OR l.approverEmail2 = :email
+    	       WHERE (l.approverEmail1 = :email
+    	              OR l.approverEmail2 = :email)
+    	         AND l.status = :status
     	       """)
-    	List<LeaveRequest> findByApproverEmail(@Param("email") String email);
-    
+    	List<LeaveRequest> findByApproverEmailAndStatus(
+    	        @Param("email") String email,
+    	        @Param("status") LeaveStatus status);
     
 }
