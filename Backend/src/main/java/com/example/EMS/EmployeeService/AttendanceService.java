@@ -177,7 +177,7 @@ public class AttendanceService {
           		   request.setLeaveTime(LeaveTime.FULL_DAY);
                		   request.setReason("Auto-generated due to insufficient work hours "+ totalTime+" on: "+date);
                		   attendance.setStatus(LeaveTypes.ABSENT);
-               		   return leaveService.applyLeave(emp.getEmployeeId(), request);
+               		   leaveService.applyLeave(emp.getEmployeeId(), request);
                		   
                	   }
                	   else if(hours < hour_Per_Day -1) {
@@ -203,7 +203,7 @@ public class AttendanceService {
                		   request.setReason("Auto-generated due to insufficient work hours "+totalTime+" on: "+date);
                		   
                		   attendance.setStatus(LeaveTypes.HALF_DAY);
-               		   return leaveService.applyLeave(emp.getEmployeeId(), request);
+               		   leaveService.applyLeave(emp.getEmployeeId(), request);
                		   
                		   
                		   
