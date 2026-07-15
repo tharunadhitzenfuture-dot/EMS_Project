@@ -62,12 +62,12 @@ public class LeaveBalanceController {
 			  LeaveBalanceDTO dto = new LeaveBalanceDTO();
 			  dto.setId(bal.getId());
 			  dto.setEmployeeId(bal.getEmployee_Id());
-			  dto.setTotalDays(dto.getTotalDays());
+			  dto.setTotalDays(bal.getTotalDays());
 			  dto.setRemainingDays(bal.getRemainingDays());
 			  dto.setYear(bal.getYear());
 			  dto.setUsedDays(bal.getUsedDays());
-			  dto.setLeaveType(bal.getLeaveType().getId());
-			  dto.setDepartment(bal.getDepartment().getId());
+			  dto.setLeaveType(bal.getLeaveTypeName());
+			  dto.setDepartment(bal.getDepartmentName());
 			  
 			  lstDto.add(dto);
 			  

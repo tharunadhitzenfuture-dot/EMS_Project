@@ -48,10 +48,6 @@ public class LeaveBalance {
 	@JoinColumn(name="leaveType_id")
 	private LeaveType leaveType;
     
-    @JsonProperty
-	 public String getEmployee_Id() {
-		 return employee != null ? employee.getEmployeeId() : null;
-	 }
     
 //    @Enumerated(EnumType.STRING)
 //    @Column(nullable = false)
@@ -62,6 +58,22 @@ public class LeaveBalance {
     @JsonIgnore
     private Departments department;
     
+    
+    @JsonProperty
+	 public String getEmployee_Id() {
+		 return employee != null ? employee.getEmployeeId() : null;
+	 }
+   
+   @JsonProperty
+	 public String getLeaveTypeName() {
+		 return leaveType != null ? leaveType.getName() : null;
+	 }
+   
+   @JsonProperty
+	 public String getDepartmentName() {
+		 return department != null ? department.getName() : null;
+	 }
+   
     
 
     public double getRemainingDays() {

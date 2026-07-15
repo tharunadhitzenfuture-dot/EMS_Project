@@ -11,8 +11,8 @@ public class LeaveBalanceDTO {
 	   private double usedDays;
 	   private double remainingDays;
 	   private Integer year;
-	   private Long leaveType;
-	   private Long department;
+	   private String leaveType;
+	   private String department;
 	   public Long getId() {
 		   return id;
 	   }
@@ -50,18 +50,19 @@ public class LeaveBalanceDTO {
 	   public void setYear(Integer year) {
 		   this.year = year;
 	   }
-	   public Long getLeaveType() {
+	   public String getLeaveType() {
 		   return leaveType;
 	   }
-	   public void setLeaveType(Long leaveType) {
+	   public void setLeaveType(String leaveType) {
 		   this.leaveType = leaveType;
 	   }
-	   public Long getDepartment() {
+	   public String getDepartment() {
 		   return department;
 	   }
-	   public void setDepartment(Long department) {
+	   public void setDepartment(String department) {
 		   this.department = department;
 	   }
+	
 	   
 	   
 	   
