@@ -83,7 +83,7 @@ public class LeaveRequestService {
 		}
 		
 		if(email1 == null || email1.isBlank()) {
-			return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("Approver 1 not set for employee: "+empId);
+			 throw new BadRequestException("Approver 1 not set for employee: "+empId);
 		}
 		else {
 			request.setApproverEmail1(email1);
@@ -96,7 +96,7 @@ public class LeaveRequestService {
 		
 		List<LeaveRequest> res = leaveRequestRepository.findOverlappingLeaves(id, request.getStartDate(), request.getEndDate());
 		if(!res.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Leave request dates overlapping with dates: "+request.getStartDate()+" and "+request.getEndDate());
+			 throw new BadRequestException("Leave request dates overlapping with dates: "+request.getStartDate()+" and "+request.getEndDate());
 		}
 		
 //		 if (request.getStartDate().isBefore(LocalDate.now()))
@@ -133,12 +133,12 @@ public class LeaveRequestService {
         
         Optional<LeaveType> leaveType = leaveTypeRepository.findByName(request.getLeaveType().getName());
         if(leaveType.isEmpty()) {
-        	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Leave type not found with name: "+request.getLeaveType().getName());
+        	 throw new BadRequestException("Leave type not found with name: "+request.getLeaveType().getName());
         }
         
         Optional<LeaveBalance> balance =leaveBalanceRepository.findByEmployeeAndYearAndLeaveTypeAndDepartment_Name(emp, year, leaveType.get(), dept );
         if(balance.isEmpty()) {
-        	return ResponseEntity.badRequest().body("Employee leave policy for type: "+request.getLeaveType().getName()+" department: "+dept+" not found");
+        	 throw new BadRequestException("Employee leave policy for type: "+request.getLeaveType().getName()+" department: "+dept+" not found");
         }
         
         
