@@ -217,7 +217,7 @@ public class AttendanceService {
             
         }
 
-        //attendanceRepo.save(attendance);
+        attendanceRepo.save(attendance);
         
         
 
