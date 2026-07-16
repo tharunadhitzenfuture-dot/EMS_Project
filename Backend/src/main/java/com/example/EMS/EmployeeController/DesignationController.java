@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.EMS.EmployeeEntity.Designation;
+import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.EmployeeEntity.Role.Role;
 import com.example.EMS.EmployeeRepository.DesignationRepository;
 import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;
@@ -51,9 +52,9 @@ public class DesignationController {
 			return ResponseEntity.badRequest().body("Designation already presented");
 		}		
 		
-		Optional<Role> department = roleRepository.findByRole(request.getDepartment());
+		Optional<Departments> department = departmentRepository.findByName(request.getDepartment());
 		if(department.isEmpty()) {
-			return ResponseEntity.badRequest().body("Role not presented with name: "+request.getDepartment());
+			return ResponseEntity.badRequest().body("Department not presented with name: "+request.getDepartment());
 		}
 		
 		return service.create(request);
