@@ -575,54 +575,57 @@ public class EmpService {
 
 		Employee employee = empRepo.save(emp);
 		
-		List<ModuleEntity> modules = moduleRepository.findAll();
+		if(employee.getRole() != null) {
+			List<ModuleEntity> modules = moduleRepository.findAll();
 
-		List<ModuleList> permissions = new ArrayList<>();
-		Optional<Role> roles = roleRepo.findByRole(employee.getRole());
-		if(roles.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role name not created with name: "+employee.getRole());
-		}
-		Role role = roles.get();
+			List<ModuleList> permissions = new ArrayList<>();
+			Optional<Role> roles = roleRepo.findByRole(employee.getRole());
+			if(roles.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role name not created with name: "+employee.getRole());
+			}
+			Role role = roles.get();
 
-		for (ModuleEntity module : modules) {
+			for (ModuleEntity module : modules) {
 
+				
+				ModuleList permission = null;
+			    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndUser(module, user);
+			   
+			    
+			    
+			    if(moduleLst.isEmpty()) {
+			    	permission = new ModuleList();
+			    }
+			    else {
+			    	permission = moduleLst.get();
+			    }
+			    
+			    Optional<UserModule> userModule = userModuleRepository.findByUserModule_IdAndRole_Id(module.getId(),role.getId());
+			    
+			    if(userModule.isPresent()) {
+			    	UserModule access = userModule.get();
+			    	permission.setCreatePermission(access.isCreatePermission());
+				    permission.setViewPermission(access.isViewPermission());
+				    permission.setEditPermission(access.isEditPermission());
+				    permission.setDeletePermission(access.isDeletePermission());		    
+			    }
+			    else {
+			    	
+				    permission.setCreatePermission(false);
+				    permission.setViewPermission(false);
+				    permission.setEditPermission(false);
+				    permission.setDeletePermission(false);
+			    }
+			    permission.setUser(user);	    
+			    permission.setRole(role);		   
+			    permission.setModule(module);
+			    permissions.add(permission);
+			}
 			
-			ModuleList permission = null;
-		    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndUser(module, user);
-		   
-		    
-		    
-		    if(moduleLst.isEmpty()) {
-		    	permission = new ModuleList();
-		    }
-		    else {
-		    	permission = moduleLst.get();
-		    }
-		    
-		    Optional<UserModule> userModule = userModuleRepository.findByUserModule_IdAndRole_Id(module.getId(),role.getId());
-		    
-		    if(userModule.isPresent()) {
-		    	UserModule access = userModule.get();
-		    	permission.setCreatePermission(access.isCreatePermission());
-			    permission.setViewPermission(access.isViewPermission());
-			    permission.setEditPermission(access.isEditPermission());
-			    permission.setDeletePermission(access.isDeletePermission());		    
-		    }
-		    else {
-		    	
-			    permission.setCreatePermission(false);
-			    permission.setViewPermission(false);
-			    permission.setEditPermission(false);
-			    permission.setDeletePermission(false);
-		    }
-		    permission.setUser(user);	    
-		    permission.setRole(role);		   
-		    permission.setModule(module);
-		    permissions.add(permission);
+			user.setModuleList(permissions);
+			moduleListRepository.saveAll(permissions);
 		}
-		
-		user.setModuleList(permissions);
-		moduleListRepository.saveAll(permissions);
+	
 		
 		
 		return ResponseEntity.ok(employee);
@@ -2063,52 +2066,55 @@ public class EmpService {
         Employee saved = empRepo.save(existing);
         
      // ================= Module List =================
-		List<ModuleEntity> modules = moduleRepository.findAll();
+        if(saved.getRole() != null) {
+        	List<ModuleEntity> modules = moduleRepository.findAll();
 
-		List<ModuleList> permissions = existingUser.getModuleList();
-		Optional<Role> roles = roleRepo.findByRole(saved.getRole());
-		if(roles.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role name not created with name: "+saved.getRole());
-		}
-		Role role = roles.get();
-		for (ModuleEntity module : modules) {
+    		List<ModuleList> permissions = existingUser.getModuleList();
+    		Optional<Role> roles = roleRepo.findByRole(saved.getRole());
+    		if(roles.isEmpty()) {
+    			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role name not created with name: "+saved.getRole());
+    		}
+    		Role role = roles.get();
+    		for (ModuleEntity module : modules) {
 
-			ModuleList permission = null;
-		    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndUser(module, existingUser);
-		    if(moduleLst.isEmpty()) {
-		    	permission = new ModuleList();
-		    }
-		    else {
-		    	permission = moduleLst.get();
-		    }
+    			ModuleList permission = null;
+    		    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndUser(module, existingUser);
+    		    if(moduleLst.isEmpty()) {
+    		    	permission = new ModuleList();
+    		    }
+    		    else {
+    		    	permission = moduleLst.get();
+    		    }
 
-		    
-		    
-		    Optional<UserModule> userModule = userModuleRepository.findByUserModule_IdAndRole_Id(module.getId(),role.getId());
-		    
-		    if(userModule.isPresent()) {
-		    	UserModule access = userModule.get();
-		    	permission.setCreatePermission(access.isCreatePermission());
-			    permission.setViewPermission(access.isViewPermission());
-			    permission.setEditPermission(access.isEditPermission());
-			    permission.setDeletePermission(access.isDeletePermission());		    
-		    }
-		    else {
-		    	permission.setCreatePermission(false);
-			    permission.setViewPermission(false);
-			    permission.setEditPermission(false);
-			    permission.setDeletePermission(false);
-		    }
-		    
-		    
-		    permission.setUser(existingUser);
-		    permission.setRole(role);	
-		    permission.setModule(module);
-		    permissions.add(permission);
-		}
+    		    
+    		    
+    		    Optional<UserModule> userModule = userModuleRepository.findByUserModule_IdAndRole_Id(module.getId(),role.getId());
+    		    
+    		    if(userModule.isPresent()) {
+    		    	UserModule access = userModule.get();
+    		    	permission.setCreatePermission(access.isCreatePermission());
+    			    permission.setViewPermission(access.isViewPermission());
+    			    permission.setEditPermission(access.isEditPermission());
+    			    permission.setDeletePermission(access.isDeletePermission());		    
+    		    }
+    		    else {
+    		    	permission.setCreatePermission(false);
+    			    permission.setViewPermission(false);
+    			    permission.setEditPermission(false);
+    			    permission.setDeletePermission(false);
+    		    }
+    		    
+    		    
+    		    permission.setUser(existingUser);
+    		    permission.setRole(role);	
+    		    permission.setModule(module);
+    		    permissions.add(permission);
+    		}
+    		
+    		existingUser.setModuleList(permissions);    
+            moduleListRepository.saveAll(permissions);
+        }
 		
-		existingUser.setModuleList(permissions);    
-        moduleListRepository.saveAll(permissions);
         return ResponseEntity.ok(saved);
     }
 

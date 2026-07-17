@@ -50,7 +50,7 @@ public class Employee {
     private String imgFile;
     private String aadhar_number;
     private String pan_number;
-    @Column(nullable=false)
+    @Column(nullable=true)
     private String role;
     
     @OneToOne(cascade = CascadeType.ALL)

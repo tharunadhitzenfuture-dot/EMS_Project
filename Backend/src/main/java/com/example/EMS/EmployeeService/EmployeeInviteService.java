@@ -1745,7 +1745,7 @@ public class EmployeeInviteService {
 
 	        Long maxId = empRepo.findMaxId();
 
-	        String type = "E";
+	        String type = "";
 
 	        if (emp.getProfessional_details() != null
 	                && emp.getProfessional_details()
