@@ -27,7 +27,7 @@ public class ProfessionalDetails {
 	private String professional_designation;
 	
 	@Enumerated(EnumType.STRING)
-	@Column(nullable= false)
+	@Column(nullable= true)
 	private JobLevel jobLevel;
 	
 	@ManyToOne(fetch = FetchType.LAZY)

@@ -124,6 +124,10 @@ public class EmpService {
     		if(prof == null) {
     			throw new ResourceNotFoundException("Employee professional details not found with email: "+email);
     		}
+    		
+    		if(employee.getProfessional_details().getJobLevel() == null) {
+    			throw new ResourceNotFoundException("Employee job level not found with email: "+email);
+    		}
     	    JobLevel jl = employee.getProfessional_details().getJobLevel();
     	    int n = Integer.parseInt(jl.name().substring(2));
     	    return n;
@@ -226,6 +230,10 @@ public class EmpService {
                      return ResponseEntity.badRequest()
                              .body("Employee cannot be their own approver.");
                  }
+                
+                if(emp.getProfessional_details().getJobLevel() == null) {
+                	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Please mention job level");
+                }
                 int n1 = Integer.parseInt(emp.getProfessional_details().getJobLevel().toString().substring(2));
 				int n2 = getJobLevel(email1);
 				int n3 = getJobLevel(email2);
@@ -848,6 +856,14 @@ public class EmpService {
 	                pd.setProfessional_designation(designation);
 //	                pd.setProfessional_department(
 //	                        getCellValue(row.getCell(20)));
+	                
+	                String departmentName = getCellValue(row.getCell(20));
+
+	                Departments department = departmentRepository.findByName(departmentName)
+	                        .orElseThrow(() ->
+	                                new RuntimeException("Department not found: " + departmentName));
+
+	                pd.setProfessional_department(department);
 	                pd.getProfessional_department().setName(getCellValue(row.getCell(20)));
 
 	                pd.setEmp_type(
@@ -1661,6 +1677,10 @@ public class EmpService {
 
                         return ResponseEntity.badRequest()
                                 .body("Employee cannot be their own approver.");
+                    }
+                    
+                    if(existing.getProfessional_details().getJobLevel() == null) {
+                    	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Please mention job level");
                     }
                     
                     int n1 = Integer.parseInt(existing.getProfessional_details().getJobLevel().toString().substring(2));

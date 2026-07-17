@@ -21,8 +21,10 @@ import com.example.EMS.EmployeeEntity.EmployeePayroll;
 import com.example.EMS.EmployeeEntity.Experience;
 import com.example.EMS.EmployeeEntity.HigherEducation;
 import com.example.EMS.EmployeeEntity.ProfessionalDetails;
+import com.example.EMS.EmployeeEntity.Departments.Departments;
 import com.example.EMS.EmployeeRepository.EmpRepository;
 import com.example.EMS.EmployeeRepository.EmployeeInviteRepository;
+import com.example.EMS.EmployeeRepository.DepartmentRepository.DepartmentRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -32,16 +34,19 @@ public class EmployeeInviteService {
 	private final EmployeeInviteRepository empInviteRepo;
 	private final EmpService empService;
 	private final EmpRepository empRepo;
+	private final DepartmentRepository departmentRepository;
 	
-	
-     
-	public EmployeeInviteService(EmployeeInviteRepository empInviteRepo, EmpService empService, EmpRepository empRepo) {
+
+	public EmployeeInviteService(EmployeeInviteRepository empInviteRepo, EmpService empService, EmpRepository empRepo,
+			DepartmentRepository departmentRepository) {
 		this.empInviteRepo = empInviteRepo;
 		this.empService = empService;
 		this.empRepo = empRepo;
+		this.departmentRepository = departmentRepository;
 	}
-	
-	
+
+
+
 	public String saveFile(MultipartFile file, String folder) throws Exception{
 		String upload = System.getProperty("user.dir") + "/"+ folder + "/";
 		File dir = new File(upload);
@@ -113,6 +118,20 @@ public class EmployeeInviteService {
 	                    .body("User already submitted response with email: "+empInvite.getEmail());
 	        }
 
+	        ProfessionalDetails pd = empInvite.getProfessional_details();
+
+	        if (pd != null && pd.getProfessional_department() != null) {
+
+	            String departmentName = pd.getProfessional_department().getName();
+
+	            Departments department = departmentRepository
+	                    .findByName(departmentName)
+	                    .orElseThrow(() ->
+	                            new RuntimeException("Department not found: " + departmentName));
+
+	            pd.setProfessional_department(department);
+	            empInvite.getProfessional_details().setProfessional_department(department);
+	        }
 	        // ================= PROFILE IMAGE =================
 
 	        if (file != null && !file.isEmpty()) {
@@ -470,6 +489,21 @@ public class EmployeeInviteService {
     // =====================================================
     // BASIC DETAILS
     // =====================================================
+    
+    ProfessionalDetails pdetails = empInvite.getProfessional_details();
+
+    if (pdetails != null && pdetails.getProfessional_department() != null) {
+
+        String departmentName = pdetails.getProfessional_department().getName();
+
+        Departments department = departmentRepository
+                .findByName(departmentName)
+                .orElseThrow(() ->
+                        new RuntimeException("Department not found: " + departmentName));
+
+        pdetails.setProfessional_department(department);
+        existing.getProfessional_details().setProfessional_department(department);
+    }
 
     if (empInvite != null) {
 
