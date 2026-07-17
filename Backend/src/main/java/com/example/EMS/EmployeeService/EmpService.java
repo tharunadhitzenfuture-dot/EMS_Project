@@ -2070,6 +2070,10 @@ public class EmpService {
         	List<ModuleEntity> modules = moduleRepository.findAll();
 
     		List<ModuleList> permissions = existingUser.getModuleList();
+
+			if (permissions == null) {
+			    permissions = new ArrayList<>();
+			}
     		Optional<Role> roles = roleRepo.findByRole(saved.getRole());
     		if(roles.isEmpty()) {
     			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role name not created with name: "+saved.getRole());
