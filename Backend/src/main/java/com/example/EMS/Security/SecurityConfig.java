@@ -1,0 +1,80 @@
+package com.example.EMS.Security;
+
+import java.util.List;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity 
+public class SecurityConfig {
+	
+	private JwtFilter jwtFilter;
+
+	public SecurityConfig(JwtFilter jwtFilter) {
+		this.jwtFilter = jwtFilter;
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder(){
+		return new BCryptPasswordEncoder();
+	}
+	
+	@Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		 
+        http
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configurationSource(corsConfig()))
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+            	.requestMatchers("/**").permitAll()
+                .requestMatchers("/api/users/**").permitAll()
+                .requestMatchers("images/**").permitAll()
+                .requestMatchers("api/companySetting/getAllDetails").permitAll()
+//                .requestMatchers("/api/employee/**").hasAnyRole("ADMIN","HR","MANAGER")
+//                .requestMatchers("/api/attendance/employee/**").hasAnyRole("ADMIN","HR","MANAGER","EMPLOYEE")
+//                .requestMatchers("/api/attendance/employeeRegister").hasAnyRole("ADMIN","HR","MANAGER","EMPLOYEE")
+//                .requestMatchers("/api/attendance/**").hasAnyRole("ADMIN","HR","MANAGER")
+//                .requestMatchers("/api/weekly/**").hasAnyRole("ADMIN","HR","MANAGER")
+//                .requestMatchers("/api/employeeInvite/**").hasAnyRole("ADMIN","HR")
+//                .requestMatchers("/api/invite/**").hasAnyRole("ADMIN","HR")
+                .requestMatchers("/uploads/**", "/uploadsPdf/**", "/onBoardingProfiles/**", "/onBoardingProfilesPdf/**", "/companylogo/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+            ;
+            
+           
+
+        return http.build();
+    }
+	
+	 @Bean
+	    public CorsConfigurationSource corsConfig() {
+	        CorsConfiguration config = new CorsConfiguration();
+	        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000", "https://oms.zenfuture.in"));
+	        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+	        config.setAllowedHeaders(List.of("*"));
+	        config.setAllowCredentials(true);
+
+	        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	        source.registerCorsConfiguration("/**", config);
+	        return source;
+	    }
+
+}

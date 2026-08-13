@@ -1,0 +1,21 @@
+package com.example.EMS.Repository;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import com.example.EMS.Entity.ShiftEmployeeDetails;
+
+@Repository
+public interface ShiftEmployeeDetailsRepository extends JpaRepository<ShiftEmployeeDetails, Long> {
+
+	Optional<ShiftEmployeeDetails> findByEmpId(String empId);
+	
+	Optional<ShiftEmployeeDetails> findByEmpIdAndStartTimeAndEndTime(String empId, LocalDate startTime, LocalDate endTime);
+	
+	@Query("SELECT s.empId FROM ShiftEmployeeDetails s WHERE s.id = :id")
+	String findEmpIdById(Long id);
+}	

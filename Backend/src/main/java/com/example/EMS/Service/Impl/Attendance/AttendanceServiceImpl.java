@@ -1,0 +1,539 @@
+package com.example.EMS.Service.Impl.Attendance;
+
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
+import java.util.List;
+import java.util.Optional;
+
+import com.example.EMS.Service.Attendance.AttendanceService;
+import com.example.EMS.Service.LeaveService.LeaveRequestService;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+
+import com.example.EMS.EmployeeDTO.AttendanceRequestDTO;
+import com.example.EMS.EmployeeDTO.WorkingHoursDTO;
+import com.example.EMS.Entity.Attendance;
+import com.example.EMS.Entity.Employee;
+import com.example.EMS.Entity.LeaveEntity.LeaveRequest;
+import com.example.EMS.Entity.LeaveEntity.LeaveType;
+import com.example.EMS.Entity.LeaveEntity.Permission;
+import com.example.EMS.Entity.WeeklyCalculations.WeeklyCalculation;
+import com.example.EMS.Repository.AttendanceRepository;
+import com.example.EMS.Repository.EmpRepository;
+import com.example.EMS.Repository.LeaveRepository.LeaveRequestRepository;
+import com.example.EMS.Repository.LeaveRepository.LeaveTypeRepository;
+import com.example.EMS.Repository.LeaveRepository.PermissionRepository;
+import com.example.EMS.Repository.WeeklyCalculations.WeeklyCalculationRepository;
+
+import com.example.EMS.enums.LeaveTime;
+import com.example.EMS.enums.LeaveTypes;
+
+import jakarta.transaction.Transactional;
+
+@Service
+@AllArgsConstructor
+public class AttendanceServiceImpl implements AttendanceService {
+	
+	private final AttendanceRepository attendanceRepo;
+	private final EmpRepository empRepo;
+	private final WeeklyCalculationRepository weekly;
+	private final LeaveRequestService leaveService;
+	private final PermissionRepository permissionRepository;
+	private final LeaveRequestRepository leaveRepository;
+	private final LeaveTypeRepository leaveTypeRepository;
+
+
+	 public Long getIdByEmployeeId(String empId) {
+
+		 return empRepo.findIdByEmployeeId(empId);
+
+	 }
+
+	public ResponseEntity<?> registerService(Employee emp,LocalDate date, LocalTime checkIn,LocalTime checkOut, String status){
+		
+		LocalDate today;
+		if(date == null) {
+			today = LocalDate.now();
+		}
+		else {
+			today = date;
+		}
+		      
+        boolean alreadyExists =attendanceRepo.findByEmployee_EmployeeIdAndAttendanceDate(emp.getEmployeeId(),today).isPresent();
+
+        if (alreadyExists) {
+
+            return ResponseEntity.badRequest()
+                    .body("Attendance already marked for date: "+date+" employee id: "+emp.getEmployeeId());
+        }
+
+        Attendance attendance = new Attendance();
+
+        attendance.setEmployee(emp);
+
+        attendance.setEmpName(
+                emp.getFirst_name() + " "
+                + emp.getLast_name());
+
+        attendance.setDepartment(
+                emp.getProfessional_details()
+                   .getProfessional_department().getName());
+
+        attendance.setDesignation(
+                emp.getProfessional_details().getProfessional_designation());
+
+        attendance.setAttendanceDate(today);
+
+        attendance.setCheckIn(checkIn);
+
+        attendance.setCheckOut(checkOut);
+
+     
+        //attendance.setStatus(status);
+
+       
+        if (checkIn != null && checkOut != null) {
+        	
+        	
+
+            Duration duration =
+                    Duration.between(checkIn, checkOut);
+            
+            long hours = duration.toHours();
+        	long minutes = duration.toMinutesPart();
+        	long seconds = duration.toSecondsPart();
+        	
+        	String totalTime =  String.format(
+        			"%02d:%02d:%02d",
+        			hours,
+        			minutes,
+        			seconds
+        			);
+
+            attendance.setTotalWorkingHours(
+                    totalTime);
+            
+          
+            Optional<Permission> permission = permissionRepository.findByPermissionDateAndEmployee_Id(today, emp.getId());
+            List<LeaveRequest> leaveReq = leaveRepository.findLeavesContainingDate(emp.getId(), today);
+            
+          
+            if(permission == null || permission.isEmpty() && leaveReq == null || leaveReq.isEmpty()) {
+            	   String dept = emp.getProfessional_details().getProfessional_department().getName();
+               	   Optional<WeeklyCalculation> week = weekly.findByDeptName(dept);
+               	   if(week.isEmpty()) {
+               		   return ResponseEntity.badRequest().body("There is no weekly record for "+dept);
+               	   }
+               	   WeeklyCalculation res = week.get();
+               	   
+               	   String[] parts = res.getWorkHours().split(":");
+
+                      if (parts.length != 3) {
+                          return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                  .body("workHours must be in HH:mm:ss format");
+                      }
+
+                      long hour_Per_Day = Long.parseLong(parts[0]);
+               	   
+               	   if(hours < hour_Per_Day/2) {
+               		   LeaveRequest request = new LeaveRequest();
+               		   request.setStartDate(date);
+               		   request.setEndDate(date);
+               		   
+               		LeaveType type = null;
+          		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
+          		   if(existing.isEmpty()) {
+          			   type = new LeaveType();
+          			  type.setName("CASUAL_LEAVE");
+          			 leaveTypeRepository.save(type);
+          		   }
+          		   else {
+          			   type = existing.get();
+          			   
+          		   }              		   
+          		   
+          		   request.setLeaveType(type);
+          		   
+          		   request.setLeaveTime(LeaveTime.FULL_DAY);
+               		   request.setReason("Auto-generated due to insufficient work hours "+ totalTime+" on: "+date);
+               		   attendance.setStatus(LeaveTypes.ABSENT);
+               		   leaveService.applyLeave(emp.getEmployeeId(), request);
+               		   
+               	   }
+               	   else if(hours < hour_Per_Day -1) {
+               		   LeaveRequest request = new LeaveRequest();
+               		   
+               		   request.setStartDate(date);
+               		   request.setEndDate(date);
+               		   
+               		   LeaveType type = null;
+             		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
+             		   if(existing.isEmpty()) {
+             			   type = new LeaveType();
+             			  type.setName("CASUAL_LEAVE");
+             			  leaveTypeRepository.save(type);
+             		   }
+             		   else {
+             			   type = existing.get();
+             			   
+             		   }              		   
+             		   
+             		   request.setLeaveType(type);
+             		   request.setLeaveTime(LeaveTime.HALF_DAY);
+               		   request.setReason("Auto-generated due to insufficient work hours "+totalTime+" on: "+date);
+               		   
+               		   attendance.setStatus(LeaveTypes.HALF_DAY);
+               		   leaveService.applyLeave(emp.getEmployeeId(), request);
+               		   
+               		   
+               		   
+               	   }
+               	   else {
+               		   attendance.setStatus(LeaveTypes.PRESENT);
+               	   }
+            }
+           
+ 
+            
+        }
+
+        attendanceRepo.save(attendance);
+        
+        
+
+        return ResponseEntity.ok(
+                "Attendance Registered Successfully");
+		
+		
+	}
+	
+	public ResponseEntity<?> getAllAttendance() {
+        List<Attendance> attendanceList = attendanceRepo.findAll();
+
+        if(attendanceList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No attendance records found");
+        }
+
+        return ResponseEntity.ok(attendanceList);
+    }
+
+
+   
+    public ResponseEntity<?> getAttendanceById(String empId) {
+
+    	Optional<List<Attendance>> attendance = attendanceRepo.findAllByEmployee_EmployeeId(empId);
+
+        if(attendance.isEmpty()) {
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Attendance not found with id : " + empId);
+        }
+
+        return ResponseEntity.ok(attendance.get());
+    }
+
+
+   
+    @Transactional
+    public ResponseEntity<?> deleteAttendanceById(String empId) {
+
+    	Optional<List<Attendance>> attendance = attendanceRepo.findAllByEmployee_EmployeeId(empId);
+
+        if(attendance.isEmpty()) {
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Attendance not found with id : " + empId);
+        }
+
+        attendanceRepo. deleteByEmployee_EmployeeId(empId);
+
+        return ResponseEntity.ok(
+                "Attendance deleted successfully");
+    }
+
+    
+    public ResponseEntity<?> updateAttendance(
+    		Employee emp,
+            String empId,
+            AttendanceRequestDTO request){
+
+    	LocalDate today;
+		if(request.getDate() == null) {
+			today = LocalDate.now();
+		}
+		else {
+			today = request.getDate();
+		}
+  
+
+        Optional<Attendance> attendanceOpt =
+                attendanceRepo
+                .findByEmployee_EmployeeIdAndAttendanceDate(
+                        empId,
+                        today);
+
+        if(attendanceOpt.isEmpty()){
+
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Attendance not found");
+        }
+
+        Attendance attendance = attendanceOpt.get();
+
+        
+      
+        if(request.getCheckIn() != null){
+
+            attendance.setCheckIn(
+                    request.getCheckIn());
+        }
+
+        
+        
+        if(request.getCheckOut() != null){
+
+            attendance.setCheckOut(
+                    request.getCheckOut());
+        }
+
+        
+        
+        if(attendance.getCheckIn() != null
+                && attendance.getCheckOut() != null){
+
+            Duration duration =
+                    Duration.between(
+                            attendance.getCheckIn(),
+                            attendance.getCheckOut());
+            
+            long hours = duration.toHours();
+        	long minutes = duration.toMinutesPart();
+        	long seconds = duration.toSecondsPart();
+        	
+        	String totalTime =  String.format(
+        			"%02d:%02d:%02d",
+        			hours,
+        			minutes,
+        			seconds
+        			);
+
+            attendance.setTotalWorkingHours(
+                    totalTime);
+            
+            Optional<Permission> permission = permissionRepository.findByPermissionDateAndEmployee_Id(today, emp.getId());
+            List<LeaveRequest> leaveReq = leaveRepository.findLeavesContainingDate(emp.getId(), today);
+            
+          
+            
+            if(permission == null || permission.isEmpty() && leaveReq == null || leaveReq.isEmpty()) {
+            
+            String dept = emp.getProfessional_details().getProfessional_department().getName();
+         	   Optional<WeeklyCalculation> week = weekly.findByDeptName(dept);
+         	   if(week.isEmpty()) {
+         		   return ResponseEntity.badRequest().body("There is no weekly record for IT");
+         	   }
+         	   WeeklyCalculation res = week.get();
+         	  String[] parts = res.getWorkHours().split(":");
+
+              if (parts.length != 3) {
+                  return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                          .body("workHours must be in HH:mm:ss format");
+              }
+
+              long hour_Per_Day = Long.parseLong(parts[0]);
+              
+
+              if(hours < hour_Per_Day/2) {
+         		  LeaveRequest requestDTO = new LeaveRequest();
+       		   
+       		   requestDTO.setStartDate(attendance.getAttendanceDate());
+       		   requestDTO.setEndDate(attendance.getAttendanceDate());
+       		LeaveType type = null;
+  		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
+  		   if(existing.isEmpty()) {
+  			   type = new LeaveType();
+  			  type.setName("CASUAL_LEAVE");
+  			  leaveTypeRepository.save(type);
+  		   }
+  		   else {
+  			   type = existing.get();
+  			   
+  		   }              		   
+  		   
+  		   requestDTO.setLeaveType(type);
+       		   requestDTO.setReason("Auto-generated due to insufficient work hours "+hours+" on: "+attendance.getAttendanceDate());
+       		   requestDTO.setLeaveTime(LeaveTime.FULL_DAY);
+       		   attendance.setStatus(LeaveTypes.ABSENT);
+       		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
+       		  
+       		   
+       	       }
+              else if(hours < hour_Per_Day-1) {
+         		   
+         		   LeaveRequest requestDTO = new LeaveRequest();
+         		   requestDTO.setStartDate(attendance.getAttendanceDate());
+         		   requestDTO.setEndDate(attendance.getAttendanceDate());
+         		   LeaveType type = null;
+        		   Optional<LeaveType> existing = leaveTypeRepository.findByName("CASUAL_LEAVE");
+        		   if(existing.isEmpty()) {
+        			   type = new LeaveType();
+        			  type.setName("CASUAL_LEAVE");
+        			  leaveTypeRepository.save(type);
+        		   }
+        		   else {
+        			   type = existing.get();
+        			   
+        		   }              		   
+        		   
+        		   requestDTO.setLeaveType(type);
+         		   requestDTO.setReason("Auto-generated due to insufficient work hours on: "+attendance.getAttendanceDate());
+         		   requestDTO.setLeaveTime(LeaveTime.HALF_DAY);
+         		   attendance.setStatus(LeaveTypes.HALF_DAY);
+         		   leaveService.applyLeave(emp.getEmployeeId(), requestDTO);
+         		   
+         		   
+         		   
+         	   }
+         	   
+         	   else {
+         		   attendance.setStatus(LeaveTypes.PRESENT);
+         	   }
+
+            }
+        }
+
+        
+        
+//        if(request.getStatus() != null){
+//
+//            attendance.setStatus(
+//                    request.getStatus());
+//        }
+
+        attendanceRepo.save(attendance);
+
+        return ResponseEntity.ok(
+                "Attendance updated successfully");
+    }
+    
+    
+    
+    public ResponseEntity<?> getWeeklyHours(WorkingHoursDTO request){
+    	Long empId = empRepo.findIdByEmployeeId(request.getEmpId());
+//    	Double hours = attendanceRepo.calculateWeeklyHours(empId, request.getStartDate(), request.getEndDate());
+    	
+        List<Attendance> records =
+    	        attendanceRepo.findByEmployeeIdAndAttendanceDateBetween(
+    	                empId,
+    	                request.getStartDate(),
+    	                request.getEndDate()
+    	        );
+     
+     long totalSeconds = 0;
+
+     for (Attendance att : records) {
+
+         String[] parts =
+                 att.getTotalWorkingHours().split(":");
+
+         long hours = Long.parseLong(parts[0]);
+         long minutes = Long.parseLong(parts[1]);
+         long seconds = Long.parseLong(parts[2]);
+
+         
+         
+         totalSeconds +=
+                 hours * 3600 +
+                 minutes * 60 +
+                 seconds;
+     }
+     
+     long hrs = totalSeconds / 3600;
+     long mins = (totalSeconds % 3600) / 60;
+     long secs = totalSeconds % 60;
+
+     String weeklyHours =
+             String.format(
+                     "%02d:%02d:%02d",
+                     hrs,
+                     mins,
+                     secs
+             );
+    	
+    	return ResponseEntity.ok("Employee ID: "+request.getEmpId()+" worked from "+ request.getStartDate()+" to "+request.getEndDate()+" totally "+weeklyHours+" hours");
+    }
+	
+    
+    public ResponseEntity<?> getEmpPresent(LocalDate date){
+    	Long count = attendanceRepo.countPresentEmployees(date);
+    	return ResponseEntity.ok(count);
+    }
+    
+
+    public ResponseEntity<?> calculateWeeklyHours(String empId) {
+    	
+    	 LocalDate today = LocalDate.now();
+    	 Long empid = empRepo.findIdByEmployeeId(empId);
+
+         LocalDate startOfWeek =
+                 today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+         LocalDate endOfWeek =
+                 today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+         
+//         Double hours = attendanceRepo.calculateWeeklyHours(empid, startOfWeek, endOfWeek);
+         
+         List<Attendance> records =
+        	        attendanceRepo.findByEmployeeIdAndAttendanceDateBetween(
+        	                empid,
+        	                startOfWeek,
+        	                endOfWeek
+        	        );
+         
+         long totalSeconds = 0;
+
+         for (Attendance att : records) {
+
+             String[] parts =
+                     att.getTotalWorkingHours().split(":");
+
+             long hours = Long.parseLong(parts[0]);
+             long minutes = Long.parseLong(parts[1]);
+             long seconds = Long.parseLong(parts[2]);
+
+             totalSeconds +=
+                     hours * 3600 +
+                     minutes * 60 +
+                     seconds;
+         }
+         
+         long hrs = totalSeconds / 3600;
+         long mins = (totalSeconds % 3600) / 60;
+         long secs = totalSeconds % 60;
+
+         String weeklyHours =
+                 String.format(
+                         "%02d:%02d:%02d",
+                         hrs,
+                         mins,
+                         secs
+                 );
+     	
+     	return ResponseEntity.ok("Employee ID: "+empId+" worked from "+ startOfWeek+" to "+endOfWeek+" totally :"+weeklyHours);
+    		
+    }
+    
+    
+ 
+	
+
+	
+}

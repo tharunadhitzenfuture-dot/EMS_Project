@@ -1,0 +1,63 @@
+package com.example.EMS.Entity.Module;
+
+
+
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+public class ModuleEntity {
+
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+	@Column(unique=true, nullable=false)
+    private String moduleName;
+    
+	@OneToMany(mappedBy="module")
+	@JsonManagedReference("module-moduleList")
+	private List<ModuleList> moduleList;
+	
+	@OneToMany(mappedBy="userModule")
+	@JsonManagedReference("user-moduleEntity")
+	private List<UserModule> usermodule;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getModuleName() {
+		return moduleName;
+	}
+
+	public void setModuleName(String moduleName) {
+		this.moduleName = moduleName;
+	}
+
+	public List<ModuleList> getModuleList() {
+		return moduleList;
+	}
+
+	public void setModuleList(List<ModuleList> moduleList) {
+		this.moduleList = moduleList;
+	}
+    
+    
+}

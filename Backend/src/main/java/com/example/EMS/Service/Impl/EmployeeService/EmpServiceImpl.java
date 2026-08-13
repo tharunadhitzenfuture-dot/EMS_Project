@@ -1,0 +1,3104 @@
+package com.example.EMS.Service.Impl.EmployeeService;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import com.example.EMS.Service.EmployeeService.EmpService;
+import lombok.AllArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.EMS.Entity.ApprovalSystem;
+import com.example.EMS.Entity.Attendance;
+import com.example.EMS.Entity.BankDetails;
+import com.example.EMS.Entity.Education;
+import com.example.EMS.Entity.EmergencyContact;
+import com.example.EMS.Entity.Employee;
+import com.example.EMS.Entity.EmployeePayroll;
+import com.example.EMS.Entity.Experience;
+import com.example.EMS.Entity.HigherEducation;
+import com.example.EMS.Entity.ProfessionalDetails;
+import com.example.EMS.Entity.RolesAssign;
+import com.example.EMS.Entity.User;
+import com.example.EMS.Entity.Departments.Departments;
+import com.example.EMS.Entity.LeaveEntity.LeaveBalance;
+import com.example.EMS.Entity.LeaveEntity.LeavePolicy;
+import com.example.EMS.Entity.LeaveEntity.LeaveRequest;
+import com.example.EMS.Entity.Module.ModuleEntity;
+import com.example.EMS.Entity.Module.ModuleList;
+import com.example.EMS.Entity.Module.UserModule;
+import com.example.EMS.Entity.Role.Role;
+import com.example.EMS.Exception.ResourceNotFoundException;
+import com.example.EMS.Repository.EmpRepository;
+import com.example.EMS.Repository.ProfessionalDetailRepository;
+import com.example.EMS.Repository.RoleAssignRepository;
+import com.example.EMS.Repository.DepartmentRepository.DepartmentRepository;
+import com.example.EMS.Repository.LeaveRepository.LeavePolicyRepository;
+import com.example.EMS.Repository.ModuleRepository.ModuleListRepository;
+import com.example.EMS.Repository.ModuleRepository.ModuleRepository;
+import com.example.EMS.Repository.ModuleRepository.UserModuleRepository;
+import com.example.EMS.Repository.RoleRepository.RoleRepository;
+import com.example.EMS.enums.JobLevel;
+
+@Service
+@AllArgsConstructor
+public class EmpServiceImpl implements EmpService {
+
+    public final EmpRepository empRepo;
+    public final PasswordEncoder passwordEncoder;
+    public final ProfessionalDetailRepository professionalRepo;
+    public final LeavePolicyRepository leavePolicyRepo;
+    public final DepartmentRepository departmentRepository;
+    public final RoleAssignRepository rolesRepository;
+    public final RoleRepository roleRepo;
+    public final ModuleRepository moduleRepository;
+    public final ModuleListRepository moduleListRepository;
+    public final UserModuleRepository userModuleRepository;
+
+
+	public Long getIdByEmployeeId(String empId) {
+    	return empRepo.findIdByEmployeeId(empId);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // CREATE — single employee via JSON body
+    // ══════════════════════════════════════════════════════════════════
+    public ResponseEntity<?> createUser(Employee emp) {
+        if (emp.getEmail() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Please enter employee mail id");
+        }
+        Optional<Employee> emailuser = empRepo.findByEmail(emp.getEmail());
+        if (emailuser.isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("User Already exists");
+        }
+        Employee employee = empRepo.save(emp);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(employee);
+    }
+
+    public int getJobLevel(String email) {
+    		Employee employee = empRepo.findByEmail(email).orElseThrow(()-> new ResourceNotFoundException("Employee not found with email :"+email));
+    		ProfessionalDetails prof = employee.getProfessional_details();
+    		if(prof == null) {
+    			throw new ResourceNotFoundException("Employee professional details not found with email: "+email);
+    		}
+    		
+    		if(employee.getProfessional_details().getJobLevel() == null) {
+    			throw new ResourceNotFoundException("Employee job level not found with email: "+email);
+    		}
+    	    JobLevel jl = employee.getProfessional_details().getJobLevel();
+    	    int n = Integer.parseInt(jl.name().substring(2));
+    	    return n;
+        	
+    }
+    
+    // ══════════════════════════════════════════════════════════════════
+    // CREATE — single employee with multipart files
+    // ══════════════════════════════════════════════════════════════════
+    @Transactional
+	public ResponseEntity<?> createEmpIMG(@RequestPart("employee") Employee emp, 
+			@RequestPart(value= "file", required=false) MultipartFile file,			
+			
+			@RequestPart(value= "aadhar", required=false) MultipartFile aadhar,
+			@RequestPart(value= "pan_card", required=false) MultipartFile pan_card,
+			@RequestPart(value= "higherEducation", required=false) List<MultipartFile> higherEducation,
+			@RequestPart(value= "bankStatement", required=false) List<MultipartFile> bankStatement,
+			@RequestPart(value= "salarySlip", required=false) List<MultipartFile> salarySlip,
+			
+			@RequestPart(value= "passbook", required=false) MultipartFile passbook,
+			@RequestPart(value= "education", required= false) MultipartFile education,
+			@RequestPart(value="resume", required= false) MultipartFile resume,
+			@RequestPart(value="offerLetter", required= false) MultipartFile offerLetter,
+			@RequestPart(value="prevExpLetter",required=false) List<MultipartFile> prevExpLetter,
+			@RequestPart(value="experienceLetter", required= false) List<MultipartFile> experienceLetter){
+		
+		Optional<Employee> empId = empRepo.findByEmployeeId(emp.getEmployeeId());
+		if(empId.isPresent()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User Already exists with Employee Id: "+ empId.get().getEmployeeId());
+		}
+		
+		Optional<Employee> emailuser = empRepo.findByEmail(emp.getEmail());
+		
+		if(emailuser.isPresent()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User Already exists with Email: "+ emailuser.get().getEmail());
+		}
+		
+		Long maxId = empRepo.findMaxId();
+		String detail =  emp.getProfessional_details().getEmp_type();
+		String type = detail.substring(0, 1).toUpperCase(); 
+		long nextId = (maxId == null) ? 1 : maxId + 1;
+		emp.setEmployeeId(String.format("ZF%s-%03d", type, nextId));
+		
+				
+		User user = new User();
+		emp.setUser(user);		
+		
+		emp.getUser().setName(emp.getFirst_name());
+		
+//		Role Assign
+		if(emp.getRole() != null) {			
+			
+			Optional<Role> rolePresent =  roleRepo.findByRole(emp.getRole().toString());			
+			if(rolePresent.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role not presented with name: "+emp.getRole().toString());
+			}			
+			if(emp.getRole().toString().equalsIgnoreCase("ADMIN")) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot assign as ADMIN");
+			}
+			Optional<RolesAssign> roles = rolesRepository.findByRole(emp.getRole().toString());
+			RolesAssign role = null;
+			if(roles.isEmpty()) {
+				role = new RolesAssign();
+				role.setRole(emp.getRole().toString());
+			}
+			else {
+				role = roles.get();
+			}
+			
+			List<Employee> lstRole = role.getEmployee();
+			emp.getUser().setRoleEntity(rolePresent.get());
+			if(role.getEmployee() == null) {
+			 lstRole = new ArrayList<>();
+			}
+			
+			if(emp.getProfessional_details().getProfessional_designation() != null || !emp.getProfessional_details().getProfessional_designation().isBlank()) {
+				role.setSub_designation(Set.of(emp.getProfessional_details().getProfessional_designation()));
+			}
+						
+			lstRole.add(emp);
+			role.setEmployee(lstRole);
+			emp.setRolesAssign(role);
+		}
+		
+		
+		emp.getUser().setEmail(emp.getEmail());
+		emp.getUser().setEmployee(emp);
+		
+		if(emp.getApproval() != null) {
+			if(emp.getApproval().getApproverEmail1() != null 
+					&& emp.getApproval().getApproverEmail2() != null && !emp.getApproval().getApproverEmail1().isBlank() &&
+					!emp.getApproval().getApproverEmail2().isBlank()) {
+				String email1 = emp.getApproval().getApproverEmail1();
+				String email2 = emp.getApproval().getApproverEmail2();
+				
+
+                 if (email1.equalsIgnoreCase(emp.getEmail())
+                         || email2.equalsIgnoreCase(emp.getEmail())) {
+
+                     return ResponseEntity.badRequest()
+                             .body("Employee cannot be their own approver.");
+                 }
+                
+                if(emp.getProfessional_details().getJobLevel() == null) {
+                	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Please mention job level");
+                }
+                int n1 = Integer.parseInt(emp.getProfessional_details().getJobLevel().toString().substring(2));
+				int n2 = getJobLevel(email1);
+				int n3 = getJobLevel(email2);
+				
+				if(n2 <= n1) {
+					return ResponseEntity.badRequest().body("Approver 1 should be higher than your job level");
+				}
+				
+				if(n3 <= n2) {
+					return ResponseEntity.badRequest().body("Approver 2 should be higher than approver 1");
+				}
+				
+				
+			}
+			 else if(emp.getApproval().getApproverEmail1() != null && !emp.getApproval().getApproverEmail1().isBlank()) {
+             	if (emp.getApproval().getApproverEmail1().equalsIgnoreCase(emp.getEmail())) {
+
+                     return ResponseEntity.badRequest()
+                             .body("Employee cannot be their own approver.");
+                 }
+             	
+             	  JobLevel jl = emp.getProfessional_details().getJobLevel();
+             	  int n1=Integer.parseInt(jl.toString().substring(2));
+                  int n2 = getJobLevel(emp.getApproval().getApproverEmail1());
+             
+
+  				if(n2 <= n1) {
+  					return ResponseEntity.badRequest().body("Approver 1 should be higher than your job level");
+  				}
+             }
+		}
+		
+		if(emp.getProfessional_details().getProfessional_department() != null) {
+			Departments department = departmentRepository
+    		        .findByName(emp.getProfessional_details()
+    		                       .getProfessional_department()
+    		                       .getName())
+    		        .orElseThrow(() -> new RuntimeException("Department not found"));
+			String departmentName = department.getName();
+
+//			Department department;
+//			try {
+//			    department = Department.valueOf(departmentName.toUpperCase());
+//			} catch (IllegalArgumentException e) {
+//			    throw new BadRequestException("Invalid department: " + departmentName);
+//			}
+			
+			Optional<List<LeavePolicy>> balances =
+			        leavePolicyRepo.findByDepartment_Name(departmentName);
+			if(balances.isPresent()) {			
+				List<LeavePolicy> lst = balances.get();
+				List<LeaveBalance> employeeBalances = new ArrayList<>();
+				for (LeavePolicy balance : lst) {
+				    LeaveBalance newBalance = new LeaveBalance();
+				    newBalance.setLeaveType(balance.getLeaveType());
+				    newBalance.setTotalDays(balance.getTotalDays());
+				    newBalance.setRemainingDays(balance.getTotalDays());
+				    newBalance.setYear(balance.getYear());
+				    newBalance.setDepartment(balance.getDepartment());
+				    newBalance.setMonth(balance.getMonth());
+				    newBalance.setUsedDays(0);
+				    // if LeaveBalance has Employee mapping
+				    newBalance.setEmployee(emp);
+
+				    employeeBalances.add(newBalance);
+				}	
+			    emp.setLeaveBalance(employeeBalances);
+			    emp.getProfessional_details().setProfessional_department(department);
+			}
+			
+			
+		}
+		
+		if(file != null && !file.isEmpty()) {
+			try {
+				String fileName = saveFile(file, "uploads");
+				emp.setImgFile(fileName);
+
+			}
+			catch(Exception e) {
+				return ResponseEntity.status(500).body("Image upload failed "+e);
+			}
+		}
+		
+		if(aadhar != null && !aadhar.isEmpty()) {
+			try {
+				
+				String fileName = saveFile(aadhar, "uploadsPdf");
+				emp.setAadhar_pdf(fileName);
+	
+			}
+			catch(Exception e) {
+				return ResponseEntity.status(500).body("Aadhar Pdf upload failed "+e);
+			}
+		}
+		
+		if(pan_card != null && !pan_card.isEmpty()) {
+			try {
+				
+				String fileName = saveFile(pan_card, "uploadsPdf");
+				emp.setPan_pdf(fileName);
+	
+			}
+			catch(Exception e) {
+				return ResponseEntity.status(500).body("Pan Pdf upload failed "+e);
+			}
+		}
+		
+		if(passbook != null && !passbook.isEmpty()) {
+			try {
+				
+				String fileName = saveFile(passbook, "uploadsPdf");
+				if(emp.getBankDetails() == null) {
+					emp.setBankDetails(new BankDetails());
+				}
+				
+				emp.getBankDetails().setPassbook_pdf(fileName);				
+				
+				
+			}
+			catch(Exception e) {
+				return ResponseEntity.status(500).body("Passbook Pdf upload failed "+e);
+			}
+		}
+		
+		if(education != null && !education.isEmpty()) {
+			try {
+				
+				String fileName = saveFile(education, "uploadsPdf");
+				if(emp.getEducation() == null) {
+					emp.setEducation(new Education());
+				}
+				
+				emp.getEducation().setEducation_pdf(fileName);
+				
+				
+				
+				
+			}
+			catch(Exception e) {
+				return ResponseEntity.status(500).body("Educational Pdf upload failed "+e);
+			}
+		}
+		
+		if(higherEducation != null && !higherEducation.isEmpty() ) {
+			try {
+				if(emp.getEducation().getHigherEducation() == null) {
+					emp.getEducation().setHigherEducation(new ArrayList<HigherEducation>());
+				}
+				
+				for(int i=0;i<higherEducation.size();i++) {
+					HigherEducation hr = emp.getEducation().getHigherEducation().get(i);
+					String fileName1 = saveFile(higherEducation.get(i), "uploadsPdf");
+					hr.setHigherEducation_pdf(fileName1);
+				}
+				
+			}
+			catch(Exception e) {
+				return ResponseEntity.status(500).body("Higher Educational Pdf upload failed "+e);
+			}
+			
+		}
+		
+		if(resume != null && !resume.isEmpty()) {
+			try {
+				String fileName = saveFile(resume, "uploadsPdf");
+				if(emp.getProfessional_details() == null) {
+					emp.setProfessional_details(new ProfessionalDetails());
+				}
+				
+				emp.getProfessional_details().setResume(fileName);
+			}
+			catch(Exception e) {
+				return ResponseEntity.status(500).body("Resume Pdf upload failed "+ e);
+			}
+		}
+		
+		if(offerLetter != null && !offerLetter.isEmpty()) {
+			try {
+				String fileName = saveFile(offerLetter, "uploadsPdf");
+				if(emp.getProfessional_details() == null) {
+					emp.setProfessional_details(new ProfessionalDetails());
+				}
+				
+				emp.getProfessional_details().setOffer_letter(fileName);
+			}
+			catch(Exception e) {
+				return ResponseEntity.status(500).body("Offer Letter Pdf upload failed: "+ e);
+			}
+		}
+		
+		if (experienceLetter != null && !experienceLetter.isEmpty()) {
+		    try {
+		        if (emp.getExperience() == null) {
+		            emp.setExperience(new ArrayList<>());
+		        }
+
+		        for (int i = 0; i < experienceLetter.size(); i++) {
+		            MultipartFile files = experienceLetter.get(i);
+		            String fileName = saveFile(files, "uploadsPdf");
+		            Experience exp;
+		            if (emp.getExperience().size() > i) {
+		                exp = emp.getExperience().get(i);
+		            } else {
+		                exp = new Experience();
+		                emp.getExperience().add(exp);
+		            }
+
+		            exp.setExp_letter(fileName);
+		        }
+
+		    } catch (Exception e) {
+		        return ResponseEntity.status(500).body("Experience upload failed "+e);
+		    }
+		}
+		
+		if (prevExpLetter != null && !prevExpLetter.isEmpty()) {
+		    try {
+		        if (emp.getExperience() == null) {
+		            emp.setExperience(new ArrayList<>());
+		        }
+
+		        for (int i = 0; i < prevExpLetter.size(); i++) {
+		            MultipartFile files = prevExpLetter.get(i);
+		            String fileName = saveFile(files, "uploadsPdf");
+		            Experience exp;
+		            if (emp.getExperience().size() > i) {
+		                exp = emp.getExperience().get(i);
+		            } else {
+		                exp = new Experience();
+		                emp.getExperience().add(exp);
+		            }
+
+		            exp.setOfferLetter_exp(fileName);
+		        }
+
+		    } catch (Exception e) {
+		        return ResponseEntity.status(500).body("Experience upload failed "+e);
+		    }
+		}
+		
+		if (bankStatement != null && !bankStatement.isEmpty()) {
+		    try {
+
+		    	if (emp.getExperience() == null) {
+		            emp.setExperience(new ArrayList<>());
+		        }
+
+		        for (int i = 0; i < bankStatement.size(); i++) {
+
+		            MultipartFile files = bankStatement.get(i);
+
+		            String fileName = saveFile(files, "uploadsPdf");
+
+		            Experience exp;
+
+		            if (emp.getExperience().size() > i) {
+		                exp = emp.getExperience().get(i);
+		            } else {
+		                exp = new Experience();
+		                emp.getExperience().add(exp);
+		            }
+
+		            exp.setBankStatement_pdf(fileName);
+
+		         
+		        }
+
+		    } catch (Exception e) {
+		        return ResponseEntity.status(500)
+		                .body("Bank statement upload failed " + e);
+		    }
+		}
+		
+		if (salarySlip != null && !salarySlip.isEmpty()) {
+		    try {
+
+		        if (emp.getExperience() == null) {
+		            emp.setExperience(new ArrayList<>());
+		        }
+
+		        for (int i = 0; i < salarySlip.size(); i++) {
+
+		            MultipartFile files = salarySlip.get(i);
+
+		            String fileName = saveFile(files, "uploadsPdf");
+
+		            Experience exp;
+
+		            if (emp.getExperience().size() > i) {
+		                exp = emp.getExperience().get(i);
+		            } else {
+		                exp = new Experience();
+		                emp.getExperience().add(exp);
+		            }
+
+		            exp.setSalarySlip_pdf(fileName);
+		        }
+
+		    } catch (Exception e) {
+		        return ResponseEntity.status(500)
+		                .body("Salary slip upload failed " + e);
+		    }
+		}
+		
+		double basic = emp.getEmpPayroll().getBasicPay();
+		double hra = emp.getEmpPayroll().getHRA();
+		double specialAllowance = emp.getEmpPayroll().getSpecialAllowance();
+		double lta = emp.getEmpPayroll().getLTA();
+		double pf = emp.getEmpPayroll().getPF();
+		double medical = emp.getEmpPayroll().getMedicalAllowance();
+		double bonus = emp.getEmpPayroll().getBonus();
+		double ctc = calculateAnnualCTC(basic,hra,specialAllowance,lta,pf,medical,bonus);
+		emp.getEmpPayroll().setAnnualCTC(ctc);
+		
+		emp.getBankDetails().setEmployee(emp);
+		emp.getEmpPayroll().setEmployee(emp);
+		emp.getEmergency_contact().setEmployee(emp);
+		emp.getEducation().setEmployee(emp);
+		emp.getProfessional_details().setEmployee(emp);
+		if (emp.getExperience() != null) {
+		    for (Experience exp : emp.getExperience()) {
+		        exp.setEmployee(emp); 
+		    }
+		}
+		
+
+		if (emp.getEducation() != null &&
+		    emp.getEducation().getHigherEducation() != null &&
+		    !emp.getEducation().getHigherEducation().isEmpty()) {
+		
+		    for (HigherEducation hr :
+		            emp.getEducation().getHigherEducation()) {
+		
+		        hr.setEducation(emp.getEducation());
+		    }
+		}
+		
+
+		Employee employee = empRepo.save(emp);
+		
+		if(employee.getRole() != null) {
+			List<ModuleEntity> modules = moduleRepository.findAll();
+
+			List<ModuleList> permissions = new ArrayList<>();
+			Optional<Role> roles = roleRepo.findByRole(employee.getRole());
+			if(roles.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role name not created with name: "+employee.getRole());
+			}
+			Role role = roles.get();
+
+			for (ModuleEntity module : modules) {
+
+				
+				ModuleList permission = null;
+			    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndUser(module, user);
+			   
+			    
+			    
+			    if(moduleLst.isEmpty()) {
+			    	permission = new ModuleList();
+			    }
+			    else {
+			    	permission = moduleLst.get();
+			    }
+			    
+			    Optional<UserModule> userModule = userModuleRepository.findByUserModule_IdAndRole_Id(module.getId(),role.getId());
+			    
+			    if(userModule.isPresent()) {
+			    	UserModule access = userModule.get();
+			    	permission.setCreatePermission(access.isCreatePermission());
+				    permission.setViewPermission(access.isViewPermission());
+				    permission.setEditPermission(access.isEditPermission());
+				    permission.setDeletePermission(access.isDeletePermission());		    
+			    }
+			    else {
+			    	
+				    permission.setCreatePermission(false);
+				    permission.setViewPermission(false);
+				    permission.setEditPermission(false);
+				    permission.setDeletePermission(false);
+			    }
+			    permission.setUser(user);	    
+			    permission.setRole(role);		   
+			    permission.setModule(module);
+			    permissions.add(permission);
+			}
+			
+			user.setModuleList(permissions);
+			moduleListRepository.saveAll(permissions);
+		}
+	
+		
+		
+		return ResponseEntity.ok(employee);
+		
+	}
+
+
+    // ══════════════════════════════════════════════════════════════════
+    // CREATE — bulk upload via Excel  - Need to update for newly added fields
+    // ══════════════════════════════════════════════════════════════════
+	public ResponseEntity<?> createUserXL(
+
+	        MultipartFile xlFile,
+
+	        List<MultipartFile> file,
+	        List<MultipartFile> aadhar,
+	        List<MultipartFile> pan_card,
+	        List<MultipartFile> higherEducation,
+	        List<MultipartFile> bankStatement,
+	        List<MultipartFile> salarySlip,
+	        List<MultipartFile> passbook,
+	        List<MultipartFile> education,
+	        List<MultipartFile> resume,
+	        List<MultipartFile> offerLetter,
+	        List<MultipartFile> prevExpLetter,
+	        List<MultipartFile> higherCertification,
+	        List<MultipartFile> experienceLetter) {
+
+	    try {
+
+	        Workbook workbook =
+	                new XSSFWorkbook(xlFile.getInputStream());
+
+	        Sheet sheet = workbook.getSheetAt(0);
+
+	        Iterator<Row> rows = sheet.iterator();
+
+	        // skip heading
+	        if (rows.hasNext()) {
+	            rows.next();
+	        }
+
+	        List<Employee> lst = new ArrayList<>();
+
+	        int rowIndex = 0;
+
+	        while (rows.hasNext()) {
+
+	            Row row = rows.next();
+
+	            if (row == null
+	                    || row.getCell(0) == null
+	                    || getCellValue(row.getCell(0)).isEmpty()) {
+
+	                continue;
+	            }
+
+	            Employee emp = new Employee();
+
+	            // =====================================================
+	            // BASIC DETAILS
+	            // =====================================================
+
+	            emp.setFirst_name(getCellValue(row.getCell(0)));
+	            emp.setLast_name(getCellValue(row.getCell(1)));
+
+	            String email =
+	                    getCellValue(row.getCell(2));
+
+	            Optional<Employee> emailUser =
+	                    empRepo.findByEmail(email);
+
+	            if (emailUser.isPresent()) {
+
+	                rowIndex++;
+	                continue;
+	            }
+
+	            emp.setEmail(email);
+
+	            Long phone =
+	                    parseLong(getCellValue(row.getCell(3)));
+
+	            if (phone != null) {
+	                emp.setPhone_number(phone);
+	            }
+
+	            emp.setDate_of_birth(parseDate(row.getCell(4)));
+	            emp.setMarital_status(getCellValue(row.getCell(5)));
+	            emp.setGender(getCellValue(row.getCell(6)));
+	            emp.setBlood_group(getCellValue(row.getCell(7)));
+	            emp.setState(getCellValue(row.getCell(8)));
+	            emp.setPincode(getCellValue(row.getCell(9)));
+	            emp.setAadhar_number(getCellValue(row.getCell(10)));
+	            emp.setPan_number(getCellValue(row.getCell(11)));
+	            emp.setAddress(getCellValue(row.getCell(12)));
+
+	            
+	            emp.setRole(getCellValue(row.getCell(13)));
+
+//	            if (roleValue != null) {
+//
+//	                switch (roleValue.trim().toUpperCase()) {
+//
+//	                    case "ADMIN":
+//	                        
+//	                        break;
+//
+//	                    case "HR":
+//	                        emp.setRole(Role.HR);
+//	                        break;
+//
+//	                    case "MANAGER":
+//	                        emp.setRole(Role.MANAGER);
+//	                        break;
+//
+//	                    default:
+//	                        emp.setRole(Role.EMPLOYEE);
+//	                        break;
+//	                }
+//	            }
+
+	            // =====================================================
+	            // PROFILE IMAGE
+	            // =====================================================
+
+	            if (file != null
+	                    && file.size() > rowIndex
+	                    && file.get(rowIndex) != null
+	                    && !file.get(rowIndex).isEmpty()) {
+
+	                String fileName =
+	                        saveFile(file.get(rowIndex), "uploads");
+
+	                emp.setImgFile(fileName);
+	            }
+
+	            // =====================================================
+	            // AADHAR PDF
+	            // =====================================================
+
+	            if (aadhar != null
+	                    && aadhar.size() > rowIndex
+	                    && aadhar.get(rowIndex) != null
+	                    && !aadhar.get(rowIndex).isEmpty()) {
+
+	                String fileName =
+	                        saveFile(aadhar.get(rowIndex),
+	                                "uploadsPdf");
+
+	                emp.setAadhar_pdf(fileName);
+	            }
+
+	            // =====================================================
+	            // PAN PDF
+	            // =====================================================
+
+	            if (pan_card != null
+	                    && pan_card.size() > rowIndex
+	                    && pan_card.get(rowIndex) != null
+	                    && !pan_card.get(rowIndex).isEmpty()) {
+
+	                String fileName =
+	                        saveFile(pan_card.get(rowIndex),
+	                                "uploadsPdf");
+
+	                emp.setPan_pdf(fileName);
+	            }
+
+	            // =====================================================
+	            // BANK DETAILS
+	            // =====================================================
+
+	            String bankName =
+	                    getCellValue(row.getCell(14));
+
+	            if (!bankName.isEmpty()) {
+
+	                BankDetails bank = new BankDetails();
+
+	                bank.setBankName(bankName);
+	                bank.setAccountHolderName(
+	                        getCellValue(row.getCell(15)));
+
+	                Long accNo =
+	                        parseLong(getCellValue(row.getCell(16)));
+
+	                if (accNo != null) {
+
+	                    bank.setAccountNumber(accNo);
+	                    bank.setConfirmAccountNumber(accNo);
+	                }
+
+	                bank.setBranchName(
+	                        getCellValue(row.getCell(17)));
+
+	                bank.setIfsc_Number(
+	                        getCellValue(row.getCell(18)));
+
+	                // PASSBOOK
+
+	                if (passbook != null
+	                        && passbook.size() > rowIndex
+	                        && passbook.get(rowIndex) != null
+	                        && !passbook.get(rowIndex).isEmpty()) {
+
+	                    String fileName =
+	                            saveFile(passbook.get(rowIndex),
+	                                    "uploadsPdf");
+
+	                    bank.setPassbook_pdf(fileName);
+	                }
+
+	                bank.setEmployee(emp);
+
+	                emp.setBankDetails(bank);
+	            }
+
+	            // =====================================================
+	            // PROFESSIONAL DETAILS
+	            // =====================================================
+
+	            String designation =
+	                    getCellValue(row.getCell(19));
+
+	            if (!designation.isEmpty()) {
+
+	                ProfessionalDetails pd =
+	                        new ProfessionalDetails();
+
+	                pd.setProfessional_designation(designation);
+//	                pd.setProfessional_department(
+//	                        getCellValue(row.getCell(20)));
+	                
+	                String departmentName = getCellValue(row.getCell(20));
+
+	                Departments department = departmentRepository.findByName(departmentName)
+	                        .orElseThrow(() ->
+	                                new RuntimeException("Department not found: " + departmentName));
+
+	                pd.setProfessional_department(department);
+	                pd.getProfessional_department().setName(getCellValue(row.getCell(20)));
+
+	                pd.setEmp_type(
+	                        getCellValue(row.getCell(21)));
+
+	                pd.setLocation(
+	                        getCellValue(row.getCell(22)));
+
+	                pd.setEmp_status(
+	                        getCellValue(row.getCell(23)));
+
+	                pd.setExp_level(
+	                        getCellValue(row.getCell(24)));
+
+	                pd.setSkills(
+	                        getCellValue(row.getCell(25)));
+
+	                pd.setDoj(parseDate(row.getCell(26)));
+
+	                pd.setProbation_period(
+	                        getCellValue(row.getCell(27)));
+
+	                pd.setConfirmation_date(
+	                        parseDate(row.getCell(28)));
+
+	                // RESUME
+
+	                if (resume != null
+	                        && resume.size() > rowIndex
+	                        && resume.get(rowIndex) != null
+	                        && !resume.get(rowIndex).isEmpty()) {
+
+	                    String fileName =
+	                            saveFile(resume.get(rowIndex),
+	                                    "uploadsPdf");
+
+	                    pd.setResume(fileName);
+	                }
+
+	                // OFFER LETTER
+
+	                if (offerLetter != null
+	                        && offerLetter.size() > rowIndex
+	                        && offerLetter.get(rowIndex) != null
+	                        && !offerLetter.get(rowIndex).isEmpty()) {
+
+	                    String fileName =
+	                            saveFile(offerLetter.get(rowIndex),
+	                                    "uploadsPdf");
+
+	                    pd.setOffer_letter(fileName);
+	                }
+
+	                pd.setEmployee(emp);
+
+	                emp.setProfessional_details(pd);
+
+	                Long maxId = empRepo.findMaxId();
+
+	                String type =
+	                        pd.getEmp_type()
+	                                .substring(0, 1)
+	                                .toUpperCase();
+
+	                long nextId =
+	                        (maxId == null) ? 1 : maxId + 1;
+
+	                emp.setEmployeeId(
+	                        String.format("ZF%s-%03d",
+	                                type,
+	                                nextId));
+	            }
+
+	            // =====================================================
+	            // PAYROLL
+	            // =====================================================
+
+	            String basicPay =
+	                    getCellValue(row.getCell(29));
+
+	            if (!basicPay.isEmpty()) {
+
+	                EmployeePayroll payroll =
+	                        new EmployeePayroll();
+
+	                payroll.setBasicPay(
+	                        parseDouble(getCellValue(row.getCell(29))));
+
+	                payroll.setHRA(
+	                        parseDouble(getCellValue(row.getCell(30))));
+
+	                payroll.setSpecialAllowance(
+	                        parseDouble(getCellValue(row.getCell(31))));
+
+	                payroll.setLTA(
+	                        parseDouble(getCellValue(row.getCell(32))));
+
+	                payroll.setPF(
+	                        parseDouble(getCellValue(row.getCell(33))));
+
+	                payroll.setMedicalAllowance(
+	                        parseDouble(getCellValue(row.getCell(34))));
+
+	                payroll.setBonus(
+	                        parseDouble(getCellValue(row.getCell(35))));
+
+	                double ctc =
+	                        calculateAnnualCTC(
+	                                payroll.getBasicPay(),
+	                                payroll.getHRA(),
+	                                payroll.getSpecialAllowance(),
+	                                payroll.getLTA(),
+	                                payroll.getPF(),
+	                                payroll.getMedicalAllowance(),
+	                                payroll.getBonus());
+
+	                payroll.setAnnualCTC(ctc);
+
+	                payroll.setEmployee(emp);
+
+	                emp.setEmpPayroll(payroll);
+	            }
+
+	            // =====================================================
+	            // EMERGENCY CONTACT
+	            // =====================================================
+
+	            String ecName =
+	                    getCellValue(row.getCell(37));
+
+	            if (!ecName.isEmpty()) {
+
+	                EmergencyContact ec =
+	                        new EmergencyContact();
+
+	                ec.setName(ecName);
+
+	                ec.setRelation(
+	                        getCellValue(row.getCell(38)));
+
+	                Long ecPhone =
+	                        parseLong(getCellValue(row.getCell(39)));
+
+	                if (ecPhone != null) {
+	                    ec.setPhone(ecPhone);
+	                }
+
+	                ec.setEmployee(emp);
+
+	                emp.setEmergency_contact(ec);
+	            }
+
+	            // =====================================================
+	            // EDUCATION
+	            // =====================================================
+
+	            String eduLevel =
+	                    getCellValue(row.getCell(40));
+
+	            if (!eduLevel.isEmpty()) {
+
+	                Education edu = new Education();
+
+	                edu.setEducationLevel(eduLevel);
+
+	                edu.setEducationalBoard(
+	                        getCellValue(row.getCell(41)));
+
+	                edu.setSchoolName(
+	                        getCellValue(row.getCell(42)));
+
+	                edu.setPlace(
+	                        getCellValue(row.getCell(43)));
+
+	                edu.setEducationalGroup(
+	                        getCellValue(row.getCell(44)));
+
+	                edu.setSchool_from(
+	                        getCellValue(row.getCell(45)));
+
+	                edu.setSchool_to(
+	                        getCellValue(row.getCell(46)));
+
+	                edu.setSchool_percentage(
+	                        parseDouble(getCellValue(row.getCell(47))));
+
+	                // EDUCATION PDF
+
+	                if (education != null
+	                        && education.size() > rowIndex
+	                        && education.get(rowIndex) != null
+	                        && !education.get(rowIndex).isEmpty()) {
+
+	                    String fileName =
+	                            saveFile(education.get(rowIndex),
+	                                    "uploadsPdf");
+
+	                    edu.setEducation_pdf(fileName);
+	                }
+
+	                // =====================================================
+	                // HIGHER EDUCATION
+	                // =====================================================
+
+	                List<HigherEducation> higherList =
+	                        new ArrayList<>();
+
+	                String degree =
+	                        getCellValue(row.getCell(57));
+
+	                if (!degree.isEmpty()) {
+
+	                    HigherEducation he =
+	                            new HigherEducation();
+
+	                    he.setDegree(degree);
+
+	                    he.setInstituition(
+	                            getCellValue(row.getCell(58)));
+
+	                    he.setSpecialization(
+	                            getCellValue(row.getCell(59)));
+
+	                    he.setDegree_from(
+	                            getCellValue(row.getCell(60)));
+
+	                    he.setDegree_to(
+	                            getCellValue(row.getCell(61)));
+
+	                    he.setPercentage(
+	                            parseDouble(getCellValue(row.getCell(62))));
+
+	                    he.setCourseType(
+	                            getCellValue(row.getCell(64)));
+
+	                    // HIGHER EDUCATION PDF
+
+	                    if (higherEducation != null
+	                            && higherEducation.size() > rowIndex
+	                            && higherEducation.get(rowIndex) != null
+	                            && !higherEducation.get(rowIndex).isEmpty()) {
+
+	                        String fileName =
+	                                saveFile(
+	                                        higherEducation.get(rowIndex),
+	                                        "uploadsPdf");
+
+	                        he.setHigherEducation_pdf(fileName);
+	                    }
+
+	                    // HIGHER CERTIFICATION FILE
+
+	                    if (higherCertification != null
+	                            && higherCertification.size() > rowIndex
+	                            && higherCertification.get(rowIndex) != null
+	                            && !higherCertification.get(rowIndex).isEmpty()) {
+
+	                        String certFileName =
+	                                saveFile(
+	                                        higherCertification.get(rowIndex),
+	                                        "uploadsPdf");
+
+	                        he.setCertification(certFileName);
+
+	                    } else {
+
+	                        he.setCertification(
+	                                getCellValue(row.getCell(63)));
+	                    }
+
+	                    he.setEducation(edu);
+
+	                    higherList.add(he);
+	                }
+
+	                edu.setHigherEducation(higherList);
+
+	                edu.setEmployee(emp);
+
+	                emp.setEducation(edu);
+	            }
+
+	            // =====================================================
+	            // EXPERIENCE
+	            // =====================================================
+
+	            String companyName =
+	                    getCellValue(row.getCell(48));
+
+	            if (!companyName.isEmpty()) {
+
+	                Experience exp = new Experience();
+
+	                exp.setCompany_name(companyName);
+
+	                exp.setJob_title(
+	                        getCellValue(row.getCell(49)));
+
+	                exp.setEmp_type_prev(
+	                        getCellValue(row.getCell(50)));
+
+	                exp.setEmp_start(
+	                        parseDate(row.getCell(51)));
+
+	                exp.setEmp_end(
+	                        parseDate(row.getCell(52)));
+	                
+	                
+	                exp.setContact_Name(
+	                		 getCellValue(row.getCell(53)));
+	                
+	                exp.setContact_Designation(
+	                		 getCellValue(row.getCell(54)));
+	                
+	                exp.setContact_Number(
+	                		 getCellValue(row.getCell(55)));
+	                
+	                exp.setContact_Email(
+	                		 getCellValue(row.getCell(56)));
+	                
+	                
+
+	                exp.setCurrently_working(
+	                        getCellValue(row.getCell(57)));
+
+	                exp.setDuration(
+	                        getCellValue(row.getCell(58)));
+
+	                exp.setTech_used(
+	                        getCellValue(row.getCell(55)));
+
+	                exp.setRoles_responsibilities(
+	                        getCellValue(row.getCell(59)));
+
+	                // PREVIOUS EXPERIENCE LETTER
+
+	                if (prevExpLetter != null
+	                        && prevExpLetter.size() > rowIndex
+	                        && prevExpLetter.get(rowIndex) != null
+	                        && !prevExpLetter.get(rowIndex).isEmpty()) {
+
+	                    String fileName =
+	                            saveFile(
+	                                    prevExpLetter.get(rowIndex),
+	                                    "uploadsPdf");
+
+	                    exp.setOfferLetter_exp(fileName);
+	                }
+
+	                // EXPERIENCE LETTER
+
+	                if (experienceLetter != null
+	                        && experienceLetter.size() > rowIndex
+	                        && experienceLetter.get(rowIndex) != null
+	                        && !experienceLetter.get(rowIndex).isEmpty()) {
+
+	                    String fileName =
+	                            saveFile(
+	                                    experienceLetter.get(rowIndex),
+	                                    "uploadsPdf");
+
+	                    exp.setExp_letter(fileName);
+	                }
+
+	                // BANK STATEMENT
+
+	                if (bankStatement != null
+	                        && bankStatement.size() > rowIndex
+	                        && bankStatement.get(rowIndex) != null
+	                        && !bankStatement.get(rowIndex).isEmpty()) {
+
+	                    String fileName =
+	                            saveFile(
+	                                    bankStatement.get(rowIndex),
+	                                    "uploadsPdf");
+
+	                    exp.setBankStatement_pdf(fileName);
+	                }
+
+	                // SALARY SLIP
+
+	                if (salarySlip != null
+	                        && salarySlip.size() > rowIndex
+	                        && salarySlip.get(rowIndex) != null
+	                        && !salarySlip.get(rowIndex).isEmpty()) {
+
+	                    String fileName =
+	                            saveFile(
+	                                    salarySlip.get(rowIndex),
+	                                    "uploadsPdf");
+
+	                    exp.setSalarySlip_pdf(fileName);
+	                }
+
+	                exp.setEmployee(emp);
+
+	                emp.setExperience(new ArrayList<>());
+
+	                emp.getExperience().add(exp);
+	            }
+
+	            Employee savedEmp =
+	                    empRepo.save(emp);
+
+	            lst.add(savedEmp);
+
+	            rowIndex++;
+	        }
+
+	        workbook.close();
+
+	        if (!lst.isEmpty()) {
+
+	            return ResponseEntity.ok(lst);
+	        }
+
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                .body("No new records available to upload");
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                .body("Upload failed : " + e.getMessage());
+	    }
+	}
+    // ══════════════════════════════════════════════════════════════════
+    // READ
+    // ══════════════════════════════════════════════════════════════════
+    public ResponseEntity<?> getAllEmployeeDetails() {
+        return ResponseEntity.ok(empRepo.findAll());
+    }
+
+    public ResponseEntity<?> getEmployeeById(String id) {
+        Optional<Employee> emp = empRepo.findByEmployeeId(id);
+        if (emp.isPresent()) return ResponseEntity.ok(emp);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
+                .body("Employee with id: " + id + " not found");
+    }
+
+    public ResponseEntity<?> getPayrollById(String empId) {
+        Optional<Employee> empOptional = empRepo.findByEmployeeId(empId);
+        if (empOptional.isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
+                    .body("Employee not found with ID: " + empId);
+        Employee emp = empOptional.get();
+        if (emp.getEmpPayroll() == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
+                    .body("Payroll details not found for Employee ID: " + empId);
+        return ResponseEntity.ok(emp.getEmpPayroll());
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // DELETE
+    // ══════════════════════════════════════════════════════════════════
+    @Transactional
+    public ResponseEntity<?> deleteEmployeeById(String id) {
+        Optional<Employee> emp = empRepo.findByEmployeeId(id);
+        if (emp.isPresent()) {
+            empRepo.deleteByEmployeeId(id);
+            return ResponseEntity.ok("Employee deleted with id: " + id);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("Employee with id: " + id + " not found");
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // UPDATE — JSON body only
+    // ══════════════════════════════════════════════════════════════════
+    public ResponseEntity<?> updateEmployee(String empId, Employee emp) {
+        Optional<Employee> existingEmp = empRepo.findByEmployeeId(empId);
+        if (!existingEmp.isPresent())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
+                    .body("Employee not found with id: " + empId);
+
+        Employee existing = existingEmp.get();
+        applyBasicFields(existing, emp);
+
+        if (emp.getBankDetails() != null)        applyBank(existing, emp.getBankDetails());
+        if (emp.getEmpPayroll() != null)         applyPayroll(existing, emp.getEmpPayroll());
+        if (emp.getEmergency_contact() != null)  applyEmergency(existing, emp.getEmergency_contact());
+        if (emp.getEducation() != null)          applyEducation(existing, emp.getEducation());
+        if (emp.getProfessional_details() != null) applyProfessional(existing, emp.getProfessional_details());
+        if (emp.getExperience() != null && !emp.getExperience().isEmpty())
+            existing.setExperience(emp.getExperience());
+
+        return ResponseEntity.ok(empRepo.save(existing));
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // UPDATE — image only
+    // ══════════════════════════════════════════════════════════════════
+    public ResponseEntity<?> updateEmployeeImage(String empId, MultipartFile image) throws Exception {
+        Optional<Employee> empOpt = empRepo.findByEmployeeId(empId);
+        if (!empOpt.isPresent())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
+        try {
+            Employee existing = empOpt.get();
+            existing.setImgFile(saveFile(image, "uploads"));
+            empRepo.save(existing);
+            return ResponseEntity.ok("Image updated successfully for id: " + empId);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Image upload failed: " + e.getMessage());
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // UPDATE — single file by type
+    // ══════════════════════════════════════════════════════════════════
+    public ResponseEntity<?> updateEmployeeFile(String empId, MultipartFile file,
+            String fileType) throws Exception {
+        Optional<Employee> empOpt = empRepo.findByEmployeeId(empId);
+        if (!empOpt.isPresent())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
+        try {
+            Employee existing = empOpt.get();
+            String path = saveFile(file, "uploadsPdf");
+            switch (fileType) {
+                case "resume":
+                    if (existing.getProfessional_details() == null)
+                        existing.setProfessional_details(new ProfessionalDetails());
+                    existing.getProfessional_details().setResume(path);
+                    break;
+                case "offerLetter":
+                    if (existing.getProfessional_details() == null)
+                        existing.setProfessional_details(new ProfessionalDetails());
+                    existing.getProfessional_details().setOffer_letter(path);
+                    break;
+                case "passbookPdf":
+                    if (existing.getBankDetails() == null)
+                        existing.setBankDetails(new BankDetails());
+                    existing.getBankDetails().setPassbook_pdf(path);
+                    break;
+                case "educationPdf":
+                    if (existing.getEducation() == null)
+                        existing.setEducation(new Education());
+                    existing.getEducation().setEducation_pdf(path);
+                    break;
+                case "expLetter":
+                    if (existing.getExperience() != null && !existing.getExperience().isEmpty())
+                        existing.getExperience().get(0).setExp_letter(path);
+                    break;
+                default:
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unknown file type");
+            }
+            empRepo.save(existing);
+            return ResponseEntity.ok(fileType + " updated successfully for id: " + empId);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("File upload failed: " + e.getMessage());
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // UPDATE — all fields + files together
+    // ══════════════════════════════════════════════════════════════════
+    @Transactional
+    public ResponseEntity<?> updateEmployeeAll(
+
+            String empId,
+            Employee emp,
+            MultipartFile image,
+
+            MultipartFile aadhar,
+            MultipartFile panCard,
+            List<MultipartFile> higherEducation,
+            List<MultipartFile> prevExpLetter,
+            List<MultipartFile> bankStatement,
+            List<MultipartFile> salarySlip,
+
+            MultipartFile passbookPdf,
+            MultipartFile educationPdf,
+
+            MultipartFile resume,
+            MultipartFile offerLetter,
+            List<MultipartFile> expLetter
+
+    ) throws Exception {
+
+        Optional<Employee> existingOpt = empRepo.findByEmployeeId(empId);
+
+        if (existingOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
+                    .body("Employee not found");
+        }
+
+        Employee existing = existingOpt.get();
+        
+        if (existing.getUser() == null) {
+          User newUser = new User();
+          newUser.setEmployee(existing);
+          existing.setUser(newUser);
+      }
+        User existingUser = existing.getUser();
+
+        
+
+        // ================= BASIC DETAILS =================
+        if (emp != null) {
+
+            if (emp.getFirst_name() != null) existing.setFirst_name(emp.getFirst_name());
+            if (emp.getLast_name() != null) existing.setLast_name(emp.getLast_name());
+            if (emp.getEmail() != null) {
+            	existing.setEmail(emp.getEmail());
+            	existingUser.setEmail(emp.getEmail());
+            	existing.setUser(existingUser);
+            }
+            if (emp.getPhone_number() != null) existing.setPhone_number(emp.getPhone_number());
+            if (emp.getDate_of_birth() != null) existing.setDate_of_birth(emp.getDate_of_birth());
+            if (emp.getMarital_status() != null) existing.setMarital_status(emp.getMarital_status());
+            if (emp.getGender() != null) existing.setGender(emp.getGender());
+            if (emp.getBlood_group() != null) existing.setBlood_group(emp.getBlood_group());
+            if (emp.getState() != null) existing.setState(emp.getState());
+            if (emp.getPincode() != null) existing.setPincode(emp.getPincode());
+            if (emp.getAadhar_number() != null) existing.setAadhar_number(emp.getAadhar_number());
+            if (emp.getPan_number() != null) existing.setPan_number(emp.getPan_number());
+            if (emp.getAddress() != null) existing.setAddress(emp.getAddress());
+            if (emp.getRole() != null) {
+            	existing.setRole(emp.getRole());
+            	Set<String> roles = new HashSet<>();
+            	roles.add(emp.getRole());
+            	
+            	existing.setUser(existingUser);
+            }
+
+            // ================= BANK DETAILS =================
+            if (emp.getBankDetails() != null) {
+
+                BankDetails newBank = emp.getBankDetails();
+                BankDetails existingBank = existing.getBankDetails();
+
+                if (existingBank == null) {
+                    existingBank = new BankDetails();
+                }
+
+                if (newBank.getBankName() != null)
+                    existingBank.setBankName(newBank.getBankName());
+
+                if (newBank.getAccountHolderName() != null)
+                    existingBank.setAccountHolderName(newBank.getAccountHolderName());
+
+                if (newBank.getAccountNumber() != null)
+                    existingBank.setAccountNumber(newBank.getAccountNumber());
+
+                if (newBank.getConfirmAccountNumber() != null)
+                    existingBank.setConfirmAccountNumber(newBank.getConfirmAccountNumber());
+
+                if (newBank.getBranchName() != null)
+                    existingBank.setBranchName(newBank.getBranchName());
+
+                if (newBank.getIfsc_Number() != null)
+                    existingBank.setIfsc_Number(newBank.getIfsc_Number());
+
+                existingBank.setEmployee(existing);
+                existing.setBankDetails(existingBank);
+            }
+            
+            // ================= Professional Details =================
+            if (emp.getProfessional_details() != null) {
+
+                ProfessionalDetails newProfessional =
+                        emp.getProfessional_details();
+
+                ProfessionalDetails existingProfessional =
+                        existing.getProfessional_details();
+
+                if (existingProfessional == null) {
+                    existingProfessional = new ProfessionalDetails();
+                }
+
+                if (newProfessional.getProfessional_designation() != null)
+                    existingProfessional.setProfessional_designation(
+                            newProfessional.getProfessional_designation());
+                
+                if (newProfessional.getJobLevel() != null) {
+                	existingProfessional.setJobLevel(
+                    		newProfessional.getJobLevel());
+                }
+                
+                
+                
+
+                if (newProfessional.getProfessional_department() != null) {
+                	
+                	if(emp.getProfessional_details().getProfessional_department() != null) {
+                		
+                		Departments department = departmentRepository
+                		        .findByName(emp.getProfessional_details()
+                		                       .getProfessional_department()
+                		                       .getName())
+                		        .orElseThrow(() -> new RuntimeException("Department not found"));
+                		
+            			String departmentName = department.getName();
+            			existingProfessional.setProfessional_department(department);
+            			
+            			Optional<List<LeavePolicy>> balances =
+            			        leavePolicyRepo.findByDepartment_Name(departmentName);
+            			if(balances.isPresent()) {			
+            				List<LeavePolicy> lst = balances.get();
+            				List<LeaveBalance> employeeBalances = new ArrayList<>();
+            				for (LeavePolicy balance : lst) {
+            				    LeaveBalance newBalance = new LeaveBalance();
+            				    newBalance.setLeaveType(balance.getLeaveType());
+            				    newBalance.setTotalDays(balance.getTotalDays());
+            				    newBalance.setRemainingDays(balance.getTotalDays());
+            				    newBalance.setYear(balance.getYear());
+            				    newBalance.setDepartment(department);
+            				    newBalance.setMonth(balance.getMonth());
+            				    newBalance.setUsedDays(0);
+            				    // if LeaveBalance has Employee mapping
+            				    newBalance.setEmployee(emp);
+
+            				    employeeBalances.add(newBalance);
+            				}	
+            			    emp.setLeaveBalance(employeeBalances);	
+            			
+            			}
+            			
+            			
+            			
+            			
+            		}
+                	
+                
+                	
+                	
+            		String detail =  emp.getProfessional_details().getEmp_type();
+            		String id = existing.getEmployeeId();
+            		String updatedId = id.substring(0, 2) + detail.charAt(0) + id.substring(3);
+            		existing.setEmployeeId(updatedId);
+            		
+                }
+                    
+                
+
+                if (newProfessional.getEmp_type() != null)
+                    existingProfessional.setEmp_type(
+                            newProfessional.getEmp_type());
+
+                if (newProfessional.getLocation() != null)
+                    existingProfessional.setLocation(
+                            newProfessional.getLocation());
+
+                if (newProfessional.getEmp_status() != null) {
+                	existingProfessional.setEmp_status(newProfessional.getEmp_status());
+                	boolean b = emp.getProfessional_details().getEmp_status().equals("Active") ? true : false;
+                	existingUser.setActive(b);
+                	existing.setUser(existingUser);
+                }
+                    
+
+                if (newProfessional.getDoj() != null)
+                    existingProfessional.setDoj(
+                            newProfessional.getDoj());
+
+                if (newProfessional.getProbation_period() != null)
+                    existingProfessional.setProbation_period(
+                            newProfessional.getProbation_period());
+
+                if (newProfessional.getConfirmation_date() != null)
+                    existingProfessional.setConfirmation_date(
+                            newProfessional.getConfirmation_date());
+
+                if (newProfessional.getSkills() != null)
+                    existingProfessional.setSkills(
+                            newProfessional.getSkills());
+
+                if (newProfessional.getExp_level() != null)
+                    existingProfessional.setExp_level(
+                            newProfessional.getExp_level());
+
+                if (newProfessional.getResume() != null)
+                    existingProfessional.setResume(
+                            newProfessional.getResume());
+
+                if (newProfessional.getOffer_letter() != null)
+                    existingProfessional.setOffer_letter(
+                            newProfessional.getOffer_letter());
+
+                existingProfessional.setEmployee(existing);
+
+                existing.setProfessional_details(existingProfessional);
+            }
+            
+         // ================= Approvers =================
+            if (emp.getApproval() != null) {
+                ApprovalSystem exist = existing.getApproval();
+
+                if (exist == null) {
+                    exist = new ApprovalSystem();
+                    exist.setEmployee(existing);
+                    existing.setApproval(exist);
+                }
+
+                String email1 = emp.getApproval().getApproverEmail1(); 
+
+                String email2 = emp.getApproval().getApproverEmail2(); 
+
+                // Validate hierarchy only when both approvers are available
+                if (email1 != null && email2 != null && !email1.isBlank() && !email2.isBlank()) {
+                	
+                    if (email1.equalsIgnoreCase(email2)) {
+                        return ResponseEntity.badRequest()
+                                .body("Approver 1 and Approver 2 cannot be the same employee.");
+                    }
+
+                    if (email1.equalsIgnoreCase(existing.getEmail())
+                            || email2.equalsIgnoreCase(existing.getEmail())) {
+
+                        return ResponseEntity.badRequest()
+                                .body("Employee cannot be their own approver.");
+                    }
+                    
+                    if(existing.getProfessional_details().getJobLevel() == null) {
+                    	return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Please mention job level");
+                    }
+                    
+                    int n1 = Integer.parseInt(existing.getProfessional_details().getJobLevel().toString().substring(2));
+                    int n2 = getJobLevel(email1);
+                    int n3 = getJobLevel(email2);
+
+    				if(n2 <= n1) {
+    					return ResponseEntity.badRequest().body("Approver 1 should be higher than your job level");
+    				}
+    				
+    				if(n3 <= n2) {
+    					return ResponseEntity.badRequest().body("Approver 2 should be higher than approver 1");
+    				}
+                }
+                else if(email1 != null && !email1.isBlank()) {
+
+                    if (email1.equalsIgnoreCase(existing.getEmail())) {
+
+                        return ResponseEntity.badRequest()
+                                .body("Employee cannot be their own approver.");
+                    }
+                    
+                    
+                    int n1 = getJobLevel(emp.getEmail());
+                    int n2 = getJobLevel(email1);
+                    
+                    if(n2 <= n1) {
+    					return ResponseEntity.badRequest().body("Approver 1 should be higher than your job level");
+    				}
+                    
+                }
+  
+
+                    exist.setProjectName(emp.getApproval().getProjectName());
+                    exist.setApproverEmail1(emp.getApproval().getApproverEmail1());
+                    exist.setApproverEmail2(emp.getApproval().getApproverEmail2());
+                
+            }
+            
+            
+            
+         // ================= leave balance =================
+//    		if(emp.getProfessional_details().getProfessional_department() != null) {
+//    			String departmentName = emp.getProfessional_details().getProfessional_department();
+//
+//    			Department department;
+//    			try {
+//    			    department = Department.valueOf(departmentName.toUpperCase());
+//    			} catch (IllegalArgumentException e) {
+//    			    throw new BadRequestException("Invalid department: " + departmentName);
+//    			}
+//    			
+//    			Optional<List<LeavePolicy>> balances =
+//    			        leavePolicyRepo.findByDepartment(department);
+//    			if(balances.isPresent()) {			
+//    				List<LeavePolicy> lst = balances.get();
+//    				System.out.println(lst);
+//    				List<LeaveBalance> employeeBalances = new ArrayList<>();
+//    				for (LeavePolicy balance : lst) {
+//    				    LeaveBalance newBalance = new LeaveBalance();
+//    				    newBalance.setType(balance.getType());
+//    				    newBalance.setTotalDays(balance.getTotalDays());
+//    				    newBalance.setRemainingDays(balance.getTotalDays());
+//    				    newBalance.setYear(balance.getYear());
+//    				    newBalance.setDepartment(department);
+//    				    newBalance.setMonth(balance.getMonth());
+//    				    newBalance.setUsedDays(0);
+//    				    // if LeaveBalance has Employee mapping
+//    				    newBalance.setEmployee(emp);
+//
+//    				    employeeBalances.add(newBalance);
+//    				}	
+//    			    emp.setLeaveBalance(employeeBalances);	
+//    			    existing.setLeaveBalance(employeeBalances);
+//    			}
+//    			
+//    			
+//    			
+//    			
+//    		}
+            
+//            if (emp.getUser() != null) {
+//
+//                User requestUser = emp.getUser();
+//
+//                if (existing.getUser() == null) {
+//                    User newUser = new User();
+//                    newUser.setEmployee(existing);
+//                    existing.setUser(newUser);
+//                }
+//
+//                User existingUser = existing.getUser();
+//
+//                if (requestUser.getName() != null) {
+//                    existingUser.setName(requestUser.getName());
+//                }
+//
+//                if (requestUser.getEmail() != null) {
+//                    existingUser.setEmail(requestUser.getEmail());
+//                }
+//
+//                if (requestUser.getRoles() != null && !requestUser.getRoles().isEmpty()) {
+//                    existingUser.setRoles(requestUser.getRoles());
+//                }
+//
+//                if (requestUser.getPassword() != null && !requestUser.getPassword().isBlank()) {
+//                    existingUser.setPassword(passwordEncoder.encode(requestUser.getPassword()));
+//                }
+//
+//                if (requestUser.getConfirmPassword() != null && !requestUser.getConfirmPassword().isBlank()) {
+//                    existingUser.setConfirmPassword(passwordEncoder.encode(requestUser.getConfirmPassword()));
+//                }
+//
+//                existingUser.setActive(requestUser.isActive());
+//                existingUser.setEmployee(existing);
+//            }
+            
+         // ================= RoleAssign =================
+    		if(emp.getRole() != null) {			
+    			
+    			Optional<Role> rolePresent =  roleRepo.findByRole(emp.getRole().toString());
+    			if(rolePresent.isEmpty()) {
+    				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role not presented with name: "+emp.getRole().toString());
+    			}		
+    			if(emp.getRole().toString().equalsIgnoreCase("ADMIN")) {
+    				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot assign as ADMIN");
+    			}
+    			
+    			Optional<RolesAssign> roles = rolesRepository.findByRole(emp.getRole().toString());
+    			RolesAssign role = null;
+    			if(roles.isEmpty()) {
+    				role = new RolesAssign();
+    				role.setRole(emp.getRole().toString());
+    			}
+    			else {
+    				role = roles.get();
+    			}
+    			
+    			List<Employee> lstRole = role.getEmployee();
+    			if(role.getEmployee() == null) {
+    			 lstRole = new ArrayList<>();
+    			}
+    			existingUser.setRoleEntity(rolePresent.get());
+    			
+    			if(emp.getProfessional_details().getProfessional_designation() != null || !emp.getProfessional_details().getProfessional_designation().isBlank()) {
+    				role.setSub_designation(Set.of(emp.getProfessional_details().getProfessional_designation()));
+    			}
+    						
+    			lstRole.add(emp);
+    			role.setEmployee(lstRole);
+    			existing.setRolesAssign(role);
+    			rolesRepository.save(role);
+    			
+    		}
+ 
+
+            // ================= PAYROLL =================
+            if (emp.getEmpPayroll() != null) {
+
+                EmployeePayroll newPayroll = emp.getEmpPayroll();
+                EmployeePayroll existingPayroll = existing.getEmpPayroll();
+
+                if (existingPayroll == null) {
+                    existingPayroll = new EmployeePayroll();
+                }
+
+                if (newPayroll.getBasicPay() != 0)
+                    existingPayroll.setBasicPay(newPayroll.getBasicPay());
+
+                if (newPayroll.getHRA() != 0)
+                    existingPayroll.setHRA(newPayroll.getHRA());
+
+                if (newPayroll.getSpecialAllowance() != 0)
+                    existingPayroll.setSpecialAllowance(newPayroll.getSpecialAllowance());
+
+                if (newPayroll.getLTA() != 0)
+                    existingPayroll.setLTA(newPayroll.getLTA());
+
+                if (newPayroll.getPF() != 0)
+                    existingPayroll.setPF(newPayroll.getPF());
+
+                if (newPayroll.getMedicalAllowance() != 0)
+                    existingPayroll.setMedicalAllowance(newPayroll.getMedicalAllowance());
+
+                if (newPayroll.getBonus() != 0)
+                    existingPayroll.setBonus(newPayroll.getBonus());
+
+                double ctc = calculateAnnualCTC(
+                        existingPayroll.getBasicPay(),
+                        existingPayroll.getHRA(),
+                        existingPayroll.getSpecialAllowance(),
+                        existingPayroll.getLTA(),
+                        existingPayroll.getPF(),
+                        existingPayroll.getMedicalAllowance(),
+                        existingPayroll.getBonus()
+                );
+
+                existingPayroll.setAnnualCTC(ctc);
+                existingPayroll.setEmployee(existing);
+
+                existing.setEmpPayroll(existingPayroll);
+            }
+
+            // ================= EXPERIENCE (FIXED) =================
+            if (emp.getExperience() != null && !emp.getExperience().isEmpty()) {
+
+                if (existing.getExperience() == null) {
+                    existing.setExperience(new ArrayList<>());
+                }
+
+                List<Experience> expList = existing.getExperience();
+                expList.clear(); // IMPORTANT FIX
+
+                for (Experience exp : emp.getExperience()) {
+                    exp.setEmployee(existing);
+                    expList.add(exp);
+                }
+            }
+
+            // ================= ATTENDANCE (FIXED) =================
+            if (emp.getAttendance() != null && !emp.getAttendance().isEmpty()) {
+
+                if (existing.getAttendance() == null) {
+                    existing.setAttendance(new ArrayList<>());
+                }
+
+                List<Attendance> list = existing.getAttendance();
+                list.clear();
+
+                for (Attendance a : emp.getAttendance()) {
+                    a.setEmployee(existing);
+                    list.add(a);
+                }
+            }
+
+            // ================= LEAVE REQUEST =================
+            if (emp.getLeaveRequest() != null && !emp.getLeaveRequest().isEmpty()) {
+
+                if (existing.getLeaveRequest() == null) {
+                    existing.setLeaveRequest(new ArrayList<>());
+                }
+
+                List<LeaveRequest> list = existing.getLeaveRequest();
+                list.clear();
+
+                for (LeaveRequest l : emp.getLeaveRequest()) {
+                    l.setEmployee(existing);
+                    list.add(l);
+                }
+            }
+
+            // ================= LEAVE BALANCE =================
+            if (emp.getLeaveBalance() != null && !emp.getLeaveBalance().isEmpty()) {
+
+                if (existing.getLeaveBalance() == null) {
+                    existing.setLeaveBalance(new ArrayList<>());
+                }
+
+                List<LeaveBalance> list = existing.getLeaveBalance();
+                list.clear();
+
+                for (LeaveBalance l : emp.getLeaveBalance()) {
+                    l.setEmployee(existing);
+                    list.add(l);
+                }
+            }
+        }
+
+        // ================= FILES =================
+        if (image != null && !image.isEmpty())
+            existing.setImgFile(saveFile(image, "uploads"));
+
+        if (aadhar != null && !aadhar.isEmpty())
+            existing.setAadhar_pdf(saveFile(aadhar, "uploadsPdf"));
+
+        if (panCard != null && !panCard.isEmpty())
+            existing.setPan_pdf(saveFile(panCard, "uploadsPdf"));
+
+        if (passbookPdf != null && !passbookPdf.isEmpty()) {
+            if (existing.getBankDetails() == null)
+                existing.setBankDetails(new BankDetails());
+
+            existing.getBankDetails().setPassbook_pdf(saveFile(passbookPdf, "uploadsPdf"));
+        }
+
+        if (educationPdf != null && !educationPdf.isEmpty()) {
+            if (existing.getEducation() == null)
+                existing.setEducation(new Education());
+
+            existing.getEducation().setEducation_pdf(saveFile(educationPdf, "uploadsPdf"));
+        }
+
+        if (resume != null && !resume.isEmpty()) {
+            if (existing.getProfessional_details() == null)
+                existing.setProfessional_details(new ProfessionalDetails());
+
+            existing.getProfessional_details().setResume(saveFile(resume, "uploadsPdf"));
+        }
+
+        if (offerLetter != null && !offerLetter.isEmpty()) {
+            if (existing.getProfessional_details() == null)
+                existing.setProfessional_details(new ProfessionalDetails());
+
+            existing.getProfessional_details().setOffer_letter(saveFile(offerLetter, "uploadsPdf"));
+        }
+
+        // ================= EXPERIENCE FILES =================
+        if (expLetter != null && !expLetter.isEmpty()) {
+
+            if (existing.getExperience() == null)
+                existing.setExperience(new ArrayList<>());
+
+            List<Experience> list = existing.getExperience();
+
+            for (int i = 0; i < expLetter.size(); i++) {
+
+                Experience e = (i < list.size()) ? list.get(i) : new Experience();
+
+                e.setEmployee(existing);
+                e.setExp_letter(saveFile(expLetter.get(i), "uploadsPdf"));
+
+                if (i >= list.size()) list.add(e);
+            }
+        }
+
+        if (prevExpLetter != null && !prevExpLetter.isEmpty()) {
+
+            if (existing.getExperience() == null)
+                existing.setExperience(new ArrayList<>());
+
+            List<Experience> list = existing.getExperience();
+
+            for (int i = 0; i < prevExpLetter.size(); i++) {
+
+                Experience e = (i < list.size()) ? list.get(i) : new Experience();
+
+                e.setEmployee(existing);
+                e.setOfferLetter_exp(saveFile(prevExpLetter.get(i), "uploadsPdf"));
+
+                if (i >= list.size()) list.add(e);
+            }
+        }
+
+        if (bankStatement != null && !bankStatement.isEmpty()) {
+
+            if (existing.getExperience() == null)
+                existing.setExperience(new ArrayList<>());
+
+            List<Experience> list = existing.getExperience();
+
+            for (int i = 0; i < bankStatement.size(); i++) {
+
+                Experience e = (i < list.size()) ? list.get(i) : new Experience();
+
+                e.setEmployee(existing);
+                e.setBankStatement_pdf(saveFile(bankStatement.get(i), "uploadsPdf"));
+
+                if (i >= list.size()) list.add(e);
+            }
+        }
+
+        if (salarySlip != null && !salarySlip.isEmpty()) {
+
+            if (existing.getExperience() == null)
+                existing.setExperience(new ArrayList<>());
+
+            List<Experience> list = existing.getExperience();
+
+            for (int i = 0; i < salarySlip.size(); i++) {
+
+                Experience e = (i < list.size()) ? list.get(i) : new Experience();
+
+                e.setEmployee(existing);
+                e.setSalarySlip_pdf(saveFile(salarySlip.get(i), "uploadsPdf"));
+
+                if (i >= list.size()) list.add(e);
+            }
+        }
+        
+        Employee saved = empRepo.save(existing);
+        
+     // ================= Module List =================
+        if(saved.getRole() != null) {
+        	List<ModuleEntity> modules = moduleRepository.findAll();
+
+    		List<ModuleList> permissions = existingUser.getModuleList();
+
+			if (permissions == null) {
+			    permissions = new ArrayList<>();
+			}
+    		Optional<Role> roles = roleRepo.findByRole(saved.getRole());
+    		if(roles.isEmpty()) {
+    			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role name not created with name: "+saved.getRole());
+    		}
+    		Role role = roles.get();
+    		for (ModuleEntity module : modules) {
+
+    			ModuleList permission = null;
+    		    Optional<ModuleList> moduleLst = moduleListRepository.findByModuleAndUser(module, existingUser);
+    		    if(moduleLst.isEmpty()) {
+    		    	permission = new ModuleList();
+    		    }
+    		    else {
+    		    	permission = moduleLst.get();
+    		    }
+
+    		    
+    		    
+    		    Optional<UserModule> userModule = userModuleRepository.findByUserModule_IdAndRole_Id(module.getId(),role.getId());
+    		    
+    		    if(userModule.isPresent()) {
+    		    	UserModule access = userModule.get();
+    		    	permission.setCreatePermission(access.isCreatePermission());
+    			    permission.setViewPermission(access.isViewPermission());
+    			    permission.setEditPermission(access.isEditPermission());
+    			    permission.setDeletePermission(access.isDeletePermission());		    
+    		    }
+    		    else {
+    		    	permission.setCreatePermission(false);
+    			    permission.setViewPermission(false);
+    			    permission.setEditPermission(false);
+    			    permission.setDeletePermission(false);
+    		    }
+    		    
+    		    
+    		    permission.setUser(existingUser);
+    		    permission.setRole(role);	
+    		    permission.setModule(module);
+    		    permissions.add(permission);
+    		}
+    		
+    		existingUser.setModuleList(permissions);    
+            moduleListRepository.saveAll(permissions);
+        }
+		
+        return ResponseEntity.ok(saved);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // PRIVATE — field mergers (avoids duplicate null-check blocks)
+    // ══════════════════════════════════════════════════════════════════
+    private void applyBasicFields(Employee existing, Employee emp) {
+        if (emp.getFirst_name() != null)    existing.setFirst_name(emp.getFirst_name());
+        if (emp.getLast_name() != null)     existing.setLast_name(emp.getLast_name());
+        if (emp.getEmail() != null)         existing.setEmail(emp.getEmail());
+        if (emp.getPhone_number() != null)  existing.setPhone_number(emp.getPhone_number());
+        if (emp.getDate_of_birth() != null) existing.setDate_of_birth(emp.getDate_of_birth());
+        if (emp.getMarital_status() != null) existing.setMarital_status(emp.getMarital_status());
+        if (emp.getGender() != null)        existing.setGender(emp.getGender());
+        if (emp.getBlood_group() != null)   existing.setBlood_group(emp.getBlood_group());
+        if (emp.getState() != null)         existing.setState(emp.getState());
+        if (emp.getPincode() != null)       existing.setPincode(emp.getPincode());
+        if (emp.getAadhar_number() != null) existing.setAadhar_number(emp.getAadhar_number());
+        if (emp.getPan_number() != null)    existing.setPan_number(emp.getPan_number());
+        if (emp.getAddress() != null)       existing.setAddress(emp.getAddress());
+        if (emp.getImgFile() != null)       existing.setImgFile(emp.getImgFile());
+    }
+
+    private void applyBank(Employee existing, BankDetails newBank) {
+        BankDetails b = existing.getBankDetails() != null
+                ? existing.getBankDetails() : new BankDetails();
+        if (newBank.getBankName() != null)           b.setBankName(newBank.getBankName());
+        if (newBank.getAccountHolderName() != null)  b.setAccountHolderName(newBank.getAccountHolderName());
+        if (newBank.getAccountNumber() != null)      b.setAccountNumber(newBank.getAccountNumber());
+        if (newBank.getConfirmAccountNumber() != null) b.setConfirmAccountNumber(newBank.getConfirmAccountNumber());
+        if (newBank.getBranchName() != null)         b.setBranchName(newBank.getBranchName());
+        if (newBank.getIfsc_Number() != null)        b.setIfsc_Number(newBank.getIfsc_Number());
+        if (newBank.getPassbook_pdf() != null)       b.setPassbook_pdf(newBank.getPassbook_pdf());
+        existing.setBankDetails(b);
+    }
+
+    private void applyPayroll(Employee existing, EmployeePayroll newPayroll) {
+        EmployeePayroll p = existing.getEmpPayroll() != null
+                ? existing.getEmpPayroll() : new EmployeePayroll();
+        if (newPayroll.getBasicPay() != 0)          p.setBasicPay(newPayroll.getBasicPay());
+        if (newPayroll.getHRA() != 0)               p.setHRA(newPayroll.getHRA());
+        if (newPayroll.getSpecialAllowance() != 0)  p.setSpecialAllowance(newPayroll.getSpecialAllowance());
+        if (newPayroll.getLTA() != 0)               p.setLTA(newPayroll.getLTA());
+        if (newPayroll.getPF() != 0)                p.setPF(newPayroll.getPF());
+        if (newPayroll.getMedicalAllowance() != 0)  p.setMedicalAllowance(newPayroll.getMedicalAllowance());
+        if (newPayroll.getBonus() != 0)             p.setBonus(newPayroll.getBonus());
+        if (newPayroll.getAnnualCTC() != 0)         p.setAnnualCTC(newPayroll.getAnnualCTC());
+        existing.setEmpPayroll(p);
+    }
+
+    private void applyEmergency(Employee existing, EmergencyContact newEC) {
+        EmergencyContact ec = existing.getEmergency_contact() != null
+                ? existing.getEmergency_contact() : new EmergencyContact();
+        if (newEC.getName() != null)     ec.setName(newEC.getName());
+        if (newEC.getRelation() != null) ec.setRelation(newEC.getRelation());
+        if (newEC.getPhone() != null)    ec.setPhone(newEC.getPhone());
+        existing.setEmergency_contact(ec);
+    }
+
+    private void applyEducation(Employee existing, Education newEdu) {
+        Education edu = existing.getEducation() != null
+                ? existing.getEducation() : new Education();
+        if (newEdu.getEducationLevel() != null)    edu.setEducationLevel(newEdu.getEducationLevel());
+        if (newEdu.getEducationalBoard() != null)  edu.setEducationalBoard(newEdu.getEducationalBoard());
+        if (newEdu.getSchoolName() != null)        edu.setSchoolName(newEdu.getSchoolName());
+        if (newEdu.getPlace() != null)             edu.setPlace(newEdu.getPlace());
+        if (newEdu.getEducationalGroup() != null)  edu.setEducationalGroup(newEdu.getEducationalGroup());
+        if (newEdu.getSchool_from() != null)       edu.setSchool_from(newEdu.getSchool_from());
+        if (newEdu.getSchool_to() != null)         edu.setSchool_to(newEdu.getSchool_to());
+        if (newEdu.getSchool_percentage() != 0)    edu.setSchool_percentage(newEdu.getSchool_percentage());
+        if (newEdu.getEducation_pdf() != null)     edu.setEducation_pdf(newEdu.getEducation_pdf());
+        if (newEdu.getHigherEducation() != null && !newEdu.getHigherEducation().isEmpty())
+            edu.setHigherEducation(newEdu.getHigherEducation());
+        existing.setEducation(edu);
+    }
+
+    private void applyProfessional(Employee existing, ProfessionalDetails newPD) {
+        ProfessionalDetails pd = existing.getProfessional_details() != null
+                ? existing.getProfessional_details() : new ProfessionalDetails();
+        if (newPD.getProfessional_designation() != null)  pd.setProfessional_designation(newPD.getProfessional_designation());
+        if (newPD.getProfessional_department() != null)   pd.setProfessional_department(newPD.getProfessional_department());
+        if (newPD.getEmp_type() != null)                  pd.setEmp_type(newPD.getEmp_type());
+        if (newPD.getLocation() != null)                  pd.setLocation(newPD.getLocation());
+        if (newPD.getEmp_status() != null)                pd.setEmp_status(newPD.getEmp_status());
+        if (newPD.getDoj() != null)                       pd.setDoj(newPD.getDoj());
+        if (newPD.getProbation_period() != null)          pd.setProbation_period(newPD.getProbation_period());
+        if (newPD.getConfirmation_date() != null)         pd.setConfirmation_date(newPD.getConfirmation_date());
+        if (newPD.getSkills() != null)                    pd.setSkills(newPD.getSkills());
+        if (newPD.getExp_level() != null)                 pd.setExp_level(newPD.getExp_level());
+        if (newPD.getResume() != null)                    pd.setResume(newPD.getResume());
+        if (newPD.getOffer_letter() != null)              pd.setOffer_letter(newPD.getOffer_letter());
+        existing.setProfessional_details(pd);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // PRIVATE — file save
+    // ══════════════════════════════════════════════════════════════════
+    public String saveFile(MultipartFile file, String folder) throws Exception {
+        String upload = System.getProperty("user.dir") + "/" + folder + "/";
+        File dir = new File(upload);
+        if (!dir.exists()) dir.mkdirs();
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        file.transferTo(new File(upload + fileName));
+        return folder + "/" + fileName;
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // PRIVATE — Excel helpers
+    // ══════════════════════════════════════════════════════════════════
+
+    // DataFormatter reads every cell as a string — never throws type mismatch
+    private String getCellValue(Cell cell) {
+        if (cell == null) return "";
+        return new DataFormatter().formatCellValue(cell).trim();
+    }
+
+    // Checks NUMERIC type before calling DateUtil — then falls back to string parse
+    private Date parseDate(Cell cell) {
+        if (cell == null) return null;
+        if (cell.getCellType() == CellType.NUMERIC
+                && DateUtil.isCellDateFormatted(cell)) {
+            return cell.getDateCellValue();
+        }
+        String val = getCellValue(cell);
+        if (val.isEmpty()) return null;
+        for (String fmt : new String[]{"dd-MM-yyyy", "dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd"}) {
+            try { return new SimpleDateFormat(fmt).parse(val); }
+            catch (ParseException ignored) {}
+        }
+        return null;
+    }
+
+    // Strips ".0" that Excel appends to numeric cells e.g. "9876543210.0"
+    private Long parseLong(String val) {
+        if (val == null || val.isEmpty()) return null;
+        try {
+            if (val.contains(".")) val = val.substring(0, val.indexOf('.'));
+            return Long.parseLong(val.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private double parseDouble(String val) {
+        if (val == null || val.isEmpty()) return 0.0;
+        try { return Double.parseDouble(val.trim()); }
+        catch (NumberFormatException e) { return 0.0; }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // PRIVATE — payroll calculator
+    // ══════════════════════════════════════════════════════════════════
+    public double calculateAnnualCTC(double basicPay, double HRA, double specialAllowance,
+            double LTA, double PF, double medicalAllowance, double bonus) {
+        return (basicPay + HRA + specialAllowance + LTA + PF + medicalAllowance + bonus) * 12;
+    }
+    
+   
+    public ResponseEntity<?> updateUserXL(
+
+            MultipartFile xlFile,
+
+            List<MultipartFile> file,
+            List<MultipartFile> aadhar,
+            List<MultipartFile> pan_card,
+            List<MultipartFile> passbook,
+            List<MultipartFile> education,
+            List<MultipartFile> higherEducation,
+            List<MultipartFile> resume,
+            List<MultipartFile> offerLetter,
+            List<MultipartFile> prevExpLetter,
+            List<MultipartFile> experienceLetter,
+            List<MultipartFile> bankStatement,
+            List<MultipartFile> higherCertification,
+            List<MultipartFile> salarySlip
+
+    ) {
+
+        try {
+
+            if (xlFile == null || xlFile.isEmpty()) {
+
+                return ResponseEntity.badRequest()
+                        .body("Excel file is required");
+            }
+
+            Workbook workbook =
+                    new XSSFWorkbook(xlFile.getInputStream());
+
+            Sheet sheet = workbook.getSheetAt(0);
+
+            Iterator<Row> rows = sheet.iterator();
+
+            // Skip heading rows
+            if (rows.hasNext()) rows.next();
+            if (rows.hasNext()) rows.next();
+
+            int updatedCount = 0;
+            int skippedCount = 0;
+
+            int rowIndex = 0;
+
+            while (rows.hasNext()) {
+
+                Row row = rows.next();
+
+                if (row == null
+                        || row.getCell(0) == null
+                        || getCellValue(row.getCell(0)).isEmpty()) {
+
+                    rowIndex++;
+                    continue;
+                }
+
+                String email =
+                        getCellValue(row.getCell(2));
+
+                if (!hasValue(email)) {
+
+                    skippedCount++;
+                    rowIndex++;
+                    continue;
+                }
+
+                Optional<Employee> optionalEmp =
+                        empRepo.findByEmail(email);
+
+                if (!optionalEmp.isPresent()) {
+
+                    skippedCount++;
+                    rowIndex++;
+                    continue;
+                }
+
+                Employee emp = optionalEmp.get();
+
+                // =====================================================
+                // BASIC DETAILS
+                // =====================================================
+
+                String firstName =
+                        getCellValue(row.getCell(0));
+
+                if (hasValue(firstName)) {
+                    emp.setFirst_name(firstName);
+                }
+
+                String lastName =
+                        getCellValue(row.getCell(1));
+
+                if (hasValue(lastName)) {
+                    emp.setLast_name(lastName);
+                }
+
+                Long phone =
+                        parseLong(getCellValue(row.getCell(3)));
+
+                if (phone != null) {
+                    emp.setPhone_number(phone);
+                }
+
+                Date dob =
+                        parseDate(row.getCell(4));
+
+                if (dob != null) {
+                    emp.setDate_of_birth(dob);
+                }
+
+                String marital =
+                        getCellValue(row.getCell(5));
+
+                if (hasValue(marital)) {
+                    emp.setMarital_status(marital);
+                }
+
+                String gender =
+                        getCellValue(row.getCell(6));
+
+                if (hasValue(gender)) {
+                    emp.setGender(gender);
+                }
+
+                String blood =
+                        getCellValue(row.getCell(7));
+
+                if (hasValue(blood)) {
+                    emp.setBlood_group(blood);
+                }
+
+                String state =
+                        getCellValue(row.getCell(8));
+
+                if (hasValue(state)) {
+                    emp.setState(state);
+                }
+
+                String pincode =
+                        getCellValue(row.getCell(9));
+
+                if (hasValue(pincode)) {
+                    emp.setPincode(pincode);
+                }
+
+                String aadharNo =
+                        getCellValue(row.getCell(10));
+
+                if (hasValue(aadharNo)) {
+                    emp.setAadhar_number(aadharNo);
+                }
+
+                String panNo =
+                        getCellValue(row.getCell(11));
+
+                if (hasValue(panNo)) {
+                    emp.setPan_number(panNo);
+                }
+
+                String address =
+                        getCellValue(row.getCell(12));
+
+                if (hasValue(address)) {
+                    emp.setAddress(address);
+                }
+
+                // =====================================================
+                // ROLE
+                // =====================================================
+
+                
+                		emp.setRole(getCellValue(row.getCell(13)));
+
+//                if (roleValue != null) {
+//
+//                    switch (roleValue.trim().toUpperCase()) {
+//
+//                        case "ADMIN":
+//                            emp.setRole(Role.ADMIN);
+//                            break;
+//
+//                        case "HR":
+//                            emp.setRole(Role.HR);
+//                            break;
+//
+//                        case "MANAGER":
+//                            emp.setRole(Role.MANAGER);
+//                            break;
+//
+//                        default:
+//                            emp.setRole(Role.EMPLOYEE);
+//                            break;
+//                    }
+//                }
+
+                // =====================================================
+                // PROFILE IMAGE
+                // =====================================================
+
+                if (file != null
+                        && file.size() > rowIndex
+                        && file.get(rowIndex) != null
+                        && !file.get(rowIndex).isEmpty()) {
+
+                    String fileName =
+                            saveFile(file.get(rowIndex),
+                                    "uploads");
+
+                    emp.setImgFile(fileName);
+                }
+
+                // =====================================================
+                // AADHAR PDF
+                // =====================================================
+
+                if (aadhar != null
+                        && aadhar.size() > rowIndex
+                        && aadhar.get(rowIndex) != null
+                        && !aadhar.get(rowIndex).isEmpty()) {
+
+                    String fileName =
+                            saveFile(aadhar.get(rowIndex),
+                                    "uploadsPdf");
+
+                    emp.setAadhar_pdf(fileName);
+                }
+
+                // =====================================================
+                // PAN PDF
+                // =====================================================
+
+                if (pan_card != null
+                        && pan_card.size() > rowIndex
+                        && pan_card.get(rowIndex) != null
+                        && !pan_card.get(rowIndex).isEmpty()) {
+
+                    String fileName =
+                            saveFile(pan_card.get(rowIndex),
+                                    "uploadsPdf");
+
+                    emp.setPan_pdf(fileName);
+                }
+
+                // =====================================================
+                // BANK DETAILS
+                // =====================================================
+
+                BankDetails bank =
+                        emp.getBankDetails();
+
+                if (bank == null) {
+
+                    bank = new BankDetails();
+                    bank.setEmployee(emp);
+                }
+
+                String bankName =
+                        getCellValue(row.getCell(14));
+
+                if (hasValue(bankName)) {
+                    bank.setBankName(bankName);
+                }
+
+                String holder =
+                        getCellValue(row.getCell(15));
+
+                if (hasValue(holder)) {
+                    bank.setAccountHolderName(holder);
+                }
+
+                Long accNo =
+                        parseLong(getCellValue(row.getCell(16)));
+
+                if (accNo != null) {
+
+                    bank.setAccountNumber(accNo);
+                    bank.setConfirmAccountNumber(accNo);
+                }
+
+                String branch =
+                        getCellValue(row.getCell(17));
+
+                if (hasValue(branch)) {
+                    bank.setBranchName(branch);
+                }
+
+                String ifsc =
+                        getCellValue(row.getCell(18));
+
+                if (hasValue(ifsc)) {
+                    bank.setIfsc_Number(ifsc);
+                }
+
+                if (passbook != null
+                        && passbook.size() > rowIndex
+                        && passbook.get(rowIndex) != null
+                        && !passbook.get(rowIndex).isEmpty()) {
+
+                    String fileName =
+                            saveFile(passbook.get(rowIndex),
+                                    "uploadsPdf");
+
+                    bank.setPassbook_pdf(fileName);
+                }
+
+                emp.setBankDetails(bank);
+
+                // =====================================================
+                // PROFESSIONAL DETAILS
+                // =====================================================
+
+                ProfessionalDetails pd =
+                        emp.getProfessional_details();
+
+                if (pd == null) {
+
+                    pd = new ProfessionalDetails();
+                    pd.setEmployee(emp);
+                }
+
+                String designation =
+                        getCellValue(row.getCell(19));
+
+                if (hasValue(designation)) {
+                    pd.setProfessional_designation(designation);
+                }
+
+                String dept =
+                        getCellValue(row.getCell(20));
+
+                if (hasValue(dept)) {
+                	  pd.getProfessional_department().setName(dept);
+                }
+
+                String empType =
+                        getCellValue(row.getCell(21));
+
+                if (hasValue(empType)) {
+                    pd.setEmp_type(empType);
+                }
+
+                String location =
+                        getCellValue(row.getCell(22));
+
+                if (hasValue(location)) {
+                    pd.setLocation(location);
+                }
+
+                String status =
+                        getCellValue(row.getCell(23));
+
+                if (hasValue(status)) {
+                    pd.setEmp_status(status);
+                }
+
+                String expLevel =
+                        getCellValue(row.getCell(24));
+
+                if (hasValue(expLevel)) {
+                    pd.setExp_level(expLevel);
+                }
+
+                String skills =
+                        getCellValue(row.getCell(25));
+
+                if (hasValue(skills)) {
+                    pd.setSkills(skills);
+                }
+
+                Date doj =
+                        parseDate(row.getCell(26));
+
+                if (doj != null) {
+                    pd.setDoj(doj);
+                }
+
+                String probation =
+                        getCellValue(row.getCell(27));
+
+                if (hasValue(probation)) {
+                    pd.setProbation_period(probation);
+                }
+
+                Date confirmDate =
+                        parseDate(row.getCell(28));
+
+                if (confirmDate != null) {
+                    pd.setConfirmation_date(confirmDate);
+                }
+
+                // RESUME
+
+                if (resume != null
+                        && resume.size() > rowIndex
+                        && resume.get(rowIndex) != null
+                        && !resume.get(rowIndex).isEmpty()) {
+
+                    String fileName =
+                            saveFile(resume.get(rowIndex),
+                                    "uploadsPdf");
+
+                    pd.setResume(fileName);
+                }
+
+                // OFFER LETTER
+
+                if (offerLetter != null
+                        && offerLetter.size() > rowIndex
+                        && offerLetter.get(rowIndex) != null
+                        && !offerLetter.get(rowIndex).isEmpty()) {
+
+                    String fileName =
+                            saveFile(offerLetter.get(rowIndex),
+                                    "uploadsPdf");
+
+                    pd.setOffer_letter(fileName);
+                }
+
+                emp.setProfessional_details(pd);
+
+                // =====================================================
+                // PAYROLL
+                // =====================================================
+
+                EmployeePayroll payroll =
+                        emp.getEmpPayroll();
+
+                if (payroll == null) {
+
+                    payroll = new EmployeePayroll();
+                    payroll.setEmployee(emp);
+                }
+
+                Double basic =
+                        parseDouble(getCellValue(row.getCell(29)));
+
+                Double hra =
+                        parseDouble(getCellValue(row.getCell(30)));
+
+                Double special =
+                        parseDouble(getCellValue(row.getCell(31)));
+
+                Double lta =
+                        parseDouble(getCellValue(row.getCell(32)));
+
+                Double pf =
+                        parseDouble(getCellValue(row.getCell(33)));
+
+                Double medical =
+                        parseDouble(getCellValue(row.getCell(34)));
+
+                Double bonus =
+                        parseDouble(getCellValue(row.getCell(35)));
+
+                if (basic != null) payroll.setBasicPay(basic);
+                if (hra != null) payroll.setHRA(hra);
+                if (special != null) payroll.setSpecialAllowance(special);
+                if (lta != null) payroll.setLTA(lta);
+                if (pf != null) payroll.setPF(pf);
+                if (medical != null) payroll.setMedicalAllowance(medical);
+                if (bonus != null) payroll.setBonus(bonus);
+
+                double ctc =
+                        calculateAnnualCTC(
+                                payroll.getBasicPay(),
+                                payroll.getHRA(),
+                                payroll.getSpecialAllowance(),
+                                payroll.getLTA(),
+                                payroll.getPF(),
+                                payroll.getMedicalAllowance(),
+                                payroll.getBonus()
+                        );
+
+                payroll.setAnnualCTC(ctc);
+
+                emp.setEmpPayroll(payroll);
+
+                // =====================================================
+                // EMERGENCY CONTACT
+                // =====================================================
+
+                EmergencyContact ec =
+                        emp.getEmergency_contact();
+
+                if (ec == null) {
+
+                    ec = new EmergencyContact();
+                    ec.setEmployee(emp);
+                }
+
+                String ecName =
+                        getCellValue(row.getCell(37));
+
+                if (hasValue(ecName)) {
+                    ec.setName(ecName);
+                }
+
+                String relation =
+                        getCellValue(row.getCell(38));
+
+                if (hasValue(relation)) {
+                    ec.setRelation(relation);
+                }
+
+                Long ecPhone =
+                        parseLong(getCellValue(row.getCell(39)));
+
+                if (ecPhone != null) {
+                    ec.setPhone(ecPhone);
+                }
+
+                emp.setEmergency_contact(ec);
+
+                // =====================================================
+                // EDUCATION
+                // =====================================================
+
+                Education edu =
+                        emp.getEducation();
+
+                if (edu == null) {
+
+                    edu = new Education();
+                    edu.setEmployee(emp);
+                }
+
+                edu.setEducationLevel(
+                        getCellValue(row.getCell(40)));
+
+                edu.setEducationalBoard(
+                        getCellValue(row.getCell(41)));
+
+                edu.setSchoolName(
+                        getCellValue(row.getCell(42)));
+
+                edu.setPlace(
+                        getCellValue(row.getCell(43)));
+
+                edu.setEducationalGroup(
+                        getCellValue(row.getCell(44)));
+
+                edu.setSchool_from(
+                        getCellValue(row.getCell(45)));
+
+                edu.setSchool_to(
+                        getCellValue(row.getCell(46)));
+
+                Double eduPercentage =
+                        parseDouble(
+                                getCellValue(row.getCell(47))
+                        );
+
+                if (eduPercentage != null) {
+                    edu.setSchool_percentage(eduPercentage);
+                }
+
+                // EDUCATION PDF
+
+                if (education != null
+                        && education.size() > rowIndex
+                        && education.get(rowIndex) != null
+                        && !education.get(rowIndex).isEmpty()) {
+
+                    String fileName =
+                            saveFile(education.get(rowIndex),
+                                    "uploadsPdf");
+
+                    edu.setEducation_pdf(fileName);
+                }
+
+                // =====================================================
+                // HIGHER EDUCATION
+                // =====================================================
+
+                List<HigherEducation> heList =
+                        edu.getHigherEducation();
+
+                if (heList == null) {
+
+                    heList = new ArrayList<>();
+                }
+
+                HigherEducation he;
+
+                if (!heList.isEmpty()) {
+
+                    he = heList.get(0);
+
+                } else {
+
+                    he = new HigherEducation();
+                }
+
+                he.setDegree(
+                        getCellValue(row.getCell(48)));
+
+                he.setInstituition(
+                        getCellValue(row.getCell(49)));
+
+                he.setSpecialization(
+                        getCellValue(row.getCell(50)));
+
+                he.setDegree_from(
+                        getCellValue(row.getCell(51)));
+
+                he.setDegree_to(
+                        getCellValue(row.getCell(52)));
+
+                Double hePercent =
+                        parseDouble(
+                                getCellValue(row.getCell(53))
+                        );
+
+                if (hePercent != null) {
+
+                    he.setPercentage(hePercent);
+                }
+
+                // HIGHER CERTIFICATION FILE
+
+                if (higherCertification != null
+                        && higherCertification.size() > rowIndex
+                        && higherCertification.get(rowIndex) != null
+                        && !higherCertification.get(rowIndex).isEmpty()) {
+
+                    String certFileName =
+                            saveFile(
+                                    higherCertification.get(rowIndex),
+                                    "uploadsPdf"
+                            );
+
+                    he.setCertification(certFileName);
+
+                } else {
+
+                    he.setCertification(
+                            getCellValue(row.getCell(54))
+                    );
+                }
+
+                he.setCourseType(
+                        getCellValue(row.getCell(55)));
+
+                // HIGHER EDUCATION PDF
+
+                if (higherEducation != null
+                        && higherEducation.size() > rowIndex
+                        && higherEducation.get(rowIndex) != null
+                        && !higherEducation.get(rowIndex).isEmpty()) {
+
+                    String fileName =
+                            saveFile(
+                                    higherEducation.get(rowIndex),
+                                    "uploadsPdf"
+                            );
+
+                    he.setHigherEducation_pdf(fileName);
+                }
+
+                he.setEducation(edu);
+
+                if (heList.isEmpty()) {
+
+                    heList.add(he);
+                }
+
+                edu.setHigherEducation(heList);
+
+                emp.setEducation(edu);
+
+                // =====================================================
+                // EXPERIENCE
+                // =====================================================
+
+                List<Experience> expList =
+                        emp.getExperience();
+
+                if (expList == null) {
+
+                    expList = new ArrayList<>();
+                }
+
+                Experience exp;
+
+                if (!expList.isEmpty()) {
+
+                    exp = expList.get(0);
+
+                } else {
+
+                    exp = new Experience();
+                }
+
+                exp.setCompany_name(
+                        getCellValue(row.getCell(56)));
+
+                exp.setJob_title(
+                        getCellValue(row.getCell(57)));
+
+                exp.setEmp_type_prev(
+                        getCellValue(row.getCell(58)));
+
+                exp.setEmp_start(
+                        parseDate(row.getCell(59)));
+
+                exp.setEmp_end(
+                        parseDate(row.getCell(60)));
+                
+                exp.setContact_Name(
+               		 getCellValue(row.getCell(61)));
+               
+               exp.setContact_Designation(
+               		 getCellValue(row.getCell(62)));
+               
+               exp.setContact_Number(
+               		 getCellValue(row.getCell(63)));
+               
+               exp.setContact_Email(
+               		 getCellValue(row.getCell(64)));
+               
+
+                exp.setCurrently_working(
+                        getCellValue(row.getCell(65)));
+
+                exp.setDuration(
+                        getCellValue(row.getCell(66)));
+
+                exp.setTech_used(
+                        getCellValue(row.getCell(67)));
+
+                exp.setRoles_responsibilities(
+                        getCellValue(row.getCell(68)));
+
+                // PREVIOUS EXPERIENCE LETTER
+
+                if (prevExpLetter != null
+                        && prevExpLetter.size() > rowIndex
+                        && prevExpLetter.get(rowIndex) != null
+                        && !prevExpLetter.get(rowIndex).isEmpty()) {
+
+                    String fileName =
+                            saveFile(
+                                    prevExpLetter.get(rowIndex),
+                                    "uploadsPdf"
+                            );
+
+                    exp.setOfferLetter_exp(fileName);
+                }
+
+                // EXPERIENCE LETTER
+
+                if (experienceLetter != null
+                        && experienceLetter.size() > rowIndex
+                        && experienceLetter.get(rowIndex) != null
+                        && !experienceLetter.get(rowIndex).isEmpty()) {
+
+                    String fileName =
+                            saveFile(
+                                    experienceLetter.get(rowIndex),
+                                    "uploadsPdf"
+                            );
+
+                    exp.setExp_letter(fileName);
+                }
+
+                // BANK STATEMENT
+
+                if (bankStatement != null
+                        && bankStatement.size() > rowIndex
+                        && bankStatement.get(rowIndex) != null
+                        && !bankStatement.get(rowIndex).isEmpty()) {
+
+                    String fileName =
+                            saveFile(
+                                    bankStatement.get(rowIndex),
+                                    "uploadsPdf"
+                            );
+
+                    exp.setBankStatement_pdf(fileName);
+                }
+
+                // SALARY SLIP
+
+                if (salarySlip != null
+                        && salarySlip.size() > rowIndex
+                        && salarySlip.get(rowIndex) != null
+                        && !salarySlip.get(rowIndex).isEmpty()) {
+
+                    String fileName =
+                            saveFile(
+                                    salarySlip.get(rowIndex),
+                                    "uploadsPdf"
+                            );
+
+                    exp.setSalarySlip_pdf(fileName);
+                }
+
+                exp.setEmployee(emp);
+
+                if (expList.isEmpty()) {
+
+                    expList.add(exp);
+                }
+
+                emp.setExperience(expList);
+
+                // =====================================================
+                // SAVE
+                // =====================================================
+
+                empRepo.save(emp);
+
+                updatedCount++;
+
+                rowIndex++;
+            }
+
+            workbook.close();
+
+            return ResponseEntity.ok(
+                    "Excel Update Completed Successfully. Updated: "
+                            + updatedCount
+                            + ", Skipped: "
+                            + skippedCount
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return ResponseEntity.badRequest()
+                    .body("Update Failed : " + e.getMessage());
+        }
+    }
+    
+    private boolean hasValue(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+    
+
+    
+}
